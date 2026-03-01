@@ -1,0 +1,2997 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>שחמט של לוטמן</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♟</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Heebo', 'Segoe UI', sans-serif;
+    background: #f4f6fb; color: #1a2035; direction: rtl;
+    -webkit-font-smoothing: antialiased; min-height: 100vh;
+    display: flex; flex-direction: column;
+  }
+  .page { display: none; flex-direction: column; min-height: 100vh; }
+  .page.active { display: flex; }
+
+  /* ── Header/Footer ── */
+  header {
+    background: linear-gradient(135deg, #1a2035 0%, #2d3f5e 100%);
+    color: #fff; padding: 28px 24px 22px;
+    text-align: center; position: relative; overflow: hidden;
+  }
+  .chess-pattern { position: absolute; inset: 0; pointer-events: none; opacity: 0.18; }
+  header h1 {
+    font-size: 2rem; font-weight: 800; letter-spacing: -0.02em;
+    text-shadow: 0 0 12px rgba(0,0,0,0.6), 0 2px 4px rgba(0,0,0,0.5);
+    position: relative; z-index: 1;
+  }
+  header p {
+    margin-top: 6px; color: #94a3b8; font-size: 0.9rem; font-weight: 300;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.7); position: relative; z-index: 1;
+  }
+  footer {
+    background: linear-gradient(135deg, #1a2035 0%, #2d3f5e 100%);
+    color: #94a3b8; padding: 18px 24px; text-align: center;
+    font-size: 0.82rem; position: relative; overflow: hidden;
+  }
+  footer span { position: relative; z-index: 1; }
+
+  /* ── Home page ── */
+  .home-main {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 40px 20px;
+  }
+  .home-cards-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 340px));
+    gap: 20px;
+    width: 100%;
+    max-width: 720px;
+    justify-content: center;
+  }
+  /* With 4 cards: perfect 2×2. With 3 or fewer: last lone card centers */
+  .home-cards-row .home-card:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    max-width: 340px;
+    justify-self: center;
+  }
+  /* 4 cards = even, so nth-child(odd) rule above doesn't fire — no override needed */
+  .home-card {
+    background: #fff; border-radius: 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
+    padding: 28px 28px 24px; text-align: center; width: 100%;
+    transition: box-shadow 0.25s, transform 0.25s; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .home-card:hover { box-shadow: 0 10px 32px rgba(0,0,0,0.12); transform: translateY(-4px); }
+  .home-card-icon { font-size: 2.8rem; margin-bottom: 10px; display: block; }
+  .home-card h2 { font-size: 1.15rem; font-weight: 800; color: #1a2035; margin-bottom: 7px; }
+  .home-card p { font-size: 0.83rem; color: #64748b; line-height: 1.55; margin-bottom: 18px; flex: 1; }
+  .btn-home {
+    display: inline-block; padding: 10px 22px; background: #1a2035; color: #fff;
+    border-radius: 12px; font-size: 0.88rem; font-family: inherit; font-weight: 700;
+    border: none; cursor: pointer; box-shadow: 0 2px 10px rgba(26,32,53,0.2);
+    transition: all 0.18s; white-space: nowrap;
+  }
+  .btn-home:hover { background: #2d3f5e; box-shadow: 0 4px 18px rgba(26,32,53,0.3); }
+  @media (max-width: 560px) {
+    .home-cards-row { grid-template-columns: 1fr; max-width: 380px; }
+    .home-cards-row .home-card:last-child:nth-child(odd) { grid-column: auto; max-width: 100%; justify-self: auto; }
+  }
+  .btn-home-green { background: #166534; }
+  .btn-home-green:hover { background: #14532d; box-shadow: 0 4px 18px rgba(22,101,52,0.3); }
+  .btn-home-orange { background: #c2410c; }
+  .btn-home-orange:hover { background: #9a3412; box-shadow: 0 4px 18px rgba(194,65,12,0.3); }
+  .btn-home-purple { background: #7c3aed; }
+  .btn-home-purple:hover { background: #6d28d9; box-shadow: 0 4px 18px rgba(124,58,237,0.3); }
+
+  /* ── Knight Tour board ── */
+  #kt-board {
+    display: grid; grid-template-columns: repeat(8, 62px);
+    border: 3px solid #1a2035; border-radius: 4px; overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  }
+  .kt-sq {
+    width: 62px; height: 62px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; position: relative; transition: background 0.12s; user-select: none;
+    flex-direction: column;
+  }
+  .kt-sq.light { background: #f0d9b5; }
+  .kt-sq.dark  { background: #b58863; }
+  .kt-sq.visited {
+    background: #c8e6c9 !important;
+  }
+  .kt-sq.visited.dark { background: #81c784 !important; }
+  .kt-sq.current { background: #7c3aed !important; box-shadow: inset 0 0 0 3px #4c1d95; }
+  .kt-sq.hint    { background: rgba(124,58,237,0.28) !important; }
+  .kt-sq.hint.dark { background: rgba(124,58,237,0.45) !important; }
+  .kt-sq.dead-end { background: rgba(220,38,38,0.18) !important; }
+  .kt-sq.dead-end.dark { background: rgba(220,38,38,0.35) !important; }
+  .kt-sq-num {
+    font-size: 0.62rem; font-weight: 800; color: #1a2035; line-height: 1;
+    pointer-events: none; opacity: 0.7;
+  }
+  .kt-sq.dark .kt-sq-num { color: #fff; }
+  .kt-sq.current .kt-sq-num { color: #fff; opacity: 1; }
+  .kt-piece { font-size: 2.2rem; line-height: 1; pointer-events: none; }
+  .kt-sq.current .kt-piece { filter: brightness(10); }
+
+  /* ── KT turn banner (purple) ── */
+  .turn-banner.kt-active { background: rgba(124,58,237,0.08); color: #6d28d9; }
+  .turn-banner.kt-done   { background: rgba(34,197,94,0.1);  color: #15803d; }
+  .turn-banner.kt-fail   { background: rgba(220,38,38,0.08); color: #dc2626; }
+
+  /* ── KT stats bar ── */
+  .kt-stats {
+    display: flex; gap: 16px; padding: 10px 18px;
+    background: #fafafa; border-bottom: 1px solid #f1f5f9;
+    font-size: 0.82rem; font-weight: 600; color: #64748b;
+    align-items: center; flex-wrap: wrap;
+  }
+  .kt-stat { display: flex; align-items: center; gap: 5px; }
+  .kt-stat-val { font-size: 1rem; font-weight: 800; color: #1a2035; }
+  .kt-progress-bar {
+    flex: 1; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; min-width: 60px;
+  }
+  .kt-progress-fill {
+    height: 100%; background: linear-gradient(90deg, #7c3aed, #a78bfa);
+    border-radius: 3px; transition: width 0.3s;
+  }
+
+  @media (max-width: 740px) {
+    #kt-board { grid-template-columns: repeat(8, 44px); }
+    .kt-sq { width: 44px; height: 44px; }
+    .kt-piece { font-size: 1.65rem; }
+    .kt-sq-num { font-size: 0.55rem; }
+  }
+  @media (max-width: 440px) {
+    #kt-board { grid-template-columns: repeat(8, 36px); }
+    .kt-sq { width: 36px; height: 36px; }
+    .kt-piece { font-size: 1.3rem; }
+  }
+  /* ── Game layout ── */
+  .game-main {
+    flex: 1; max-width: 1120px; margin: 0 auto;
+    padding: 24px 20px 48px; width: 100%;
+    display: grid; grid-template-columns: 1fr 260px; gap: 24px; align-items: start;
+  }
+  .board-section {
+    background: #fff; border-radius: 18px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07); overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.04);
+  }
+
+  /* ── Player bar ── */
+  .player-bar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 18px; background: #f8fafc; border-bottom: 1px solid #f1f5f9;
+  }
+  .player-bar.bottom { border-bottom: none; border-top: 1px solid #f1f5f9; }
+  .player-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
+    background: #1a2035;
+  }
+  .player-avatar.white-player { background: #e2e8f0; }
+  .player-name { font-weight: 700; font-size: 0.95rem; flex: 1; }
+  .player-side { font-size: 0.75rem; color: #94a3b8; font-weight: 500; }
+  .captured-pieces { font-size: 0.82rem; display: flex; flex-wrap: wrap; gap: 1px; align-items: center; min-height: 22px; }
+  .turn-indicator {
+    display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+    background: #e2e8f0; transition: background 0.3s; margin-right: 4px;
+  }
+  .turn-indicator.active { background: #6366f1; box-shadow: 0 0 6px rgba(99,102,241,0.5); }
+
+  /* ── Pieces — explicit black/white color ── */
+  .piece {
+    font-size: 2.4rem; line-height: 1; display: block; pointer-events: none;
+  }
+  .white-piece {
+    color: #ffffff;
+    text-shadow: 0 0 2px #333, 0 1px 4px rgba(0,0,0,0.85), 1px 1px 0 #444, -1px -1px 0 #555;
+  }
+  .black-piece {
+    color: #111111;
+    text-shadow: 0 0 1px rgba(255,255,255,0.3), 0 1px 3px rgba(0,0,0,0.25), 1px 1px 0 #333;
+  }
+
+  /* ── Board ── */
+  .board-wrap { padding: 12px 8px; background: #fff; display: flex; justify-content: center; }
+  .board-container { display: flex; flex-direction: row; align-items: center; gap: 4px; }
+  .rank-labels { display: flex; flex-direction: column; font-size: 0.7rem; color: #94a3b8; font-weight: 600; margin-left: 4px; }
+  .file-labels-wrap { display: flex; flex-direction: column; align-items: center; }
+  .file-labels { display: flex; flex-direction: row; font-size: 0.7rem; color: #94a3b8; font-weight: 600; margin-top: 4px; }
+  .rank-label-item { height: 62px; display: flex; align-items: center; justify-content: center; width: 18px; }
+  .file-label-item { width: 62px; display: flex; align-items: center; justify-content: center; height: 18px; }
+
+  #board, #ws-board {
+    display: grid; grid-template-columns: repeat(8, 62px);
+    border: 3px solid #1a2035; border-radius: 4px; overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  }
+  .sq {
+    width: 62px; height: 62px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; position: relative; transition: background 0.1s; user-select: none;
+  }
+  .sq.light { background: #f0d9b5; }
+  .sq.ws-light-disabled { opacity: 0.5; pointer-events: none; }
+  .sq.dark  { background: #b58863; }
+  .sq.selected { background: #f6f669 !important; box-shadow: inset 0 0 0 3px #aaa800; }
+  .sq.highlight::after {
+    content: ''; position: absolute; width: 30px; height: 30px;
+    border-radius: 50%; background: rgba(0,0,0,0.18); pointer-events: none; z-index: 2;
+  }
+  .sq.highlight.has-piece::after { display: none; }
+  .sq.highlight.has-piece { box-shadow: inset 0 0 0 4px rgba(0,0,0,0.35) !important; }
+  .sq.last-move-from { background: rgba(155,199,0,0.41) !important; }
+  .sq.last-move-to   { background: rgba(155,199,0,0.41) !important; }
+  .sq.in-check { background: rgba(220,0,0,0.55) !important; }
+
+  /* ── Side panel ── */
+  .side-panel { display: flex; flex-direction: column; gap: 12px; width: 260px; }
+  .panel-card {
+    background: #fff; border-radius: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04); overflow: hidden; transition: box-shadow 0.25s;
+    border: 1px solid #f1f5f9;
+  }
+  .panel-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+  .panel-card-header {
+    background: #fff; padding: 11px 16px; border-bottom: 1px solid #f8fafc;
+    font-size: 0.75rem; font-weight: 700; color: #b0bec5;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .panel-card-body { padding: 13px 16px; }
+  #status-text { font-size: 0.92rem; font-weight: 600; color: #1a2035; line-height: 1.5; }
+  #status-text.check { color: #dc2626; }
+  #status-text.checkmate { color: #dc2626; font-size: 1rem; font-weight: 800; }
+  #status-text.draw { color: #7c3aed; }
+
+  .btn {
+    display: block; width: 100%; padding: 9px 16px; border-radius: 10px;
+    font-size: 0.88rem; font-family: inherit; font-weight: 600;
+    cursor: pointer; border: 1.5px solid; transition: all 0.18s; text-align: center; margin-bottom: 8px;
+  }
+  .btn:last-child { margin-bottom: 0; }
+  .btn-primary { background: #1a2035; color: #fff; border-color: #1a2035; box-shadow: 0 2px 8px rgba(26,32,53,0.18); }
+  .btn-primary:hover { background: #2d3f5e; border-color: #2d3f5e; }
+  .btn-secondary { background: #fff; color: #475569; border-color: #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .btn-secondary:hover { background: #f8fafc; border-color: #cbd5e1; }
+
+  #move-list {
+    max-height: 200px; overflow-y: auto; font-size: 0.82rem; color: #475569;
+    scrollbar-width: thin; scrollbar-color: #e2e8f0 transparent;
+  }
+  .move-pair { display: flex; gap: 4px; padding: 3px 0; border-bottom: 1px solid #f8fafc; align-items: center; }
+  .move-num { color: #94a3b8; font-weight: 600; min-width: 22px; }
+  .move-token { padding: 1px 7px; border-radius: 5px; font-weight: 500; flex: 1; }
+  .move-token.current { background: #1a2035; color: #fff; }
+
+  .mode-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+  .mode-pill {
+    padding: 5px 13px; border: 1.5px solid #e2e8f0; border-radius: 20px;
+    background: #f8fafc; color: #475569; font-size: 0.78rem;
+    font-family: inherit; font-weight: 600; cursor: pointer; transition: all 0.15s;
+  }
+  .mode-pill:hover { background: #f1f5f9; }
+  .mode-pill.active { background: #1a2035; color: #fff; border-color: #1a2035; }
+
+  /* ── Modals ── */
+  #promo-modal, #game-over {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55); z-index: 1000;
+    align-items: center; justify-content: center;
+  }
+  #promo-modal.open, #game-over.open { display: flex; }
+  .promo-box {
+    background: #fff; border-radius: 16px; box-shadow: 0 8px 40px rgba(0,0,0,0.22);
+    padding: 24px; text-align: center;
+  }
+  .promo-box h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 16px; color: #1a2035; }
+  .promo-pieces { display: flex; gap: 10px; justify-content: center; }
+  .promo-piece {
+    width: 64px; height: 64px; border-radius: 12px; border: 2px solid #e2e8f0;
+    background: #f8fafc; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .promo-piece:hover { border-color: #1a2035; transform: scale(1.06); }
+  .promo-piece .piece { font-size: 2.4rem; }
+  .promo-piece.dark-bg { background: #b58863; }
+  .game-over-box {
+    background: #fff; border-radius: 20px; box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+    padding: 32px 40px; text-align: center; max-width: 360px;
+  }
+  .game-over-box .go-icon { font-size: 3.5rem; margin-bottom: 12px; }
+  .game-over-box h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: 8px; color: #1a2035; }
+  .game-over-box p { font-size: 0.95rem; color: #64748b; margin-bottom: 20px; }
+
+  @media (max-width: 860px) {
+    .game-main {
+      grid-template-columns: 1fr;
+      padding: 16px 12px 32px;
+    }
+    .side-panel { width: 100%; }
+  }
+  @media (max-width: 600px) {
+    /* Mobile: side panel collapses - only tabs card shows, rules/history hidden by default */
+    .side-panel > .side-tabs-card:nth-child(n+2) { display: none; }
+    .sq { width: 42px; height: 42px; }
+    #board, #ws-board { grid-template-columns: repeat(8, 42px); }
+    .piece { font-size: 1.55rem; }
+    .rank-label-item { height: 42px; }
+    .file-label-item { width: 42px; }
+    .board-actions { flex-wrap: nowrap; }
+    .turn-banner { margin: 0 10px 10px; font-size: 0.88rem; }
+    header h1 { font-size: 1.5rem; }
+  }
+  @media (max-width: 440px) {
+    .sq { width: 36px; height: 36px; }
+    #board, #ws-board { grid-template-columns: repeat(8, 36px); }
+    .piece { font-size: 1.3rem; }
+    .rank-label-item { height: 36px; }
+    .file-label-item { width: 36px; }
+  }
+
+  /* ── Turn Banner ── */
+  .turn-banner {
+    display: flex; align-items: center; justify-content: center;
+    gap: 10px; padding: 11px 18px; font-size: 0.95rem; font-weight: 700;
+    border-radius: 12px; margin: 0 16px 12px; text-align: center;
+    transition: background 0.3s, color 0.3s;
+  }
+  .turn-banner.white { background: #f1f5f9; color: #1a2035; }
+  .turn-banner.black { background: #1a2035; color: #fff; }
+  .turn-banner.wolf  { background: rgba(127,29,29,0.08); color: #7f1d1d; }
+  .turn-banner.sheep { background: #f1f5f9; color: #1a2035; }
+  .turn-banner .tb-dot { width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── Tab sidebar ── */
+  .side-panel { display: flex; flex-direction: column; gap: 0; width: 260px; }
+  .side-tabs-card {
+    background: #fff; border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow: hidden;
+  }
+  .tab-bar {
+    display: flex; border-bottom: 1.5px solid #f1f5f9; background: #fafafa;
+  }
+  .tab-btn {
+    flex: 1; padding: 11px 4px; background: none; border: none;
+    font-family: inherit; font-size: 0.78rem; font-weight: 700; color: #94a3b8;
+    cursor: pointer; transition: all 0.15s;
+    border-bottom: 2.5px solid transparent; margin-bottom: -1.5px;
+  }
+  .tab-btn:hover { color: #475569; background: #f1f5f9; }
+  .tab-btn.active { color: #1a2035; border-bottom-color: #1a2035; background: #fff; }
+  .tab-pane { display: none; padding: 16px; }
+  .tab-pane.active { display: block; }
+
+  /* ── Action row below board ── */
+  .board-actions {
+    display: flex; gap: 8px; padding: 12px 16px;
+    background: #fafafa; border-top: 1px solid #f1f5f9; flex-wrap: wrap;
+  }
+  .board-actions .btn { margin-bottom: 0; flex: 1; min-width: 80px; }
+
+  /* ── Danger button ── */
+  .btn-danger { background: #fff5f5; color: #dc2626; border-color: #fecaca; }
+  .btn-danger:hover { background: #fee2e2; border-color: #fca5a5; }
+
+  /* ── Barricade turn — reuses .turn-banner ── */
+  .turn-banner.bar-blue   { background: #f1f5f9; color: #1a2035; }
+  .turn-banner.bar-orange { background: #f1f5f9; color: #1a2035; }
+  .bar-wall-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  }
+
+  /* ── Active player bar highlight ── */
+  .player-bar.is-turn { border-right: 3px solid #6366f1; background: #f8f9ff; }
+  .player-bar.bottom.is-turn { border-right: 3px solid #6366f1; border-top-color: #f1f5f9; background: #f8f9ff; }
+
+  /* ── Piece move animation ── */
+  @keyframes pieceLand {
+    0%   { transform: scale(1.35); opacity:0.7 }
+    60%  { transform: scale(0.9); opacity:1 }
+    100% { transform: scale(1); opacity:1 }
+  }
+  .piece-anim { animation: pieceLand 0.22s cubic-bezier(.4,0,.2,1); }
+
+  /* ── Turn pulse on active player bar ── */
+  @keyframes turnGlow {
+    0%, 100% { box-shadow: inset 3px 0 0 #6366f1; }
+    50%       { box-shadow: inset 3px 0 0 #818cf8, 0 0 12px rgba(99,102,241,0.15); }
+  }
+  .player-bar.is-turn { animation: turnGlow 2s ease-in-out infinite; }
+
+  /* ── Barricade wall/move pulse ── */
+  @keyframes barFlash { 0%{opacity:0} 30%{opacity:1} 100%{opacity:1} }
+  .bar-placed { animation: barFlash 0.25s ease-out; }
+
+  /* ── Confirm modal ── */
+  #confirm-modal {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45); z-index: 2000;
+    align-items: center; justify-content: center;
+  }
+  #confirm-modal.open { display: flex; }
+  .confirm-box {
+    background: #fff; border-radius: 20px;
+    box-shadow: 0 12px 48px rgba(0,0,0,0.22);
+    padding: 32px 36px; text-align: center; max-width: 320px; width: 90%;
+  }
+  .confirm-box .confirm-icon { font-size: 2.8rem; margin-bottom: 12px; }
+  .confirm-box h3 { font-size: 1.2rem; font-weight: 800; margin-bottom: 8px; color: #1a2035; }
+  .confirm-box p  { font-size: 0.88rem; color: #64748b; margin-bottom: 20px; }
+  .confirm-btns { display: flex; gap: 10px; }
+  .confirm-btns .btn { flex: 1; margin: 0; }
+
+  /* ── Barricade: action selector embedded in board ── */
+  .bar-action-bar {
+    display: flex; gap: 8px; padding: 10px 16px;
+    background: #fafafa; border-bottom: 1px solid #f1f5f9;
+    align-items: center; flex-wrap: wrap;
+  }
+  .bar-action-label { font-size: 0.75rem; font-weight: 700; color: #94a3b8; margin-left: auto; }
+
+</style>
+</head>
+<body>
+
+<!-- ════════════ HOME PAGE ════════════ -->
+<div id="page-home" class="page active">
+  <header>
+    <svg class="chess-pattern" id="home-hdr-svg" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"></svg>
+    <h1>♟ שחמט של לוטמן</h1>
+    <p>הבית של משחק השחמט הקלאסי</p>
+  </header>
+  <div class="home-main">
+    <div class="home-cards-row">
+      <div class="home-card" id="home-card-chess">
+        <span class="home-card-icon">♟</span>
+        <h2>משחק שחמט רגיל</h2>
+        <p>שחק שחמט קלאסי — נגד חבר על אותו המסך, או מול המחשב ברמות קושי שונות. כולל כל כללי השחמט המלאים.</p>
+        <button class="btn-home" id="btn-go-game">▶ למשחק שחמט רגיל</button>
+      </div>
+      <div class="home-card" id="home-card-ws">
+        <span class="home-card-icon">🐺</span>
+        <h2>זאב וכבשים</h2>
+        <p>משחק אסטרטגי א-סימטרי — זאב אחד מול 4 כבשים על ריבועים כהים. הזאב מנסה לחצות; הכבשים מנסות לחסום.</p>
+        <button class="btn-home btn-home-green" id="btn-go-ws">▶ למשחק זאב וכבשים</button>
+      </div>
+      <div class="home-card" id="home-card-bar">
+        <span class="home-card-icon">🚧</span>
+        <h2>חסימת שערים</h2>
+        <p>מרוץ אסטרטגי על לוח 9×9 — הגע לצד השני לפני יריבך. בכל תור: זוז צעד אחד <b>או</b> הנח חומה לחסימה.</p>
+        <button class="btn-home btn-home-orange" id="btn-go-bar">▶ למשחק חסימת שערים</button>
+      </div>
+      <div class="home-card" id="home-card-kt">
+        <span class="home-card-icon">♞</span>
+        <h2>מסע הפרש</h2>
+        <p>אתגר בודד קלאסי — הוליך את הפרש על פני כל 64 המשבצות, כל אחת בדיוק פעם אחת. תוכל לחזור לנקודת ההתחלה?</p>
+        <button class="btn-home btn-home-purple" id="btn-go-kt">▶ למסע הפרש</button>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <svg class="chess-pattern" id="home-ftr-svg" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"></svg>
+    <span>Loteman Games © 2026</span>
+  </footer>
+</div>
+
+<!-- ════════════ GAME PAGE ════════════ -->
+<div id="page-game" class="page">
+  <header>
+    <svg class="chess-pattern" id="game-hdr-svg" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"></svg>
+    <h1>♟ שחמט של לוטמן</h1>
+  </header>
+  <div style="background:#fff;border-bottom:1px solid #f1f5f9;padding:10px 20px;">
+    <button onclick="goHome()" style="background:none;border:none;cursor:pointer;color:#94a3b8;font-family:inherit;font-size:0.85rem;font-weight:600;display:flex;align-items:center;gap:6px;padding:4px 0;transition:color 0.15s;" onmouseover="this.style.color='#1a2035'" onmouseout="this.style.color='#94a3b8'">
+      ← חזרה לדף הבית
+    </button>
+  </div>
+
+  <div class="game-main">
+    <div class="board-section">
+      <!-- Black player bar -->
+      <div class="player-bar" id="player-bar-black">
+        <div class="player-avatar"><span class="piece black-piece" style="font-size:1.3rem">♟</span></div>
+        <div style="flex:1">
+          <div class="player-name">שחור</div>
+          <div class="captured-pieces" id="cap-black"></div>
+        </div>
+        <span class="turn-indicator" id="turn-black"></span>
+      </div>
+
+      <!-- Turn banner -->
+      <div id="chess-turn-banner" class="turn-banner white">
+        <span class="tb-dot" id="chess-tb-dot" style="background:#e2e8f0;border:2px solid #94a3b8"></span>
+        <span id="chess-tb-text">תור הלבן</span>
+      </div>
+
+      <div class="board-wrap">
+        <div class="board-container">
+          <div class="rank-labels" id="rank-labels"></div>
+          <div class="file-labels-wrap">
+            <div id="board"></div>
+            <div class="file-labels" id="file-labels"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- White player bar -->
+      <div class="player-bar bottom" id="player-bar-white">
+        <div class="player-avatar white-player"><span class="piece white-piece" style="font-size:1.3rem;text-shadow:0 0 2px #888,0 1px 3px rgba(0,0,0,0.6)">♙</span></div>
+        <div style="flex:1">
+          <div class="player-name">לבן</div>
+          <div class="captured-pieces" id="cap-white"></div>
+        </div>
+        <span class="turn-indicator" id="turn-white"></span>
+      </div>
+
+      <!-- Board actions -->
+      <div class="board-actions">
+        <button class="btn btn-secondary" onclick="undoMove()" style="font-size:0.82rem">↩ בטל</button>
+        <button class="btn btn-secondary" onclick="flipBoard()" style="font-size:0.82rem">🔃 הפוך</button>
+        <button class="btn btn-danger" onclick="confirmNewGame('chess')" style="font-size:0.82rem">🔄 חדש</button>
+      </div>
+    </div>
+
+    <!-- Tabbed side panel -->
+    <div class="side-panel">
+      <div class="side-tabs-card">
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab('chess','game',this)">🎮 משחק</button>
+          <button class="tab-btn" onclick="switchTab('chess','settings',this)">⚙️ הגדרות</button>
+          <button class="tab-btn" onclick="switchTab('chess','history',this)">📜 היסטוריה</button>
+        </div>
+        <div id="chess-tab-game" class="tab-pane active">
+          <div id="status-text" style="font-size:0.92rem;font-weight:600;color:#1a2035;margin-bottom:12px;">תור הלבן</div>
+          <div style="font-size:0.75rem;font-weight:700;color:#b0bec5;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">כלים שבויים — שחור</div>
+          <div style="font-size:0.82rem;color:#475569;min-height:20px;margin-bottom:10px" id="cap-black-tab"></div>
+          <div style="font-size:0.75rem;font-weight:700;color:#b0bec5;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">כלים שבויים — לבן</div>
+          <div style="font-size:0.82rem;color:#475569;min-height:20px" id="cap-white-tab"></div>
+        </div>
+        <div id="chess-tab-settings" class="tab-pane">
+          <div style="font-size:0.75rem;font-weight:700;color:#b0bec5;margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">מצב משחק</div>
+          <div class="mode-pills" style="margin-bottom:0">
+            <button class="mode-pill active" id="mode-pvp" onclick="setMode('pvp')">👥 שני שחקנים</button>
+            <button class="mode-pill" id="mode-ai-easy" onclick="setMode('ai-easy')">🤖 קל</button>
+            <button class="mode-pill" id="mode-ai-hard" onclick="setMode('ai-hard')">🤖 קשה</button>
+          </div>
+        </div>
+        <div id="chess-tab-history" class="tab-pane" style="padding:10px 12px">
+          <div id="move-list"><div style="color:#94a3b8;font-size:0.82rem;padding:4px 0">אין מהלכים עדיין</div></div>
+        </div>
+      </div>
+
+      <!-- Rules card — always visible below tabs -->
+      <div class="side-tabs-card" style="margin-top:12px">
+        <div style="padding:14px 16px">
+          <div style="font-size:0.75rem;font-weight:700;color:#b0bec5;margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em">כללי המשחק</div>
+          <div style="font-size:0.82rem;color:#475569;line-height:1.8">
+            <p>♟ <b>זוז</b> — כלי זזים לפי כללי שחמט</p>
+            <p>♟ <b>אנפסון</b> — לכידת רץ אויב</p>
+            <p>♟ <b>הצרחה</b> — מלך ורגלי בו זמנית</p>
+            <p>♟ <b>קידום</b> — רגלי מגיע לשורה אחרונה</p>
+            <p style="margin-top:6px">🏆 <b>ניצחון</b> — מט למלך היריב</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <svg class="chess-pattern" id="game-ftr-svg" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"></svg>
+    <span>Loteman Games © 2026</span>
+  </footer>
+</div>
+
+<!-- Promotion modal -->
+<div id="promo-modal">
+  <div class="promo-box">
+    <h3>בחר כלי לקידום</h3>
+    <div class="promo-pieces" id="promo-pieces"></div>
+  </div>
+</div>
+
+<!-- Game over modal -->
+<div id="game-over">
+  <div class="game-over-box">
+    <div class="go-icon" id="go-icon">♟</div>
+    <h2 id="go-title"></h2>
+    <p id="go-desc"></p>
+    <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="handleGameOverNewGame();closeGameOver()">משחק חדש</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════
+//  CHESS SVG PATTERN
+//  6 chess piece silhouettes, 200×200 viewBox
+// ══════════════════════════════════════
+const CHESS_SHAPES = [
+  // Pawn
+  `<g><ellipse cx="100" cy="162" rx="44" ry="14"/><rect x="76" y="128" width="48" height="36" rx="5"/><ellipse cx="100" cy="122" rx="30" ry="10"/><circle cx="100" cy="86" r="30"/></g>`,
+  // Rook
+  `<g><rect x="50" y="154" width="100" height="20" rx="4"/><rect x="62" y="88" width="76" height="68" rx="3"/><rect x="50" y="58" width="100" height="34" rx="3"/><rect x="50" y="40" width="18" height="22"/><rect x="82" y="40" width="18" height="22"/><rect x="132" y="40" width="18" height="22"/></g>`,
+  // Bishop
+  `<g><ellipse cx="100" cy="163" rx="45" ry="13"/><rect x="72" y="130" width="56" height="36" rx="5"/><ellipse cx="100" cy="125" rx="28" ry="10"/><ellipse cx="100" cy="84" rx="22" ry="40"/><circle cx="100" cy="40" r="13"/><rect x="88" y="36" width="24" height="9" rx="3"/></g>`,
+  // Knight
+  `<g><ellipse cx="100" cy="164" rx="44" ry="13"/><rect x="66" y="130" width="68" height="36" rx="5"/><path d="M82 130 C58 108, 52 72, 68 50 C76 36, 96 28, 108 24 C122 18, 140 26, 144 42 C150 62, 140 78, 126 86 C114 92, 108 96, 108 106 L108 130 Z"/><circle cx="88" cy="58" r="8" fill="white" opacity="0.4"/></g>`,
+  // Queen
+  `<g><ellipse cx="100" cy="163" rx="50" ry="14"/><path d="M58 148 L70 86 L100 120 L130 86 L142 148 Z"/><ellipse cx="100" cy="148" rx="42" ry="11"/><circle cx="70" cy="76" r="14"/><circle cx="100" cy="64" r="14"/><circle cx="130" cy="76" r="14"/><circle cx="52" cy="96" r="12"/><circle cx="148" cy="96" r="12"/></g>`,
+  // King
+  `<g><ellipse cx="100" cy="164" rx="50" ry="13"/><path d="M60 150 L72 94 L100 118 L128 94 L140 150 Z"/><ellipse cx="100" cy="150" rx="40" ry="11"/><rect x="58" y="86" width="84" height="12" rx="3"/><rect x="93" y="42" width="14" height="52" rx="4"/><rect x="76" y="56" width="48" height="14" rx="4"/></g>`
+];
+
+// Use a fixed large canvas size so patterns work even when elements are hidden
+function drawChessPattern(svgEl) {
+  if (!svgEl) return;
+  const parent = svgEl.parentElement;
+  // Get real width — fall back to body width if parent is hidden (display:none)
+  const W = parent.offsetWidth || document.body.offsetWidth || window.innerWidth || 800;
+  const H = parent.offsetHeight || 130;
+  svgEl.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svgEl.setAttribute('width', W);
+  svgEl.setAttribute('height', H);
+  const SIZE = 44, HALF = SIZE / 2;
+  const COLS = Math.ceil(W / SIZE) + 2;
+  const ROWS = Math.ceil(H / SIZE) + 2;
+  const scale = SIZE / 200;
+  let out = '';
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      const ox = (row % 2 === 1) ? HALF : 0;
+      const cx = col * SIZE + ox - HALF;
+      const cy = row * SIZE - HALF;
+      const si = Math.floor(Math.random() * CHESS_SHAPES.length);
+      out += `<g fill="white" transform="translate(${cx},${cy}) scale(${scale})">${CHESS_SHAPES[si]}</g>`;
+    }
+  }
+  svgEl.innerHTML = out;
+}
+
+function drawAllPatterns() {
+  document.querySelectorAll('.chess-pattern').forEach(drawChessPattern);
+}
+
+// Draw on load and on resize
+window.addEventListener('load', drawAllPatterns);
+window.addEventListener('resize', drawAllPatterns);
+
+// ══════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════
+function goToGame() {
+  document.getElementById('page-home').classList.remove('active');
+  document.getElementById('page-game').classList.add('active');
+  // Re-draw patterns now that game page is visible and has real dimensions
+  requestAnimationFrame(() => {
+    document.querySelectorAll('#page-game .chess-pattern').forEach(drawChessPattern);
+  });
+  newGame();
+}
+function goHome() {
+  document.getElementById('page-game').classList.remove('active');
+  document.getElementById('page-ws').classList.remove('active');
+  document.getElementById('page-bar').classList.remove('active');
+  document.getElementById('page-kt').classList.remove('active');
+  document.getElementById('page-home').classList.add('active');
+  ktStopTimer();
+}
+
+// ══════════════════════════════════════
+//  CHESS ENGINE
+// ══════════════════════════════════════
+const PIECE_UNICODE = {
+  wK:'♔',wQ:'♕',wR:'♖',wB:'♗',wN:'♘',wP:'♙',
+  bK:'♚',bQ:'♛',bR:'♜',bB:'♝',bN:'♞',bP:'♟'
+};
+const INIT_BOARD = [
+  ['bR','bN','bB','bQ','bK','bB','bN','bR'],
+  ['bP','bP','bP','bP','bP','bP','bP','bP'],
+  [null,null,null,null,null,null,null,null],
+  [null,null,null,null,null,null,null,null],
+  [null,null,null,null,null,null,null,null],
+  [null,null,null,null,null,null,null,null],
+  ['wP','wP','wP','wP','wP','wP','wP','wP'],
+  ['wR','wN','wB','wQ','wK','wB','wN','wR']
+];
+
+let board, turn, selected, highlights, legalMoves, history, moveNotations;
+let flipped = false, gameMode = 'pvp', gameOver = false;
+let enPassant = null;   // [row, col] of the square a pawn can capture INTO via e.p.
+let castlingRights, lastFrom = null, lastTo = null, pendingPromotion = null;
+
+const gc = p => p ? p[0] : null;
+const gt = p => p ? p[1] : null;
+const inB = (r,c) => r>=0&&r<8&&c>=0&&c<8;
+
+// Generate pseudo-legal moves (ignoring discovered checks on own king)
+function pseudoMoves(r, c, brd, ep, cR) {
+  const piece = brd[r][c]; if (!piece) return [];
+  const col = gc(piece), type = gt(piece);
+  const moves = [];
+  const free = (nr,nc) => inB(nr,nc) && (!brd[nr][nc] || gc(brd[nr][nc]) !== col);
+  const enemy = (nr,nc) => inB(nr,nc) && brd[nr][nc] && gc(brd[nr][nc]) !== col;
+  const empty = (nr,nc) => inB(nr,nc) && !brd[nr][nc];
+
+  const slide = dirs => dirs.forEach(([dr,dc]) => {
+    let nr=r+dr, nc=c+dc;
+    while (inB(nr,nc)) { if (!brd[nr][nc]) { moves.push([nr,nc]); } else { if (enemy(nr,nc)) moves.push([nr,nc]); break; } nr+=dr; nc+=dc; }
+  });
+
+  if (type==='R') slide([[-1,0],[1,0],[0,-1],[0,1]]);
+  if (type==='B') slide([[-1,-1],[-1,1],[1,-1],[1,1]]);
+  if (type==='Q') slide([[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[-1,1],[1,-1],[1,1]]);
+  if (type==='N') [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]].forEach(([dr,dc])=>{ if(free(r+dr,c+dc)) moves.push([r+dr,c+dc]); });
+
+  if (type==='K') {
+    for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++) { if(dr===0&&dc===0) continue; if(free(r+dr,c+dc)) moves.push([r+dr,c+dc]); }
+    // Castling
+    if (col==='w'&&r===7&&c===4&&!isInCheck(brd,'w')) {
+      if (cR.wK&&empty(7,5)&&empty(7,6)&&!attacked(brd,7,5,'b')&&!attacked(brd,7,6,'b')) moves.push([7,6]);
+      if (cR.wQ&&empty(7,3)&&empty(7,2)&&empty(7,1)&&!attacked(brd,7,3,'b')&&!attacked(brd,7,2,'b')) moves.push([7,2]);
+    }
+    if (col==='b'&&r===0&&c===4&&!isInCheck(brd,'b')) {
+      if (cR.bK&&empty(0,5)&&empty(0,6)&&!attacked(brd,0,5,'w')&&!attacked(brd,0,6,'w')) moves.push([0,6]);
+      if (cR.bQ&&empty(0,3)&&empty(0,2)&&empty(0,1)&&!attacked(brd,0,3,'w')&&!attacked(brd,0,2,'w')) moves.push([0,2]);
+    }
+  }
+
+  if (type==='P') {
+    const dir = col==='w' ? -1 : 1;
+    const start = col==='w' ? 6 : 1;
+    if (empty(r+dir,c)) {
+      moves.push([r+dir,c]);
+      if (r===start && empty(r+2*dir,c)) moves.push([r+2*dir,c]);
+    }
+    [-1,1].forEach(dc => {
+      const nr=r+dir, nc=c+dc;
+      if (enemy(nr,nc)) moves.push([nr,nc]);
+      // ── EN PASSANT ──
+      // ep = square the pawn moves TO (the empty square "behind" the double-pushed pawn)
+      if (ep && ep[0]===nr && ep[1]===nc) moves.push([nr,nc]);
+    });
+  }
+  return moves;
+}
+
+// Attack check (for check detection — no ep, no castling)
+function attacked(brd, r, c, byColor) {
+  for (let sr=0;sr<8;sr++) for (let sc=0;sc<8;sc++) {
+    const p = brd[sr][sc];
+    if (!p || gc(p)!==byColor) continue;
+    // Use simplified attacker (no ep/castling needed for attack check)
+    const raw = attackerMoves(sr,sc,brd,byColor,gt(p));
+    if (raw.some(([tr,tc])=>tr===r&&tc===c)) return true;
+  }
+  return false;
+}
+function attackerMoves(r,c,brd,col,type) {
+  const moves=[];
+  const slide = dirs => dirs.forEach(([dr,dc])=>{ let nr=r+dr,nc=c+dc; while(inB(nr,nc)){moves.push([nr,nc]); if(brd[nr][nc])break; nr+=dr;nc+=dc;} });
+  if(type==='R') slide([[-1,0],[1,0],[0,-1],[0,1]]);
+  if(type==='B') slide([[-1,-1],[-1,1],[1,-1],[1,1]]);
+  if(type==='Q') slide([[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[-1,1],[1,-1],[1,1]]);
+  if(type==='N') [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]].forEach(([dr,dc])=>{ if(inB(r+dr,c+dc)) moves.push([r+dr,c+dc]); });
+  if(type==='K') { for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++) { if(dr===0&&dc===0)continue; if(inB(r+dr,c+dc)) moves.push([r+dr,c+dc]); } }
+  if(type==='P') { const dir=col==='w'?-1:1; [-1,1].forEach(dc=>{ if(inB(r+dir,c+dc)) moves.push([r+dir,c+dc]); }); }
+  return moves;
+}
+
+function isInCheck(brd, col) {
+  let kr=-1,kc=-1;
+  for(let r=0;r<8;r++) for(let c=0;c<8;c++) if(brd[r][c]===col+'K'){kr=r;kc=c;}
+  if(kr===-1) return false;
+  return attacked(brd,kr,kc, col==='w'?'b':'w');
+}
+
+function simulateMove(brd, fr, fc, tr, tc, ep) {
+  const nb = brd.map(r=>[...r]);
+  const type = gt(nb[fr][fc]);
+  // En passant: remove the captured pawn (which is on (fr, tc), same rank as mover, target file)
+  if (type==='P' && fc!==tc && !nb[tr][tc] && ep && ep[0]===tr && ep[1]===tc) {
+    nb[fr][tc] = null;
+  }
+  nb[tr][tc] = nb[fr][fc];
+  nb[fr][fc] = null;
+  return nb;
+}
+
+function getLegal(r, c, brd, ep, cR) {
+  const col = gc(brd[r][c]);
+  return pseudoMoves(r,c,brd,ep,cR).filter(([tr,tc]) => {
+    const nb = simulateMove(brd,r,c,tr,tc,ep);
+    return !isInCheck(nb, col);
+  });
+}
+
+function hasAnyLegal(col, brd, ep, cR) {
+  for(let r=0;r<8;r++) for(let c=0;c<8;c++)
+    if(brd[r][c]&&gc(brd[r][c])===col && getLegal(r,c,brd,ep,cR).length>0) return true;
+  return false;
+}
+
+// ── Game state ──
+function newGame() {
+  board = INIT_BOARD.map(r=>[...r]);
+  turn='w'; selected=null; highlights=[]; legalMoves=[];
+  history=[]; moveNotations=[]; gameOver=false; enPassant=null;
+  castlingRights={wK:true,wQ:true,bK:true,bQ:true};
+  lastFrom=null; lastTo=null;
+  renderBoard(); updateStatus(); updateMoveList(); updateCaptures();
+}
+function setMode(m) {
+  gameMode=m;
+  document.querySelectorAll('.mode-pill').forEach(p=>p.classList.remove('active'));
+  document.getElementById('mode-'+m).classList.add('active');
+  newGame();
+}
+function flipBoard() { flipped=!flipped; renderBoard(); }
+
+// ── Render ──
+
+// ══════════════════════════════════════
+//  SHARED GRID RENDERER
+//  Used by both Chess and Wolf & Sheep
+// ══════════════════════════════════════
+/**
+ * renderGrid(opts) — generic grid renderer for div-based boards
+ *
+ * opts = {
+ *   boardId: string,           // id of board container
+ *   rankLabelsId: string,      // id of rank-labels container
+ *   fileLabelsId: string,      // id of file-labels container
+ *   size: number,              // board size (8)
+ *   flipped: bool,             // flip board orientation
+ *   getCellClass: (r,c)=>str,  // extra CSS classes for cell
+ *   getCellContent:(r,c)=>el,  // returns child element or null
+ *   onCellClick: (r,c)=>void,  // click handler
+ *   rankLabel: (i)=>str,       // label for rank i (display index)
+ *   fileLabel: (i)=>str,       // label for file i
+ * }
+ */
+function renderGrid(opts) {
+  const {boardId, rankLabelsId, fileLabelsId, size, flipped,
+         getCellClass, getCellContent, onCellClick, rankLabel, fileLabel} = opts;
+
+  const boardEl = document.getElementById(boardId);
+  if (!boardEl) return;
+  boardEl.innerHTML = '';
+
+  const rl = rankLabelsId ? document.getElementById(rankLabelsId) : null;
+  const fl = fileLabelsId ? document.getElementById(fileLabelsId) : null;
+
+  if (rl) {
+    rl.innerHTML = '';
+    for (let i = 0; i < size; i++) {
+      const ri = flipped ? i : size - 1 - i;
+      const d = document.createElement('div');
+      d.className = 'rank-label-item';
+      d.textContent = rankLabel ? rankLabel(ri) : (ri + 1);
+      rl.appendChild(d);
+    }
+  }
+
+  if (fl) {
+    fl.innerHTML = '';
+    for (let i = 0; i < size; i++) {
+      const ci = flipped ? size - 1 - i : i;
+      const d = document.createElement('div');
+      d.className = 'file-label-item';
+      d.textContent = fileLabel ? fileLabel(ci) : 'abcdefgh'[ci];
+      fl.appendChild(d);
+    }
+  }
+
+  for (let ri = 0; ri < size; ri++) {
+    for (let ci = 0; ci < size; ci++) {
+      const r = flipped ? ri : size - 1 - ri;
+      const c = flipped ? size - 1 - ci : ci;
+      const sq = document.createElement('div');
+      const isLight = (r + c) % 2 === 0;
+      sq.className = 'sq ' + (isLight ? 'light' : 'dark');
+      sq.dataset.r = r; sq.dataset.c = c;
+      const extra = getCellClass ? getCellClass(r, c) : '';
+      if (extra) extra.split(' ').forEach(cls => cls && sq.classList.add(cls));
+      const child = getCellContent ? getCellContent(r, c) : null;
+      if (child) sq.appendChild(child);
+      sq.addEventListener('click', () => onCellClick && onCellClick(r, c));
+      boardEl.appendChild(sq);
+    }
+  }
+}
+
+function renderBoard() {
+  renderGrid({
+    boardId: 'board',
+    rankLabelsId: 'rank-labels',
+    fileLabelsId: 'file-labels',
+    size: 8,
+    flipped,
+    getCellClass(r, c) {
+      const classes = [];
+      if (selected && selected[0]===r && selected[1]===c) classes.push('selected');
+      if (highlights.some(([hr,hc])=>hr===r&&hc===c)) {
+        classes.push('highlight');
+        if (board[r][c]) classes.push('has-piece');
+      }
+      if (lastFrom && lastFrom[0]===r && lastFrom[1]===c) classes.push('last-move-from');
+      if (lastTo   && lastTo[0]===r   && lastTo[1]===c)   classes.push('last-move-to');
+      if (board[r][c]===turn+'K' && isInCheck(board,turn)) classes.push('in-check');
+      return classes.join(' ');
+    },
+    getCellContent(r, c) {
+      if (!board[r][c]) return null;
+      const p = board[r][c], col = gc(p);
+      const span = document.createElement('span');
+      span.className = 'piece ' + (col==='w' ? 'white-piece' : 'black-piece');
+      span.textContent = PIECE_UNICODE[p];
+      return span;
+    },
+    onCellClick: onSqClick,
+  });
+  document.getElementById('turn-white').classList.toggle('active', turn==='w' && !gameOver);
+  document.getElementById('turn-black').classList.toggle('active', turn==='b' && !gameOver);
+  updateChessTurnBanner(turn, gameOver);
+}
+
+
+function onSqClick(r,c) {
+  if(gameOver) return;
+  if(gameMode!=='pvp'&&turn==='b') return;
+  const piece=board[r][c];
+  if(selected) {
+    const [sr,sc]=selected;
+    if(legalMoves.some(([lr,lc])=>lr===r&&lc===c)) { doMove(sr,sc,r,c); return; }
+    if(piece&&gc(piece)===turn) {
+      selected=[r,c]; legalMoves=getLegal(r,c,board,enPassant,castlingRights);
+      highlights=legalMoves; renderBoard(); return;
+    }
+    selected=null; highlights=[]; legalMoves=[]; renderBoard(); return;
+  }
+  if(piece&&gc(piece)===turn) {
+    selected=[r,c]; legalMoves=getLegal(r,c,board,enPassant,castlingRights);
+    highlights=legalMoves; renderBoard();
+  }
+}
+
+function doMove(fr,fc,tr,tc,ai=false) {
+  const type=gt(board[fr][fc]), col=gc(board[fr][fc]);
+  if(type==='P'&&(tr===0||tr===7)) {
+    pendingPromotion={fr,fc,tr,tc,ai};
+    if(ai) applyMove(fr,fc,tr,tc,'Q',true);
+    else   showPromoModal(col);
+    return;
+  }
+  applyMove(fr,fc,tr,tc,null,ai);
+}
+
+function applyMove(fr,fc,tr,tc,promo,ai=false) {
+  const piece=board[fr][fc], type=gt(piece), col=gc(piece);
+  const cap=board[tr][tc];
+  const epPrev=enPassant;
+
+  // Save state for undo
+  history.push({
+    board:board.map(r=>[...r]), turn, enPassant:enPassant?[...enPassant]:null,
+    castlingRights:{...castlingRights}, lastFrom:lastFrom?[...lastFrom]:null,
+    lastTo:lastTo?[...lastTo]:null, moveNotations:[...moveNotations]
+  });
+
+  // ── EN PASSANT capture ──
+  // The ep square is the empty square the capturing pawn moves TO
+  // The captured pawn is on (fr, tc) — same row as mover, target column
+  let epCap=null;
+  if(type==='P' && fc!==tc && !board[tr][tc] && epPrev && epPrev[0]===tr && epPrev[1]===tc) {
+    epCap=board[fr][tc];
+    board[fr][tc]=null;
+  }
+
+  // ── Update en passant for next turn ──
+  enPassant=null;
+  if(type==='P' && Math.abs(tr-fr)===2) {
+    enPassant=[(fr+tr)/2, fc]; // square jumped over
+  }
+
+  // ── Castling ──
+  if(type==='K') {
+    if(col==='w'){castlingRights.wK=false;castlingRights.wQ=false;}
+    else         {castlingRights.bK=false;castlingRights.bQ=false;}
+    if(fc===4&&tc===6){board[tr][5]=board[tr][7];board[tr][7]=null;}
+    if(fc===4&&tc===2){board[tr][3]=board[tr][0];board[tr][0]=null;}
+  }
+  if(type==='R'){
+    if(fr===7&&fc===7)castlingRights.wK=false; if(fr===7&&fc===0)castlingRights.wQ=false;
+    if(fr===0&&fc===7)castlingRights.bK=false; if(fr===0&&fc===0)castlingRights.bQ=false;
+  }
+
+  board[tr][tc]=promo?col+promo:piece;
+  board[fr][fc]=null;
+  lastFrom=[fr,fc]; lastTo=[tr,tc];
+
+  // Notation
+  const F='abcdefgh';
+  let note='';
+  if(type==='K'&&Math.abs(tc-fc)===2) { note=tc>fc?'O-O':'O-O-O'; }
+  else {
+    const capX=(cap||epCap)?'x':'';
+    const pl=type!=='P'?type:(capX?F[fc]:'');
+    note=pl+capX+F[tc]+(8-tr);
+    if(promo) note+='='+promo;
+  }
+  turn=col==='w'?'b':'w';
+  if(isInCheck(board,turn)) note+='+';
+  moveNotations.push({col,note});
+
+  selected=null; highlights=[]; legalMoves=[];
+  renderBoard(); updateStatus(); updateMoveList(); updateCaptures();
+  requestAnimationFrame(() => animatePieceAt(tr, tc));
+  if (navigator.vibrate) navigator.vibrate(18);
+
+  if(!hasAnyLegal(turn,board,enPassant,castlingRights)) {
+    gameOver=true;
+    setTimeout(()=>{
+      if(isInCheck(board,turn)) {
+        const w=col==='w'?'לבן':'שחור';
+        showGameOver(w+' ניצח!','כלה!','♔');
+        document.getElementById('status-text').textContent=w+' ניצח בכלה!';
+        document.getElementById('status-text').className='checkmate';
+      } else {
+        showGameOver('תיקו!','פאט — אין מהלכים אפשריים','🤝');
+        document.getElementById('status-text').textContent='פאט — תיקו!';
+        document.getElementById('status-text').className='draw';
+      }
+    },200);
+    return;
+  }
+  if(!ai&&gameMode!=='pvp'&&turn==='b') setTimeout(aiMove,420);
+}
+
+function undoMove() {
+  if(history.length===0) return;
+  const steps=(gameMode!=='pvp'&&history.length>=2)?2:1;
+  for(let i=0;i<steps;i++){
+    if(history.length===0) break;
+    const h=history.pop();
+    board=h.board.map(r=>[...r]); turn=h.turn;
+    enPassant=h.enPassant?[...h.enPassant]:null;
+    castlingRights={...h.castlingRights};
+    lastFrom=h.lastFrom?[...h.lastFrom]:null;
+    lastTo=h.lastTo?[...h.lastTo]:null;
+    moveNotations=[...h.moveNotations];
+  }
+  gameOver=false; selected=null; highlights=[]; legalMoves=[];
+  renderBoard(); updateStatus(); updateMoveList(); updateCaptures();
+}
+
+// ── AI ──
+function aiMove() {
+  if(gameOver||turn!=='b') return;
+  const depth=gameMode==='ai-hard'?3:1;
+  const mv=bestMove(board,'b',depth,enPassant,castlingRights);
+  if(mv) doMove(mv.fr,mv.fc,mv.tr,mv.tc,true);
+}
+function evalBoard(brd){
+  const v={P:1,N:3,B:3,R:5,Q:9,K:0}; let s=0;
+  for(let r=0;r<8;r++) for(let c=0;c<8;c++){const p=brd[r][c];if(!p)continue;const pv=v[gt(p)]||0;s+=gc(p)==='b'?pv:-pv;}
+  return s;
+}
+function allMoves(col,brd,ep,cR){
+  const mv=[];
+  for(let r=0;r<8;r++) for(let c=0;c<8;c++)
+    if(brd[r][c]&&gc(brd[r][c])===col) getLegal(r,c,brd,ep,cR).forEach(([tr,tc])=>mv.push({fr:r,fc:c,tr,tc}));
+  return mv;
+}
+function simMoveAI(brd,fr,fc,tr,tc,ep,cR){
+  const nb=brd.map(r=>[...r]);
+  const p=nb[fr][fc],type=gt(p),col=gc(p);
+  const ncR={...cR}; let nEp=null;
+  if(type==='P'&&fc!==tc&&!nb[tr][tc]&&ep&&ep[0]===tr&&ep[1]===tc) nb[fr][tc]=null;
+  if(type==='P'&&Math.abs(tr-fr)===2) nEp=[(fr+tr)/2,fc];
+  if(type==='K'){if(col==='w'){ncR.wK=false;ncR.wQ=false;}else{ncR.bK=false;ncR.bQ=false;} if(fc===4&&tc===6){nb[tr][5]=nb[tr][7];nb[tr][7]=null;} if(fc===4&&tc===2){nb[tr][3]=nb[tr][0];nb[tr][0]=null;}}
+  if(type==='R'){if(fr===7&&fc===7)ncR.wK=false;if(fr===7&&fc===0)ncR.wQ=false;if(fr===0&&fc===7)ncR.bK=false;if(fr===0&&fc===0)ncR.bQ=false;}
+  nb[tr][tc]=(type==='P'&&(tr===0||tr===7))?col+'Q':p;
+  nb[fr][fc]=null;
+  return {nb,nEp,ncR};
+}
+function mmx(brd,d,a,b,mx,ep,cR){
+  if(d===0) return evalBoard(brd);
+  const col=mx?'b':'w', mvs=allMoves(col,brd,ep,cR);
+  if(!mvs.length) return isInCheck(brd,col)?(mx?-9999:9999):0;
+  if(mx){let best=-Infinity; for(const m of mvs){const{nb,nEp,ncR}=simMoveAI(brd,m.fr,m.fc,m.tr,m.tc,ep,cR);best=Math.max(best,mmx(nb,d-1,a,b,false,nEp,ncR));a=Math.max(a,best);if(b<=a)break;} return best;}
+  else  {let best=Infinity;  for(const m of mvs){const{nb,nEp,ncR}=simMoveAI(brd,m.fr,m.fc,m.tr,m.tc,ep,cR);best=Math.min(best,mmx(nb,d-1,a,b,true, nEp,ncR));b=Math.min(b,best);if(b<=a)break;} return best;}
+}
+function bestMove(brd,col,d,ep,cR){
+  const mvs=allMoves(col,brd,ep,cR);
+  if(!mvs.length) return null;
+  if(d===1) return mvs[Math.floor(Math.random()*mvs.length)];
+  let bs=-Infinity,bm=null;
+  for(const m of mvs){const{nb,nEp,ncR}=simMoveAI(brd,m.fr,m.fc,m.tr,m.tc,ep,cR);const s=mmx(nb,d-1,-Infinity,Infinity,false,nEp,ncR);if(s>bs){bs=s;bm=m;}}
+  return bm;
+}
+
+// ── UI ──
+function updateStatus(){
+  const el=document.getElementById('status-text'); if(gameOver)return;
+  if(isInCheck(board,turn)){el.textContent=(turn==='w'?'לבן':'שחור')+' — שַׁח!';el.className='check';}
+  else{el.textContent='תור '+(turn==='w'?'הלבן':'השחור');el.className='';}
+}
+function updateMoveList(){
+  const el=document.getElementById('move-list');
+  if(!moveNotations.length){el.innerHTML='<div style="color:#94a3b8;font-size:0.82rem;">אין מהלכים עדיין</div>';return;}
+  let html='';
+  for(let i=0;i<moveNotations.length;i+=2){
+    const num=Math.floor(i/2)+1;
+    const wm=moveNotations[i]?.note||'', bm=moveNotations[i+1]?.note||'';
+    const wc=i===moveNotations.length-1?'current':'', bc=i+1===moveNotations.length-1?'current':'';
+    html+=`<div class="move-pair"><span class="move-num">${num}.</span><span class="move-token ${wc}">${wm}</span><span class="move-token ${bc}">${bm}</span></div>`;
+  }
+  el.innerHTML=html; el.scrollTop=el.scrollHeight;
+}
+function updateCaptures(){
+  const on={};
+  for(let r=0;r<8;r++) for(let c=0;c<8;c++) if(board[r][c]) on[board[r][c]]=(on[board[r][c]]||0)+1;
+  const init={wP:8,wN:2,wB:2,wR:2,wQ:1,bP:8,bN:2,bB:2,bR:2,bQ:1};
+  const capB=[],capW=[];
+  Object.entries(init).forEach(([k,v])=>{
+    const diff=v-(on[k]||0); if(diff<=0) return;
+    const cls=k[0]==='w'?'white-piece':'black-piece';
+    const arr=k[0]==='w'?capB:capW;
+    for(let i=0;i<diff;i++) arr.push(`<span class="piece ${cls}" style="font-size:0.85rem">${PIECE_UNICODE[k]}</span>`);
+  });
+  const cbHtml = capB.join(''), cwHtml = capW.join('');
+  document.getElementById('cap-black').innerHTML = cbHtml;
+  document.getElementById('cap-white').innerHTML = cwHtml;
+  const cbt = document.getElementById('cap-black-tab');
+  const cwt = document.getElementById('cap-white-tab');
+  if (cbt) cbt.innerHTML = cbHtml || '<span style="color:#94a3b8;font-size:0.78rem">אין כלים שבויים</span>';
+  if (cwt) cwt.innerHTML = cwHtml || '<span style="color:#94a3b8;font-size:0.78rem">אין כלים שבויים</span>';
+}
+function showPromoModal(col){
+  const pcs=col==='w'?[{t:'Q',s:'♕'},{t:'R',s:'♖'},{t:'B',s:'♗'},{t:'N',s:'♘'}]:[{t:'Q',s:'♛'},{t:'R',s:'♜'},{t:'B',s:'♝'},{t:'N',s:'♞'}];
+  const cls=col==='w'?'white-piece':'black-piece';
+  const bg=col==='w'?'dark-bg':'';
+  document.getElementById('promo-pieces').innerHTML=pcs.map(p=>`<div class="promo-piece ${bg}" onclick="choosePromo('${p.t}')"><span class="piece ${cls}">${p.s}</span></div>`).join('');
+  document.getElementById('promo-modal').classList.add('open');
+}
+function choosePromo(type){
+  document.getElementById('promo-modal').classList.remove('open');
+  if(pendingPromotion){const{fr,fc,tr,tc,ai}=pendingPromotion;pendingPromotion=null;applyMove(fr,fc,tr,tc,type,ai);}
+}
+function showGameOver(title,desc,icon){
+  document.getElementById('go-title').textContent=title;
+  document.getElementById('go-desc').textContent=desc;
+  document.getElementById('go-icon').textContent=icon;
+  document.getElementById('game-over').classList.add('open');
+}
+function closeGameOver(){ document.getElementById('game-over').classList.remove('open'); }
+
+
+// ══════════════════════════════════════
+//  WOLF & SHEEP ENGINE
+//  Classic Fox & Hounds on dark squares
+//  Wolf starts row 0 col 0 (dark corner)
+//  Sheep start on row 7 dark squares: cols 1,3,5,7
+//  Wolf moves diagonally any adjacent dark sq (fwd+back)
+//  Sheep move diagonally forward only (toward row 0 = wolf start = UP)
+//  Wolf wins: reaches row 7 (sheep starting row)
+//  Sheep win: wolf has no legal moves
+// ══════════════════════════════════════
+
+// Board coords: row 0 = top (wolf start), row 7 = bottom (sheep start)
+// Dark squares: (r+c) % 2 === 1
+
+let wsBoard = {};  // key "r,c" => "wolf" | "sheep"
+let wsTurn = 'wolf';  // wolf goes first
+let wsSelected = null;
+let wsHighlights = [];
+let wsHistory = [];
+let wsMoveLog = [];
+let wsMode = 'pvp';  // pvp | ai-wolf | ai-sheep
+let wsOver = false;
+
+function wsNewGame() {
+  wsBoard = {};
+  // Wolf starts at row 0 col 4 (dark square: 0+4=4... wait need odd)
+  // Dark squares: (r+c) % 2 === 1
+  // Row 0 dark cols: 1,3,5,7. Wolf starts center-ish at col 4... 
+  // Standard Fox&Hounds: fox at d1 = col3 row7 in chess coords
+  // We use row0=top. Wolf (fox) starts at top, col 0 row 0 is light.
+  // Wolf at (0,1) - dark. Sheep at row7: (7,0),(7,2),(7,4),(7,6) - all dark (7+0=7,7+2=9,7+4=11,7+6=13 all odd)
+  // Standard Fox & Hounds:
+  // Sheep (hounds) start at TOP row 0, dark squares
+  // Wolf (fox) starts at BOTTOM row 7, dark square
+  wsBoard['7,4'] = 'wolf';   // wolf at bottom center-ish (7+4=11, odd = dark)
+  wsBoard['0,1'] = 'sheep';  // 0+1=1 odd = dark
+  wsBoard['0,3'] = 'sheep';  // 0+3=3 odd = dark  
+  wsBoard['0,5'] = 'sheep';  // 0+5=5 odd = dark
+  wsBoard['0,7'] = 'sheep';  // 0+7=7 odd = dark
+  wsTurn = 'wolf';
+  wsSelected = null; wsHighlights = [];
+  wsHistory = []; wsMoveLog = [];
+  wsOver = false;
+  wsRender();
+  wsUpdateStatus();
+  wsUpdateMoveList();
+  // If AI is wolf, trigger AI
+  if (wsMode === 'ai-wolf') setTimeout(wsAiMove, 500);
+}
+
+function wsSetMode(m) {
+  wsMode = m;
+  document.querySelectorAll('[id^="ws-mode-"]').forEach(p => p.classList.remove('active'));
+  document.getElementById('ws-mode-' + m).classList.add('active');
+  wsNewGame();
+}
+
+function isDark(r, c) { return (r + c) % 2 === 1; }
+
+function wsGetMoves(r, c, piece) {
+  const moves = [];
+  const dirs = piece === 'wolf'
+    ? [[-1,-1],[-1,1],[1,-1],[1,1]]   // wolf: all 4 diagonals
+    : [[1,-1],[1,1]];                 // sheep: only DOWN (toward row 7, away from start row 0)
+  for (const [dr, dc] of dirs) {
+    const nr = r + dr, nc = c + dc;
+    if (nr < 0 || nr > 7 || nc < 0 || nc > 7) continue;
+    if (!isDark(nr, nc)) continue;
+    if (wsBoard[nr + ',' + nc]) continue;  // occupied
+    moves.push([nr, nc]);
+  }
+  return moves;
+}
+
+function wsHasAnyMove(piece) {
+  for (const key of Object.keys(wsBoard)) {
+    if (wsBoard[key] !== piece) continue;
+    const [r, c] = key.split(',').map(Number);
+    if (wsGetMoves(r, c, piece).length > 0) return true;
+  }
+  return false;
+}
+
+function wsRender() {
+  renderGrid({
+    boardId: 'ws-board',
+    rankLabelsId: 'ws-rank-labels',
+    fileLabelsId: 'ws-file-labels',
+    size: 8,
+    flipped: false,
+    rankLabel: ri => 8 - ri,
+    getCellClass(r, c) {
+      const dark = (r + c) % 2 === 1;
+      const classes = [];
+      if (!dark) { classes.push('ws-light-disabled'); return classes.join(' '); }
+      if (wsSelected && wsSelected[0]===r && wsSelected[1]===c) classes.push('selected');
+      if (wsHighlights.some(([hr,hc])=>hr===r&&hc===c)) {
+        classes.push('highlight');
+        if (wsBoard[r+','+c]) classes.push('has-piece');
+      }
+      return classes.join(' ');
+    },
+    getCellContent(r, c) {
+      const dark = (r + c) % 2 === 1;
+      if (!dark) return null;
+      const piece = wsBoard[r + ',' + c];
+      if (!piece) return null;
+      const span = document.createElement('span');
+      span.style.cssText = 'font-size:2rem;line-height:1;display:block;pointer-events:none;';
+      span.textContent = piece === 'wolf' ? '🐺' : '🐑';
+      return span;
+    },
+    onCellClick: wsOnClick,
+  });
+  document.getElementById('ws-turn-wolf').classList.toggle('active', wsTurn==='wolf' && !wsOver);
+  document.getElementById('ws-turn-sheep').classList.toggle('active', wsTurn==='sheep' && !wsOver);
+  updateWsTurnBanner(wsTurn, wsOver);
+}
+
+
+function wsOnClick(r, c) {
+  if (wsOver) return;
+  // Block human turn when AI controls this side
+  if (wsMode === 'ai-wolf'  && wsTurn === 'wolf')  return;
+  if (wsMode === 'ai-sheep' && wsTurn === 'sheep') return;
+
+  const key = r + ',' + c;
+  const piece = wsBoard[key];
+
+  if (wsSelected) {
+    const [sr, sc] = wsSelected;
+    // Legal move?
+    if (wsHighlights.some(([hr,hc])=>hr===r&&hc===c)) {
+      wsDoMove(sr, sc, r, c);
+      return;
+    }
+    // Re-select same team piece
+    if (piece === wsTurn) {
+      wsSelected = [r, c];
+      wsHighlights = wsGetMoves(r, c, wsTurn);
+      wsRender(); return;
+    }
+    // Deselect
+    wsSelected = null; wsHighlights = []; wsRender(); return;
+  }
+
+  if (piece === wsTurn) {
+    wsSelected = [r, c];
+    wsHighlights = wsGetMoves(r, c, wsTurn);
+    wsRender();
+  }
+}
+
+function wsDoMove(fr, fc, tr, tc, ai=false) {
+  const fromKey = fr+','+fc, toKey = tr+','+tc;
+  const piece = wsBoard[fromKey];
+
+  // Save history
+  wsHistory.push({
+    board: {...wsBoard}, turn: wsTurn,
+    moveLog: [...wsMoveLog]
+  });
+
+  wsBoard[toKey] = piece;
+  delete wsBoard[fromKey];
+  requestAnimationFrame(() => animatePieceAt(tr, tc));
+  if (navigator.vibrate) navigator.vibrate(18);
+
+  const F = 'abcdefgh';
+  const note = (piece==='wolf'?'🐺':'🐑') + ' ' + F[fc]+(8-fr)+'→'+F[tc]+(8-tr);
+  wsMoveLog.push(note);
+
+  wsTurn = wsTurn === 'wolf' ? 'sheep' : 'wolf';
+  wsSelected = null; wsHighlights = [];
+  wsRender();
+  wsUpdateStatus();
+  wsUpdateMoveList();
+
+  // Win check
+  // Wolf wins: any wolf piece reached row 7
+  const wolfOnRow0 = Object.entries(wsBoard).some(([k,v]) => v==='wolf' && k.startsWith('0,'));
+  if (wolfOnRow0) {
+    wsOver = true;
+    setTimeout(()=> wsShowOver('הזאב ניצח!','הזאב פרץ דרך הכבשים!','🐺'), 150);
+    return;
+  }
+  // Sheep win: wolf has no moves
+  if (!wsHasAnyMove('wolf')) {
+    wsOver = true;
+    setTimeout(()=> wsShowOver('הכבשים ניצחו!','הזאב נחסם לחלוטין!','🐑'), 150);
+    return;
+  }
+  // Sheep stuck (shouldn't usually happen but handle)
+  if (wsTurn === 'sheep' && !wsHasAnyMove('sheep')) {
+    wsTurn = 'wolf';
+    wsUpdateStatus();
+  }
+
+  if (!ai) {
+    if (wsMode === 'ai-wolf' && wsTurn === 'wolf')   setTimeout(wsAiMove, 450);
+    if (wsMode === 'ai-sheep' && wsTurn === 'sheep') setTimeout(wsAiMove, 450);
+  }
+}
+
+function wsUndo() {
+  if (wsHistory.length === 0) return;
+  const steps = (wsMode !== 'pvp' && wsHistory.length >= 2) ? 2 : 1;
+  for (let i = 0; i < steps; i++) {
+    if (!wsHistory.length) break;
+    const h = wsHistory.pop();
+    wsBoard = {...h.board}; wsTurn = h.turn; wsMoveLog = [...h.moveLog];
+  }
+  wsOver = false; wsSelected = null; wsHighlights = [];
+  wsRender(); wsUpdateStatus(); wsUpdateMoveList();
+}
+
+function wsUpdateStatus() {
+  const el = document.getElementById('ws-status');
+  if (!el) return;
+  if (wsOver) return;
+  el.textContent = 'תור ' + (wsTurn === 'wolf' ? 'הזאב 🐺' : 'הכבשים 🐑');
+}
+
+function wsUpdateMoveList() {
+  const el = document.getElementById('ws-move-list');
+  if (!el) return;
+  if (!wsMoveLog.length) { el.innerHTML='<div style="color:#94a3b8;font-size:0.82rem;">אין מהלכים עדיין</div>'; return; }
+  el.innerHTML = wsMoveLog.map((n,i)=>
+    `<div class="move-pair"><span class="move-num">${i+1}.</span><span class="move-token" style="font-size:0.78rem">${n}</span></div>`
+  ).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+function wsShowOver(title, desc, icon) {
+  document.getElementById('go-title').textContent = title;
+  document.getElementById('go-desc').textContent  = desc;
+  document.getElementById('go-icon').textContent  = icon;
+  document.getElementById('game-over').classList.add('open');
+  wsUpdateStatus();
+}
+
+// ── AI for Wolf & Sheep ──
+// Simple heuristic minimax (depth 4)
+function wsEval(board) {
+  // Find wolf row (lower = closer to row 7 = better for wolf)
+  let wolfRow = -1, wolfCol = -1;
+  for (const [k,v] of Object.entries(board)) {
+    if (v === 'wolf') { const [r,c]=k.split(',').map(Number); wolfRow=r; wolfCol=c; }
+  }
+  if (wolfRow === -1) return -9999;
+  // Score: wolf wants high row (close to 7), sheep want wolf stuck
+  let score = (7 - wolfRow) * 10;  // wolf wants low row (toward 0)
+  // Bonus if wolf reached row 0
+  if (wolfRow === 0) return 9999;
+  // Penalty for wolf if surrounded
+  const wolfMoves = wsGetMovesFromBoard(board, wolfRow, wolfCol, 'wolf');
+  score += wolfMoves.length * 3;
+  return score;
+}
+
+function wsGetMovesFromBoard(board, r, c, piece) {
+  const dirs = piece==='wolf' ? [[-1,-1],[-1,1],[1,-1],[1,1]] : [[1,-1],[1,1]];
+  return dirs.map(([dr,dc])=>[r+dr,c+dc]).filter(([nr,nc])=>
+    nr>=0&&nr<8&&nc>=0&&nc<8 && isDark(nr,nc) && !board[nr+','+nc]
+  );
+}
+
+function wsAllMovesBoard(board, turn) {
+  const moves = [];
+  for (const [k,v] of Object.entries(board)) {
+    if (v !== turn) continue;
+    const [r,c] = k.split(',').map(Number);
+    for (const [nr,nc] of wsGetMovesFromBoard(board, r, c, turn))
+      moves.push({fr:r,fc:c,tr:nr,tc:nc});
+  }
+  return moves;
+}
+
+function wsApplyBoard(board, fr, fc, tr, tc) {
+  const nb = {...board};
+  nb[tr+','+tc] = nb[fr+','+fc];
+  delete nb[fr+','+fc];
+  return nb;
+}
+
+function wsMM(board, depth, alpha, beta, isWolf) {
+  // Terminal checks
+  const wolfOnRow0 = Object.entries(board).some(([k,v])=>v==='wolf'&&k.startsWith('0,'));
+  if (wolfOnRow0) return 9999;
+  const wolfMvs = wsAllMovesBoard(board, 'wolf');
+  if (!wolfMvs.length) return -9999;
+  if (depth === 0) return wsEval(board);
+
+  if (isWolf) {
+    let best = -Infinity;
+    for (const m of wolfMvs) {
+      const nb = wsApplyBoard(board, m.fr, m.fc, m.tr, m.tc);
+      best = Math.max(best, wsMM(nb, depth-1, alpha, beta, false));
+      alpha = Math.max(alpha, best);
+      if (beta <= alpha) break;
+    }
+    return best;
+  } else {
+    const sheepMvs = wsAllMovesBoard(board, 'sheep');
+    if (!sheepMvs.length) return wsEval(board);
+    let best = Infinity;
+    for (const m of sheepMvs) {
+      const nb = wsApplyBoard(board, m.fr, m.fc, m.tr, m.tc);
+      best = Math.min(best, wsMM(nb, depth-1, alpha, beta, true));
+      beta = Math.min(beta, best);
+      if (beta <= alpha) break;
+    }
+    return best;
+  }
+}
+
+function wsAiMove() {
+  if (wsOver) return;
+  const isWolf = wsTurn === 'wolf';
+  const moves = wsAllMovesBoard(wsBoard, wsTurn);
+  if (!moves.length) return;
+  const depth = 5;
+  let bestScore = isWolf ? -Infinity : Infinity;
+  let bestMove = moves[0];
+  for (const m of moves) {
+    const nb = wsApplyBoard(wsBoard, m.fr, m.fc, m.tr, m.tc);
+    const s = wsMM(nb, depth-1, -Infinity, Infinity, !isWolf);
+    if (isWolf ? s > bestScore : s < bestScore) { bestScore = s; bestMove = m; }
+  }
+  wsDoMove(bestMove.fr, bestMove.fc, bestMove.tr, bestMove.tc, true);
+}
+
+function goToWS() {
+  document.getElementById('page-home').classList.remove('active');
+  document.getElementById('page-ws').classList.add('active');
+  requestAnimationFrame(() => {
+    document.querySelectorAll('#page-ws .chess-pattern').forEach(drawChessPattern);
+  });
+  wsNewGame();
+}
+
+
+// ══════════════════════════════════════
+//  BARRICADE ENGINE
+// ══════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+//  BARRICADE (Quoridor) ENGINE
+//  9×9 board. Two players: Blue starts row 8 (bottom), goal row 0
+//                          Orange starts row 0 (top), goal row 8
+//  Each turn: move pawn 1 step OR place a wall (2-cell segment)
+//  10 walls per player. Wall blocks passage between cells.
+//  Rule: walls cannot completely cut off a player's path to goal.
+// ══════════════════════════════════════════════════════════════
+
+const BAR_N = 9;          // board size
+const BAR_CELL = 52;      // px per cell (canvas)
+const BAR_WALL_W = 8;     // wall thickness px
+const BAR_GAP = 4;        // gap between cells px
+const BAR_PAD = 28;       // padding
+
+// State
+let barPos = {};          // {blue:[r,c], orange:[r,c]}
+let barWallsH = new Set();// "r,c" = horizontal wall BELOW row r between col c and c+1 (blocks r↔r+1)
+let barWallsV = new Set();// "r,c" = vertical wall RIGHT of col c between row r and r+1 (blocks c↔c+1)
+let barWallsLeft = {};    // {blue:10, orange:10}
+let barTurn = 'blue';
+let barAction = 'move';   // 'move' | 'wall'
+let barOrient = 'H';      // 'H' | 'V'
+let barOver = false;
+let barMode = 'pvp';
+let barHistory = [];
+let barHover = null;      // {r,c} for wall preview
+let barCanvas, barCtx;
+
+function barCellPx(r, c) {
+  // Returns top-left pixel of cell (r,c) on canvas
+  const x = BAR_PAD + c * (BAR_CELL + BAR_GAP);
+  const y = BAR_PAD + r * (BAR_CELL + BAR_GAP);
+  return {x, y};
+}
+
+function barCanvasSize() {
+  return BAR_PAD * 2 + BAR_N * BAR_CELL + (BAR_N - 1) * BAR_GAP;
+}
+
+function barNewGame() {
+  barPos = { blue: [8, 4], orange: [0, 4] };
+  barWallsH = new Set();
+  barWallsV = new Set();
+  barWallsLeft = { blue: 10, orange: 10 };
+  barTurn = 'blue';
+  barAction = 'move';
+  barOrient = 'H';
+  barOver = false;
+  barHistory = [];
+  barHover = null;
+  barSetAction('move');
+  barDraw();
+  barUpdateUI();
+  if (barMode === 'ai-easy' || barMode === 'ai-hard') {
+    if (barTurn === 'orange') setTimeout(barAiMove, 500);
+  }
+}
+
+function barSetMode(m) {
+  barMode = m;
+  document.querySelectorAll('[id^="bar-mode-"]').forEach(p => p.classList.remove('active'));
+  document.getElementById('bar-mode-' + m).classList.add('active');
+  barNewGame();
+}
+
+function barSetAction(a) {
+  barAction = a;
+  document.getElementById('bar-action-move').classList.toggle('active', a === 'move');
+  document.getElementById('bar-action-wall').classList.toggle('active', a === 'wall');
+  document.getElementById('bar-wall-orient-wrap').style.display = a === 'wall' ? 'block' : 'none';
+  barHover = null;
+  barDraw();
+}
+
+function barSetOrient(o) {
+  barOrient = o;
+  document.getElementById('bar-orient-h').classList.toggle('active', o === 'H');
+  document.getElementById('bar-orient-v').classList.toggle('active', o === 'V');
+  barHover = null;
+  barDraw();
+}
+
+// ── Wall helpers ──
+// Horizontal wall at "r,c": blocks movement between row r and row r+1, at columns c and c+1
+// Stored as two half-walls: the wall occupies gaps at (r,c) and (r,c+1) [both halves]
+// We store just the LEFT anchor "r,c" meaning cols c and c+1 are blocked below row r
+
+function barHWallBlocks(r1, c, r2) {
+  // Does a horizontal wall block movement from (r1,c) to (r2,c)?
+  if (r2 !== r1 + 1 && r2 !== r1 - 1) return false;
+  const minR = Math.min(r1, r2);
+  // wall at "minR,c-1" or "minR,c" blocks this passage
+  return barWallsH.has(minR + ',' + (c - 1)) || barWallsH.has(minR + ',' + c);
+}
+
+function barVWallBlocks(r, c1, c2) {
+  // Does a vertical wall block movement from (r,c1) to (r,c2)?
+  if (c2 !== c1 + 1 && c2 !== c1 - 1) return false;
+  const minC = Math.min(c1, c2);
+  // wall at "r-1,minC" or "r,minC" blocks this passage
+  return barWallsV.has((r - 1) + ',' + minC) || barWallsV.has(r + ',' + minC);
+}
+
+function barCanMove(r, c, dr, dc) {
+  const nr = r + dr, nc = c + dc;
+  if (nr < 0 || nr >= BAR_N || nc < 0 || nc >= BAR_N) return false;
+  if (dr !== 0) return !barHWallBlocks(r, c, nr);
+  if (dc !== 0) return !barVWallBlocks(r, c, nc);
+  return true;
+}
+
+function barGetMoves(r, c, otherR, otherC) {
+  const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+  const moves = [];
+  for (const [dr, dc] of dirs) {
+    const nr = r + dr, nc = c + dc;
+    if (nr < 0 || nr >= BAR_N || nc < 0 || nc >= BAR_N) continue;
+    if (!barCanMove(r, c, dr, dc)) continue;
+    // Jump over opponent
+    if (nr === otherR && nc === otherC) {
+      const jR = nr + dr, jC = nc + dc;
+      if (jR >= 0 && jR < BAR_N && jC >= 0 && jC < BAR_N && barCanMove(nr, nc, dr, dc)) {
+        moves.push([jR, jC]);
+      } else {
+        // Can't jump straight — add diagonal moves
+        for (const [sdr, sdc] of dirs) {
+          if (sdr === dr && sdc === dc) continue;
+          if (sdr === -dr && sdc === -dc) continue;
+          if (barCanMove(nr, nc, sdr, sdc)) moves.push([nr + sdr, nc + sdc]);
+        }
+      }
+    } else {
+      moves.push([nr, nc]);
+    }
+  }
+  return moves;
+}
+
+// BFS: does player at [r,c] have any path to goal row?
+function barHasPath(r, c, goalRow, wallsH, wallsV, otherPos) {
+  const visited = new Set();
+  const queue = [[r, c]];
+  visited.add(r + ',' + c);
+  const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+  while (queue.length) {
+    const [cr, cc] = queue.shift();
+    if (cr === goalRow) return true;
+    for (const [dr, dc] of dirs) {
+      const nr = cr + dr, nc = cc + dc;
+      if (nr < 0 || nr >= BAR_N || nc < 0 || nc >= BAR_N) continue;
+      const key = nr + ',' + nc;
+      if (visited.has(key)) continue;
+      // Check walls
+      if (dr !== 0) { // vertical move
+        const minR = Math.min(cr, nr);
+        if (wallsH.has(minR + ',' + (cc - 1)) || wallsH.has(minR + ',' + cc)) continue;
+      } else { // horizontal move
+        const minC = Math.min(cc, nc);
+        if (wallsV.has((cr - 1) + ',' + minC) || wallsV.has(cr + ',' + minC)) continue;
+      }
+      visited.add(key);
+      queue.push([nr, nc]);
+    }
+  }
+  return false;
+}
+
+function barWallValid(r, c, orient) {
+  // Wall out of bounds
+  if (orient === 'H') {
+    if (r < 0 || r >= BAR_N - 1 || c < 0 || c >= BAR_N - 1) return false;
+    // No overlap: same wall or perpendicular center overlap
+    if (barWallsH.has(r + ',' + c)) return false;
+    if (barWallsH.has(r + ',' + (c - 1)) || barWallsH.has(r + ',' + (c + 1))) return false;
+    // Check perpendicular: V wall with same center would be r,c
+    if (barWallsV.has(r + ',' + c)) return false;
+  } else {
+    if (r < 0 || r >= BAR_N - 1 || c < 0 || c >= BAR_N - 1) return false;
+    if (barWallsV.has(r + ',' + c)) return false;
+    if (barWallsV.has((r - 1) + ',' + c) || barWallsV.has((r + 1) + ',' + c)) return false;
+    if (barWallsH.has(r + ',' + c)) return false;
+  }
+  // Test path connectivity
+  const testH = new Set(barWallsH);
+  const testV = new Set(barWallsV);
+  if (orient === 'H') testH.add(r + ',' + c);
+  else testV.add(r + ',' + c);
+  const bp = barPos.blue, op = barPos.orange;
+  if (!barHasPath(bp[0], bp[1], 0, testH, testV, op)) return false;
+  if (!barHasPath(op[0], op[1], 8, testH, testV, bp)) return false;
+  return true;
+}
+
+// ── Place wall ──
+function barPlaceWall(r, c, orient, player) {
+  if (!barWallValid(r, c, orient)) return false;
+  if (barWallsLeft[player] <= 0) return false;
+  if (orient === 'H') barWallsH.add(r + ',' + c);
+  else barWallsV.add(r + ',' + c);
+  barWallsLeft[player]--;
+  return true;
+}
+
+// ── Canvas drawing ──
+function barDraw() {
+  if (!barCanvas || !barCtx) return;
+  const ctx = barCtx;
+  const S = barCanvasSize();
+  const scale = barCanvas._scale || 1;
+  ctx.save();
+  ctx.clearRect(0, 0, barCanvas.width, barCanvas.height);
+  ctx.scale(scale, scale);
+
+  // Background
+  ctx.fillStyle = '#f8f9fb';
+  ctx.fillRect(0, 0, S, S);
+
+  const blueGoalRow = 0, orangeGoalRow = 8;
+
+  // Draw cells
+  for (let r = 0; r < BAR_N; r++) {
+    for (let c = 0; c < BAR_N; c++) {
+      const {x, y} = barCellPx(r, c);
+      // Goal rows
+      if (r === blueGoalRow) {
+        ctx.fillStyle = 'rgba(37,99,235,0.12)';
+      } else if (r === orangeGoalRow) {
+        ctx.fillStyle = 'rgba(234,88,12,0.12)';
+      } else {
+        ctx.fillStyle = '#ffffff';
+      }
+      ctx.beginPath();
+      ctx.roundRect(x, y, BAR_CELL, BAR_CELL, 4);
+      ctx.fill();
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+  }
+
+  // Draw wall preview
+  if (barAction === 'wall' && barHover && !barOver) {
+    const {r, c} = barHover;
+    const valid = barWallValid(r, c, barOrient) && barWallsLeft[barTurn] > 0;
+    ctx.fillStyle = valid ? 'rgba(99,102,241,0.55)' : 'rgba(220,38,38,0.45)';
+    barDrawWallShape(ctx, r, c, barOrient);
+  }
+
+  // Draw placed walls
+  ctx.fillStyle = '#2563eb';
+  // We'll draw H walls orange, V walls blue — actually use color by... 
+  // We don't track who placed each wall, just draw them all nicely
+  barWallsH.forEach(key => {
+    const [r, c] = key.split(',').map(Number);
+    barDrawWallShape(ctx, r, c, 'H', '#e85d04');
+  });
+  barWallsV.forEach(key => {
+    const [r, c] = key.split(',').map(Number);
+    barDrawWallShape(ctx, r, c, 'V', '#2563eb');
+  });
+
+  // Draw valid move highlights
+  if (barAction === 'move' && !barOver) {
+    const [br, bc] = barPos.blue;
+    const [or, oc] = barPos.orange;
+    const cur = barTurn === 'blue' ? [br, bc] : [or, oc];
+    const other = barTurn === 'blue' ? [or, oc] : [br, bc];
+    const moves = barGetMoves(cur[0], cur[1], other[0], other[1]);
+    // Move dots with glow effect
+    const dotColor = barTurn === 'blue' ? [37,99,235] : [234,88,12];
+    const [dr_,dg_,db_] = dotColor;
+    for (const [mr, mc] of moves) {
+      const {x, y} = barCellPx(mr, mc);
+      const cx_ = x + BAR_CELL/2, cy_ = y + BAR_CELL/2;
+      // Check if this is the hovered cell
+      const isHov = barHover && barHover.r === mr && barHover.c === mc;
+      const radius = isHov ? 14 : 10;
+      // Glow
+      ctx.shadowColor = `rgba(${dr_},${dg_},${db_},0.6)`;
+      ctx.shadowBlur = isHov ? 14 : 8;
+      ctx.fillStyle = `rgba(${dr_},${dg_},${db_},${isHov ? 0.55 : 0.35})`;
+      ctx.beginPath();
+      ctx.arc(cx_, cy_, radius, 0, Math.PI*2);
+      ctx.fill();
+      ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
+    }
+  }
+
+  // Draw pawns
+  barDrawPawn(ctx, barPos.blue[0], barPos.blue[1], '#2563eb', '#1d4ed8');
+  barDrawPawn(ctx, barPos.orange[0], barPos.orange[1], '#ea580c', '#c2410c');
+  ctx.restore();
+}
+
+function barDrawWallShape(ctx, r, c, orient, color) {
+  ctx.fillStyle = color || ctx.fillStyle;
+  if (orient === 'H') {
+    // horizontal wall: spans cols c and c+1, sits in gap below row r
+    const {x: x0, y: y0} = barCellPx(r, c);
+    const x = x0;
+    const y = y0 + BAR_CELL;
+    const w = BAR_CELL * 2 + BAR_GAP;
+    const h = BAR_GAP;
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, 2);
+    ctx.fill();
+  } else {
+    // vertical wall: spans rows r and r+1, sits in gap right of col c
+    const {x: x0, y: y0} = barCellPx(r, c);
+    const x = x0 + BAR_CELL;
+    const y = y0;
+    const w = BAR_GAP;
+    const h = BAR_CELL * 2 + BAR_GAP;
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, 2);
+    ctx.fill();
+  }
+}
+
+function barDrawPawn(ctx, r, c, fill, stroke) {
+  const {x, y} = barCellPx(r, c);
+  const cx = x + BAR_CELL / 2;
+  const cy = y + BAR_CELL / 2;
+  const radius = BAR_CELL * 0.32;
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.fillStyle = fill;
+  ctx.fill();
+  ctx.strokeStyle = stroke;
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  // white highlight
+  ctx.beginPath();
+  ctx.arc(cx - radius*0.25, cy - radius*0.25, radius*0.3, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(255,255,255,0.45)';
+  ctx.fill();
+}
+
+// ── Input handling ──
+function barCanvasXYtoRC(px, py) {
+  // Convert pixel to cell row/col
+  const c = Math.floor((px - BAR_PAD) / (BAR_CELL + BAR_GAP));
+  const r = Math.floor((py - BAR_PAD) / (BAR_CELL + BAR_GAP));
+  return {r, c};
+}
+
+function barCanvasXYtoWall(px, py, orient) {
+  // For wall placement, find the wall anchor cell
+  const inner_x = px - BAR_PAD;
+  const inner_y = py - BAR_PAD;
+  if (orient === 'H') {
+    // horizontal wall: click in gap below a cell row
+    const c = Math.floor(inner_x / (BAR_CELL + BAR_GAP));
+    // find row: which gap is closest?
+    const cellH = BAR_CELL + BAR_GAP;
+    const r = Math.floor((inner_y - BAR_CELL * 0.5) / cellH);
+    return {r, c};
+  } else {
+    // vertical wall: click in gap right of a cell col
+    const cellW = BAR_CELL + BAR_GAP;
+    const c = Math.floor((inner_x - BAR_CELL * 0.5) / cellW);
+    const r = Math.floor(inner_y / (BAR_CELL + BAR_GAP));
+    return {r, c};
+  }
+}
+
+function barGetEventPos(e) {
+  const rect = barCanvas.getBoundingClientRect();
+  // Convert from CSS pixels to logical canvas coordinates (before DPR scale)
+  const displayScale = barCanvas._displayScale || 1;
+  const cssToLogical = 1 / displayScale;
+  const clientX = e.touches ? e.touches[0].clientX : (e.changedTouches ? e.changedTouches[0].clientX : e.clientX);
+  const clientY = e.touches ? e.touches[0].clientY : (e.changedTouches ? e.changedTouches[0].clientY : e.clientY);
+  return {
+    px: (clientX - rect.left) * cssToLogical,
+    py: (clientY - rect.top)  * cssToLogical
+  };
+}
+
+function barOnMouseMove(e) {
+  if (barOver) return;
+  const {px, py} = barGetEventPos(e);
+  if (barAction === 'wall') {
+    const {r, c} = barCanvasXYtoWall(px, py, barOrient);
+    barHover = {r, c};
+  } else {
+    const {r, c} = barCanvasXYtoRC(px, py);
+    barHover = {r, c};
+  }
+  barDraw();
+}
+
+function barOnClick(e) {
+  if (barOver) return;
+  if (barMode !== 'pvp' && barTurn === 'orange') return;
+  const {px, py} = barGetEventPos(e);
+  barHandleInput(px, py);
+}
+
+function barHandleInput(px, py) {
+  if (barOver) return;
+  if (barAction === 'move') {
+    const {r, c} = barCanvasXYtoRC(px, py);
+    if (r < 0 || r >= BAR_N || c < 0 || c >= BAR_N) return;
+    const cur = barTurn === 'blue' ? barPos.blue : barPos.orange;
+    const other = barTurn === 'blue' ? barPos.orange : barPos.blue;
+    const legal = barGetMoves(cur[0], cur[1], other[0], other[1]);
+    if (legal.some(([mr, mc]) => mr === r && mc === c)) {
+      barDoMove(r, c);
+    }
+  } else {
+    const {r, c} = barCanvasXYtoWall(px, py, barOrient);
+    if (barWallsLeft[barTurn] > 0 && barWallValid(r, c, barOrient)) {
+      barDoWall(r, c, barOrient);
+    }
+  }
+}
+
+function barSaveHistory() {
+  barHistory.push({
+    pos: { blue: [...barPos.blue], orange: [...barPos.orange] },
+    wallsH: new Set(barWallsH),
+    wallsV: new Set(barWallsV),
+    wallsLeft: { ...barWallsLeft },
+    turn: barTurn
+  });
+}
+
+function barDoMove(r, c) {
+  barSaveHistory();
+  barPos[barTurn] = [r, c];
+  // Check win
+  const won = (barTurn === 'blue' && r === 0) || (barTurn === 'orange' && r === 8);
+  barTurn = barTurn === 'blue' ? 'orange' : 'blue';
+  barDraw();
+  barUpdateUI();
+  if (won) {
+    barOver = true;
+    const winner = barTurn === 'blue' ? 'כתום' : 'כחול'; // switched already
+    setTimeout(() => {
+      document.getElementById('go-title').textContent = winner + ' ניצח!';
+      document.getElementById('go-desc').textContent = 'הגיע לצד השני!';
+      document.getElementById('go-icon').textContent = winner === 'כחול' ? '🔵' : '🟠';
+      document.getElementById('game-over').classList.add('open');
+    }, 150);
+    return;
+  }
+  if (barMode !== 'pvp' && barTurn === 'orange') setTimeout(barAiMove, 450);
+}
+
+function barDoWall(r, c, orient, ai = false) {
+  barSaveHistory();
+  barPlaceWall(r, c, orient, barTurn);
+  barTurn = barTurn === 'blue' ? 'orange' : 'blue';
+  barHover = null;
+  barDraw();
+  barUpdateUI();
+  if (navigator.vibrate) navigator.vibrate([12, 8, 12]);
+  if (!ai && barMode !== 'pvp' && barTurn === 'orange') setTimeout(barAiMove, 450);
+}
+
+function barUndo() {
+  if (barHistory.length === 0) return;
+  const steps = (barMode !== 'pvp' && barHistory.length >= 2) ? 2 : 1;
+  for (let i = 0; i < steps; i++) {
+    if (!barHistory.length) break;
+    const h = barHistory.pop();
+    barPos = { blue: [...h.pos.blue], orange: [...h.pos.orange] };
+    barWallsH = new Set(h.wallsH);
+    barWallsV = new Set(h.wallsV);
+    barWallsLeft = { ...h.wallsLeft };
+    barTurn = h.turn;
+  }
+  barOver = false;
+  barDraw();
+  barUpdateUI();
+}
+
+function barUpdateUI() {
+  const el = document.getElementById('bar-status');
+  if (el) el.textContent = barOver ? '' : 'תור ה' + (barTurn === 'blue' ? 'כחול 🔵' : 'כתום 🟠');
+  const bw = document.getElementById('bar-walls-blue');
+  const ow = document.getElementById('bar-walls-orange');
+  if (bw) bw.textContent = '🚧 ' + barWallsLeft.blue;
+  if (ow) ow.textContent = '🚧 ' + barWallsLeft.orange;
+  const tb = document.getElementById('bar-turn-blue');
+  const to = document.getElementById('bar-turn-orange');
+  if (tb) tb.classList.toggle('active', barTurn === 'blue' && !barOver);
+  if (to) to.classList.toggle('active', barTurn === 'orange' && !barOver);
+  updateBarTurnStrip(barTurn, barOver);
+}
+
+// ── AI ──
+function barBFS(r, c, goalRow, wallsH, wallsV) {
+  const visited = new Set();
+  const queue = [[r, c, 0]];
+  visited.add(r + ',' + c);
+  const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+  while (queue.length) {
+    const [cr, cc, dist] = queue.shift();
+    if (cr === goalRow) return dist;
+    for (const [dr, dc] of dirs) {
+      const nr = cr + dr, nc = cc + dc;
+      if (nr < 0 || nr >= BAR_N || nc < 0 || nc >= BAR_N) continue;
+      const key = nr + ',' + nc;
+      if (visited.has(key)) continue;
+      if (dr !== 0) {
+        const minR = Math.min(cr, nr);
+        if (wallsH.has(minR + ',' + (cc - 1)) || wallsH.has(minR + ',' + cc)) continue;
+      } else {
+        const minC = Math.min(cc, nc);
+        if (wallsV.has((cr - 1) + ',' + minC) || wallsV.has(cr + ',' + minC)) continue;
+      }
+      visited.add(key);
+      queue.push([nr, nc, dist + 1]);
+    }
+  }
+  return 999;
+}
+
+function barEval() {
+  const blueDist  = barBFS(barPos.blue[0],   barPos.blue[1],   0, barWallsH, barWallsV);
+  const orangeDist = barBFS(barPos.orange[0], barPos.orange[1], 8, barWallsH, barWallsV);
+  // From orange's perspective (AI is orange): lower orangeDist = better, lower blueDist = worse
+  return blueDist - orangeDist;
+}
+
+function barAiMove() {
+  if (barOver || barTurn !== 'orange') return;
+  const hard = barMode === 'ai-hard';
+
+  // Collect all possible moves
+  const cur = [...barPos.orange], other = [...barPos.blue];
+  const pawnMoves = barGetMoves(cur[0], cur[1], other[0], other[1]);
+
+  let bestScore = -Infinity, bestAction = null;
+
+  // Evaluate pawn moves
+  for (const [r, c] of pawnMoves) {
+    const oldPos = [...barPos.orange];
+    barPos.orange = [r, c];
+    const score = barEval() + (Math.random() * 0.5); // small noise
+    barPos.orange = oldPos;
+    if (score > bestScore) {
+      bestScore = score;
+      bestAction = { type: 'move', r, c };
+    }
+  }
+
+  // Evaluate wall placements (only in hard mode and if walls left)
+  if (hard && barWallsLeft.orange > 0) {
+    const orients = ['H', 'V'];
+    // Try a sample of wall positions near blue player
+    const [br, bc] = barPos.blue;
+    for (const orient of orients) {
+      for (let dr = -2; dr <= 2; dr++) {
+        for (let dc = -2; dc <= 2; dc++) {
+          const wr = br + dr, wc = bc + dc;
+          if (!barWallValid(wr, wc, orient)) continue;
+          // Temporarily place wall
+          if (orient === 'H') barWallsH.add(wr + ',' + wc);
+          else barWallsV.add(wr + ',' + wc);
+          barWallsLeft.orange--;
+          const score = barEval() + (Math.random() * 0.3);
+          if (orient === 'H') barWallsH.delete(wr + ',' + wc);
+          else barWallsV.delete(wr + ',' + wc);
+          barWallsLeft.orange++;
+          if (score > bestScore) {
+            bestScore = score;
+            bestAction = { type: 'wall', r: wr, c: wc, orient };
+          }
+        }
+      }
+    }
+  }
+
+  if (!bestAction) return;
+  if (bestAction.type === 'move') barDoMove(bestAction.r, bestAction.c);
+  else barDoWall(bestAction.r, bestAction.c, bestAction.orient, true);
+}
+
+// ── Navigation ──
+function goToBar() {
+  document.getElementById('page-home').classList.remove('active');
+  document.getElementById('page-bar').classList.add('active');
+  // Two rAF frames: first lets the page render & get real dimensions,
+  // second draws after canvas has actual layout size
+  requestAnimationFrame(() => {
+    document.querySelectorAll('#page-bar .chess-pattern').forEach(drawChessPattern);
+    requestAnimationFrame(() => {
+      barInitCanvas();
+      barNewGame();
+    });
+  });
+}
+
+window.addEventListener('resize', () => {
+  if (document.getElementById('page-bar').classList.contains('active')) {
+    barResizeCanvas();
+    if (barCtx) {
+      barCtx = barCanvas.getContext('2d');
+    }
+    barDraw();
+  }
+});
+
+function barInitCanvas() {
+  barCanvas = document.getElementById('bar-canvas');
+  if (!barCanvas) return;
+  barResizeCanvas();
+  barCtx = barCanvas.getContext('2d');
+  if (!barCtx.roundRect) {
+    CanvasRenderingContext2D.prototype.roundRect = function(x,y,w,h,r){
+      r = Math.min(r, w/2, h/2);
+      this.beginPath();
+      this.moveTo(x+r, y);
+      this.lineTo(x+w-r, y);
+      this.quadraticCurveTo(x+w, y, x+w, y+r);
+      this.lineTo(x+w, y+h-r);
+      this.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+      this.lineTo(x+r, y+h);
+      this.quadraticCurveTo(x, y+h, x, y+h-r);
+      this.lineTo(x, y+r);
+      this.quadraticCurveTo(x, y, x+r, y);
+      this.closePath();
+      return this;
+    };
+  }
+  barCanvas.onclick     = barOnClick;
+  barCanvas.ontouchend  = (e) => { e.preventDefault(); barOnClick(e); }; // uses changedTouches
+  barCanvas.onmousemove = barOnMouseMove;
+  barCanvas.ontouchmove = (e) => { e.preventDefault(); barOnMouseMove(e); };
+  barCanvas.onmouseleave = () => { barHover = null; barDraw(); };
+}
+
+function barResizeCanvas() {
+  if (!barCanvas) return;
+  const S = barCanvasSize();
+  // Use the board-section container width for responsive sizing
+  const container = barCanvas.closest('.board-section') || barCanvas.parentElement;
+  const containerW = container ? container.clientWidth - 24 : window.innerWidth - 60;
+  const maxW = Math.min(containerW, 520);
+  const dpr = window.devicePixelRatio || 1;
+  const displaySize = Math.min(S, maxW);
+  // Set canvas internal resolution = displaySize * dpr (crisp on retina)
+  barCanvas.width  = Math.floor(displaySize * dpr);
+  barCanvas.height = Math.floor(displaySize * dpr);
+  barCanvas.style.width  = displaySize + 'px';
+  barCanvas.style.height = displaySize + 'px';
+  // Store scale for coordinate conversion
+  barCanvas._scale = displaySize / S * dpr;
+  barCanvas._displayScale = displaySize / S;
+}
+
+
+// ══════════════════════════════════════
+//  UX: TABS
+// ══════════════════════════════════════
+function switchTab(game, pane, btn) {
+  // Deactivate all tabs in this game's tab-bar
+  btn.closest('.tab-bar').querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // Hide all panes for this game prefix
+  document.querySelectorAll(`[id^="${game}-tab-"]`).forEach(p => p.classList.remove('active'));
+  const target = document.getElementById(`${game}-tab-${pane}`);
+  if (target) target.classList.add('active');
+}
+
+// ══════════════════════════════════════
+//  UX: CONFIRM NEW GAME MODAL
+// ══════════════════════════════════════
+let _pendingNewGame = null;
+function confirmNewGame(which) {
+  _pendingNewGame = which;
+  document.getElementById('confirm-modal').classList.add('open');
+}
+
+function handleGameOverNewGame() {
+  // Determine which game is active
+  if (document.getElementById('page-kt').classList.contains('active')) ktNewGame();
+  else if (document.getElementById('page-ws').classList.contains('active')) wsNewGame();
+  else if (document.getElementById('page-bar').classList.contains('active')) barNewGame();
+  else newGame();
+}
+function closeConfirm() {
+  document.getElementById('confirm-modal').classList.remove('open');
+  _pendingNewGame = null;
+}
+function doConfirmNewGame() {
+  closeConfirm();
+  if (_pendingNewGame === 'chess') newGame();
+  else if (_pendingNewGame === 'ws')  wsNewGame();
+  else if (_pendingNewGame === 'bar') barNewGame();
+  else if (_pendingNewGame === 'kt')  ktNewGame();
+}
+
+// ══════════════════════════════════════
+//  UX: CHESS TURN BANNER
+// ══════════════════════════════════════
+function updateChessTurnBanner(t, over) {
+  const banner = document.getElementById('chess-turn-banner');
+  const dot    = document.getElementById('chess-tb-dot');
+  const txt    = document.getElementById('chess-tb-text');
+  const pbW = document.getElementById('player-bar-white');
+  const pbB = document.getElementById('player-bar-black');
+  if (!banner) return;
+  if (over) { banner.style.display = 'none'; return; }
+  banner.style.display = '';
+  if (t === 'w') {
+    banner.className = 'turn-banner white';
+    dot.style.background = '#fff'; dot.style.border = '2px solid #94a3b8';
+    txt.textContent = 'תור הלבן';
+    if (pbW) pbW.classList.add('is-turn'); if (pbB) pbB.classList.remove('is-turn');
+  } else {
+    banner.className = 'turn-banner black';
+    dot.style.background = '#fff'; dot.style.border = '2px solid #64748b';
+    txt.textContent = 'תור השחור';
+    if (pbB) pbB.classList.add('is-turn'); if (pbW) pbW.classList.remove('is-turn');
+  }
+}
+
+// ══════════════════════════════════════
+//  UX: WS TURN BANNER
+// ══════════════════════════════════════
+function updateWsTurnBanner(t, over) {
+  const banner = document.getElementById('ws-turn-banner');
+  const txt    = document.getElementById('ws-tb-text');
+  const bW = document.getElementById('ws-bar-wolf');
+  const bS = document.getElementById('ws-bar-sheep');
+  if (!banner) return;
+  if (over) { banner.style.display = 'none'; return; }
+  banner.style.display = '';
+  const dot = document.getElementById('ws-tb-dot');
+  if (t === 'wolf') {
+    banner.className = 'turn-banner wolf';
+    if (dot) { dot.style.background = '#7f1d1d'; dot.style.borderColor = '#fca5a5'; }
+    txt.textContent = 'תור הזאב 🐺';
+    if (bW) bW.classList.add('is-turn'); if (bS) bS.classList.remove('is-turn');
+  } else {
+    banner.className = 'turn-banner sheep';
+    if (dot) { dot.style.background = '#475569'; dot.style.borderColor = '#94a3b8'; }
+    txt.textContent = 'תור הכבשים 🐑';
+    if (bS) bS.classList.add('is-turn'); if (bW) bW.classList.remove('is-turn');
+  }
+}
+
+// ══════════════════════════════════════
+//  UX: BARRICADE TURN STRIP
+// ══════════════════════════════════════
+function updateBarTurnStrip(t, over) {
+  const strip = document.getElementById('bar-turn-strip');
+  const dot   = document.getElementById('bar-ts-dot');
+  const txt   = document.getElementById('bar-ts-text');
+  const pbT = document.getElementById('bar-player-top');
+  const pbB = document.getElementById('bar-player-bot');
+  if (!strip) return;
+  if (over) { strip.style.display = 'none'; return; }
+  strip.style.display = '';
+  if (t === 'blue') {
+    strip.className = 'turn-banner bar-blue';
+    dot.style.background = '#2563eb'; dot.style.borderColor = '#93c5fd';
+    txt.textContent = 'תור הכחול';
+    if (pbB) pbB.classList.add('is-turn'); if (pbT) pbT.classList.remove('is-turn');
+  } else {
+    strip.className = 'turn-banner bar-orange';
+    dot.style.background = '#ea580c'; dot.style.borderColor = '#fdba74';
+    txt.textContent = 'תור הכתום';
+    if (pbT) pbT.classList.add('is-turn'); if (pbB) pbB.classList.remove('is-turn');
+  }
+}
+
+// ══════════════════════════════════════
+//  UX: PIECE ANIMATION HELPER
+// ══════════════════════════════════════
+function animatePieceAt(r, c) {
+  const sq = document.querySelector(`#board [data-r="${r}"][data-c="${c}"] .piece,
+    #ws-board [data-r="${r}"][data-c="${c}"] span`);
+  if (!sq) return;
+  sq.classList.remove('piece-anim');
+  void sq.offsetWidth; // reflow
+  sq.classList.add('piece-anim');
+  sq.addEventListener('animationend', () => sq.classList.remove('piece-anim'), {once:true});
+}
+
+
+// ══════════════════════════════════════════════════════════
+//  KNIGHT'S TOUR  —  מסע הפרש
+// ══════════════════════════════════════════════════════════
+let ktSize = 8;            // board size (5, 6, or 8)
+let ktBoard = [];          // -1 = unvisited, 0+ = visit order
+let ktPos = null;          // [r,c] current knight position, null = not started
+let ktMoves = 0;           // how many moves made
+let ktHistory = [];        // [{r,c}] for undo
+let ktMode = 'free';       // 'free' | 'timed'
+let ktTimer = null;
+let ktSeconds = 0;
+let ktOver = false;
+let ktBestScore = {};      // {size: {moves, seconds}} best per size
+
+const KT_KNIGHT_MOVES = [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]];
+const F = 'abcdefgh';
+
+function ktInBounds(r, c) { return r >= 0 && r < ktSize && c >= 0 && c < ktSize; }
+
+function ktGetMoves(r, c) {
+  return KT_KNIGHT_MOVES
+    .map(([dr,dc]) => [r+dr, c+dc])
+    .filter(([nr,nc]) => ktInBounds(nr,nc) && ktBoard[nr][nc] === -1);
+}
+
+// Warnsdorf's heuristic — sort moves by fewest onward options
+function ktWarnsdorf(r, c) {
+  return ktGetMoves(r, c).sort((a, b) => {
+    return ktGetMoves(a[0], a[1]).length - ktGetMoves(b[0], b[1]).length;
+  });
+}
+
+// ── Init ──
+function ktNewGame() {
+  ktStopTimer();
+  ktBoard = Array.from({length: ktSize}, () => Array(ktSize).fill(-1));
+  ktPos = null; ktMoves = 0; ktHistory = []; ktOver = false; ktSeconds = 0;
+  ktUpdateTimerDisplay();
+  ktRender();
+  ktUpdateStatus('בחר משבצת התחלה');
+  ktUpdateMoveList();
+  const undoBtn = document.getElementById('kt-btn-undo');
+  const hintBtn = document.getElementById('kt-btn-hint');
+  if (undoBtn) undoBtn.disabled = true;
+  if (hintBtn) hintBtn.disabled = false;
+}
+
+// ── Click handler ──
+function ktOnClick(r, c) {
+  if (ktOver) return;
+
+  if (ktPos === null) {
+    // First click — place knight
+    ktBoard[r][c] = 0;
+    ktPos = [r, c]; ktMoves = 1;
+    ktHistory = [{r, c}];
+    if (ktMode === 'timed') ktStartTimer();
+    ktRender();
+    ktCheckWin();
+    ktUpdateMoveList();
+    const undoBtn = document.getElementById('kt-btn-undo');
+    if (undoBtn) undoBtn.disabled = false;
+    return;
+  }
+
+  // Subsequent clicks — must be valid knight move
+  const [cr, cc] = ktPos;
+  const valid = ktGetMoves(cr, cc).some(([nr,nc]) => nr===r && nc===c);
+  if (!valid) return;
+
+  ktBoard[r][c] = ktMoves;
+  ktPos = [r, c]; ktMoves++;
+  ktHistory.push({r, c});
+  if (navigator.vibrate) navigator.vibrate(14);
+  ktRender();
+  ktCheckWin();
+  ktUpdateMoveList();
+}
+
+// ── Win / stuck check ──
+function ktCheckWin() {
+  const total = ktSize * ktSize;
+  if (ktMoves === total) {
+    ktOver = true; ktStopTimer();
+    // Check if closed tour (can return to start)
+    const [sr, sc] = ktHistory[0] ? [ktHistory[0].r, ktHistory[0].c] : [0, 0];
+    const [cr, cc] = ktPos;
+    const canClose = KT_KNIGHT_MOVES.some(([dr,dc]) => cr+dr===sr && cc+dc===sc);
+    const msg = canClose ? `🎉 סיבוב סגור! כל ${total} משבצות + חזרה לנקודת הזינוק!` : `🏆 הצלחת! כל ${total} המשבצות!`;
+    ktUpdateStatus(msg, 'done');
+    ktSaveBest();
+    document.getElementById('kt-btn-hint').disabled = true;
+    setTimeout(() => ktShowWin(canClose), 400);
+    return;
+  }
+  // Check if stuck
+  if (ktPos && ktGetMoves(ktPos[0], ktPos[1]).length === 0 && ktMoves < total) {
+    ktOver = true; ktStopTimer();
+    ktUpdateStatus(`⛔ נתקעת! הגעת ל-${ktMoves} מתוך ${total}`, 'fail');
+    document.getElementById('kt-btn-hint').disabled = true;
+    ktRender();
+  }
+}
+
+// ── Undo ──
+function ktUndo() {
+  if (ktHistory.length === 0) return;
+  if (ktHistory.length === 1) {
+    ktBoard[ktHistory[0].r][ktHistory[0].c] = -1;
+    ktHistory = []; ktPos = null; ktMoves = 0; ktOver = false;
+    ktStopTimer(); ktSeconds = 0; ktUpdateTimerDisplay();
+    document.getElementById('kt-btn-undo').disabled = true;
+    document.getElementById('kt-btn-hint').disabled = false;
+    ktUpdateStatus('בחר משבצת התחלה');
+    ktRender(); ktUpdateMoveList(); return;
+  }
+  const last = ktHistory.pop();
+  ktBoard[last.r][last.c] = -1;
+  ktMoves--;
+  const prev = ktHistory[ktHistory.length - 1];
+  ktPos = [prev.r, prev.c];
+  ktOver = false;
+  document.getElementById('kt-btn-hint').disabled = false;
+  ktRender(); ktUpdateMoveList();
+  ktUpdateStatus(`מהלך ${ktMoves} — המשך`);
+}
+
+// ── Hint (Warnsdorf) ──
+function ktHint() {
+  if (ktOver || !ktPos) return;
+  const best = ktWarnsdorf(ktPos[0], ktPos[1]);
+  if (best.length === 0) return;
+  // Flash the best move
+  ktRender(best[0]);
+}
+
+// ── Render ──
+function ktRender(highlightHint) {
+  const boardEl = document.getElementById('kt-board');
+  if (!boardEl) return;
+  boardEl.style.gridTemplateColumns = `repeat(${ktSize}, 62px)`;
+  boardEl.innerHTML = '';
+
+  // Labels
+  const rl = document.getElementById('kt-rank-labels');
+  const fl = document.getElementById('kt-file-labels');
+  if (rl) {
+    rl.innerHTML = '';
+    for (let i=0; i<ktSize; i++) {
+      const d = document.createElement('div');
+      d.className = 'rank-label-item'; d.textContent = ktSize - i;
+      rl.appendChild(d);
+    }
+  }
+  if (fl) {
+    fl.innerHTML = '';
+    for (let i=0; i<ktSize; i++) {
+      const d = document.createElement('div');
+      d.className = 'file-label-item'; d.textContent = 'abcdefgh'[i];
+      fl.appendChild(d);
+    }
+  }
+
+  // Compute which cells are valid next moves
+  const validMoves = new Set();
+  let deadEnds = new Set();
+  if (ktPos) {
+    const moves = ktGetMoves(ktPos[0], ktPos[1]);
+    moves.forEach(([r,c]) => validMoves.add(r+','+c));
+    moves.forEach(([r,c]) => {
+      if (ktGetMoves(r,c).length === 0) deadEnds.add(r+','+c);
+    });
+  }
+
+  for (let r=0; r<ktSize; r++) {
+    for (let c=0; c<ktSize; c++) {
+      const sq = document.createElement('div');
+      const isLight = (r+c)%2 === 0;
+      sq.className = 'kt-sq ' + (isLight ? 'light' : 'dark');
+      const key = r+','+c;
+      const isVisited = ktBoard[r][c] >= 0;
+      const isCurrent = ktPos && ktPos[0]===r && ktPos[1]===c;
+      const isHint = highlightHint && highlightHint[0]===r && highlightHint[1]===c;
+      const isValid = validMoves.has(key);
+      const isDead  = deadEnds.has(key);
+
+      if (isCurrent) sq.classList.add('current');
+      else if (isVisited) sq.classList.add('visited');
+      else if (isHint) sq.classList.add('hint');
+      else if (isDead && !ktOver) sq.classList.add('dead-end');
+      else if (isValid && !ktOver) sq.classList.add('hint');
+
+      // Number label
+      if (isVisited) {
+        const num = document.createElement('div');
+        num.className = 'kt-sq-num';
+        num.textContent = ktBoard[r][c] + 1;
+        sq.appendChild(num);
+      }
+      // Knight piece on current square
+      if (isCurrent) {
+        const piece = document.createElement('span');
+        piece.className = 'kt-piece';
+        piece.textContent = '♞';
+        sq.appendChild(piece);
+      }
+
+      // Unvisited squares — show piece if starting pos not yet chosen or is valid
+      if (!ktPos && !isVisited) {
+        sq.style.cursor = 'pointer';
+      } else if (ktPos && !isVisited && !isValid) {
+        sq.style.cursor = 'default';
+      }
+
+      sq.addEventListener('click', () => ktOnClick(r, c));
+      boardEl.appendChild(sq);
+    }
+  }
+
+  // Progress
+  const pct = Math.round(ktMoves / (ktSize*ktSize) * 100);
+  const prog = document.getElementById('kt-progress');
+  const movesVal = document.getElementById('kt-moves-val');
+  if (prog) prog.style.width = pct + '%';
+  if (movesVal) movesVal.textContent = ktMoves;
+
+  // Update square size for smaller boards
+  const sqSize = ktSize === 5 ? 74 : ktSize === 6 ? 66 : 62;
+  boardEl.style.gridTemplateColumns = `repeat(${ktSize}, ${sqSize}px)`;
+  boardEl.querySelectorAll('.kt-sq').forEach(sq => {
+    sq.style.width = sq.style.height = sqSize + 'px';
+  });
+  if (rl) rl.querySelectorAll('.rank-label-item').forEach(d => d.style.height = sqSize+'px');
+  if (fl) fl.querySelectorAll('.file-label-item').forEach(d => d.style.width = sqSize+'px');
+}
+
+// ── Status ──
+function ktUpdateStatus(msg, state) {
+  const el = document.getElementById('kt-status');
+  const banner = document.getElementById('kt-turn-banner');
+  const dot = document.getElementById('kt-tb-dot');
+  const bannerTxt = document.getElementById('kt-tb-text');
+  if (el) el.textContent = msg;
+  if (bannerTxt) bannerTxt.textContent = msg;
+  if (banner) {
+    banner.className = 'turn-banner ' + (state === 'done' ? 'kt-done' : state === 'fail' ? 'kt-fail' : 'kt-active');
+  }
+  if (dot) {
+    dot.style.background = state === 'done' ? '#16a34a' : state === 'fail' ? '#dc2626' : '#7c3aed';
+    dot.style.borderColor = state === 'done' ? '#86efac' : state === 'fail' ? '#fca5a5' : '#c4b5fd';
+  }
+}
+
+// ── Move list ──
+function ktUpdateMoveList() {
+  const el = document.getElementById('kt-move-list');
+  if (!el) return;
+  if (ktHistory.length === 0) {
+    el.innerHTML = '<div style="color:#94a3b8;font-size:0.82rem;">אין מהלכים עדיין</div>'; return;
+  }
+  const items = ktHistory.map((p,i) =>
+    `<div class="move-pair"><span class="move-num">${i+1}.</span><span class="move-token${i===ktHistory.length-1?' current':''}">${F[p.c]}${ktSize-p.r}</span></div>`
+  ).reverse().slice(0,30).join('');
+  el.innerHTML = `<div style="max-height:220px;overflow-y:auto;scrollbar-width:thin">${items}</div>`;
+}
+
+// ── Win modal ──
+function ktShowWin(closed) {
+  const t = Math.floor(ktSeconds/60)+':'+String(ktSeconds%60).padStart(2,'0');
+  const icon = closed ? '🌀' : '🏆';
+  const title = closed ? 'סיבוב סגור!' : 'הצלחת!';
+  const desc = closed
+    ? `ביקרת בכל המשבצות וחזרת לנקודת ההתחלה! זמן: ${t}`
+    : `ביקרת בכל ${ktSize*ktSize} המשבצות! זמן: ${t}`;
+  const go = document.getElementById('game-over');
+  if (go) {
+    document.getElementById('go-icon').textContent = icon;
+    document.getElementById('go-title').textContent = title;
+    document.getElementById('go-desc').textContent = desc;
+    go.classList.add('open');
+  }
+}
+
+// ── Timer ──
+function ktStartTimer() {
+  ktStopTimer();
+  ktTimer = setInterval(() => { ktSeconds++; ktUpdateTimerDisplay(); }, 1000);
+}
+function ktStopTimer() { if (ktTimer) { clearInterval(ktTimer); ktTimer = null; } }
+function ktUpdateTimerDisplay() {
+  const el = document.getElementById('kt-timer-val');
+  if (el) el.textContent = Math.floor(ktSeconds/60)+':'+String(ktSeconds%60).padStart(2,'0');
+}
+
+// ── Best score ──
+function ktSaveBest() {
+  const prev = ktBestScore[ktSize];
+  const total = ktSize * ktSize;
+  if (ktMoves === total) {
+    if (!prev || ktSeconds < prev.seconds) {
+      ktBestScore[ktSize] = {moves: ktMoves, seconds: ktSeconds};
+      const el = document.getElementById('kt-best-score');
+      const t = Math.floor(ktSeconds/60)+':'+String(ktSeconds%60).padStart(2,'0');
+      if (el) el.textContent = `${ktSize}×${ktSize}: ${t} ⭐`;
+    }
+  }
+}
+
+// ── Mode / Size ──
+function ktSetMode(m) {
+  ktMode = m;
+  document.querySelectorAll('[id^="kt-mode-"]').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('kt-mode-' + m);
+  if (btn) btn.classList.add('active');
+  ktNewGame();
+}
+function ktSetSize(s) {
+  ktSize = s;
+  document.querySelectorAll('[id^="kt-size-"]').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('kt-size-' + s);
+  if (btn) btn.classList.add('active');
+  // Update board CSS
+  const boardEl = document.getElementById('kt-board');
+  if (boardEl) boardEl.id = 'kt-board'; // trigger re-render
+  ktNewGame();
+}
+
+// ── Navigation ──
+function goToKT() {
+  document.getElementById('page-home').classList.remove('active');
+  document.getElementById('page-kt').classList.add('active');
+  requestAnimationFrame(() => {
+    document.querySelectorAll('#page-kt .chess-pattern').forEach(drawChessPattern);
+    ktNewGame();
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var card = document.getElementById('home-card-chess');
+  var btn  = document.getElementById('btn-go-game');
+  if (card) card.addEventListener('click', goToGame);
+  if (btn)  btn.addEventListener('click',  function(e){ e.stopPropagation(); goToGame(); });
+
+  var wsCard = document.getElementById('home-card-ws');
+  var wsBtn  = document.getElementById('btn-go-ws');
+  if (wsCard) wsCard.addEventListener('click', goToWS);
+  if (wsBtn)  wsBtn.addEventListener('click',  function(e){ e.stopPropagation(); goToWS(); });
+
+  var barCard = document.getElementById('home-card-bar');
+  var barBtn  = document.getElementById('btn-go-bar');
+  if (barCard) barCard.addEventListener('click', goToBar);
+  if (barBtn)  barBtn.addEventListener('click', function(e){ e.stopPropagation(); goToBar(); });
+
+  var ktCard = document.getElementById('home-card-kt');
+  var ktBtn  = document.getElementById('btn-go-kt');
+  if (ktCard) ktCard.addEventListener('click', goToKT);
+  if (ktBtn)  ktBtn.addEventListener('click', function(e){ e.stopPropagation(); goToKT(); });
+
+  drawAllPatterns();
+});
+</script>
+
+<!-- ════════════ WOLF & SHEEP PAGE ════════════ -->
+<div id="page-ws" class="page">
+  <header>
+    <svg class="chess-pattern" id="ws-hdr-svg" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"></svg>
+    <h1>🐺 זאב וכבשים</h1>
+  </header>
+  <div style="background:#fff;border-bottom:1px solid #f1f5f9;padding:10px 20px;">
+    <button onclick="goHome()" style="background:none;border:none;cursor:pointer;color:#94a3b8;font-family:inherit;font-size:0.85rem;font-weight:600;display:flex;align-items:center;gap:6px;padding:4px 0;transition:color 0.15s;" onmouseover="this.style.color='#1a2035'" onmouseout="this.style.color='#94a3b8'">← חזרה לדף הבית</button>
+  </div>
+
+  <div class="game-main">
+    <div class="board-section">
+      <!-- Sheep player bar (top) -->
+      <div class="player-bar" id="ws-bar-sheep">
+        <div class="player-avatar" style="background:#1e3a5f;font-size:1.3rem">🐑</div>
+        <div style="flex:1">
+          <div class="player-name">כבשים (4)</div>
+          <div class="player-side">זזות מטה בלבד • מנצחות בחסימה</div>
+        </div>
+        <span class="turn-indicator" id="ws-turn-sheep"></span>
+      </div>
+
+      <!-- Turn banner -->
+      <div id="ws-turn-banner" class="turn-banner sheep">
+        <span class="tb-dot" id="ws-tb-dot" style="background:#475569;border:2px solid #94a3b8"></span>
+        <span id="ws-tb-text">תור הזאב</span>
+      </div>
+
+      <div class="board-wrap">
+        <div class="board-container">
+          <div class="rank-labels" id="ws-rank-labels"></div>
+          <div class="file-labels-wrap">
+            <div id="ws-board"></div>
+            <div class="file-labels" id="ws-file-labels"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Wolf player bar (bottom) -->
+      <div class="player-bar bottom" id="ws-bar-wolf">
+        <div class="player-avatar" style="background:#7f1d1d;font-size:1.3rem">🐺</div>
+        <div style="flex:1">
+          <div class="player-name">זאב</div>
+          <div class="player-side">זז לכל הכיוונים • מנצח בחציה</div>
+        </div>
+        <span class="turn-indicator" id="ws-turn-wolf"></span>
+      </div>
+
+      <div class="board-actions">
+        <button class="btn btn-secondary" onclick="wsUndo()" style="font-size:0.82rem">↩ בטל</button>
+        <button class="btn btn-danger" onclick="confirmNewGame('ws')" style="font-size:0.82rem">🔄 חדש</button>
+      </div>
+    </div>
+
+    <!-- Tabbed side panel -->
+    <div class="side-panel">
+      <div class="side-tabs-card">
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab('ws','game',this)">🎮 משחק</button>
+          <button class="tab-btn" onclick="switchTab('ws','settings',this)">⚙️ הגדרות</button>
+          <button class="tab-btn" onclick="switchTab('ws','history',this)">📜 היסטוריה</button>
+        </div>
+        <div id="ws-tab-game" class="tab-pane active">
+          <div id="ws-status" style="font-size:0.92rem;font-weight:600;color:#1a2035">תור הזאב</div>
+        </div>
+        <div id="ws-tab-settings" class="tab-pane">
+          <div style="font-size:0.75rem;font-weight:700;color:#b0bec5;margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">מצב משחק</div>
+          <div class="mode-pills">
+            <button class="mode-pill active" id="ws-mode-pvp" onclick="wsSetMode('pvp')">👥 שני שחקנים</button>
+            <button class="mode-pill" id="ws-mode-ai-wolf" onclick="wsSetMode('ai-wolf')">🤖 מחשב=זאב</button>
+            <button class="mode-pill" id="ws-mode-ai-sheep" onclick="wsSetMode('ai-sheep')">🤖 מחשב=כבשים</button>
+          </div>
+        </div>
+        <div id="ws-tab-history" class="tab-pane" style="padding:10px 12px">
+          <div id="ws-move-list"><div style="color:#94a3b8;font-size:0.82rem;">אין מהלכים עדיין</div></div>
+        </div>
+      </div>
+
+      <!-- Rules card — always visible below tabs -->
+      <div class="side-tabs-card" style="margin-top:12px">
+        <div style="padding:14px 16px">
+          <div style="font-size:0.75rem;font-weight:700;color:#b0bec5;margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em">כללי המשחק</div>
+          <div style="font-size:0.82rem;color:#475569;line-height:1.8">
+            <p>🐺 <b>זאב</b> — זז אלכסונית לכל כיוון</p>
+            <p>🐑 <b>כבשים</b> — זזות מטה בלבד</p>
+            <p style="margin-top:6px">🏆 זאב מנצח בהגעה לשורה 1</p>
+            <p>🏆 כבשים מנצחות בחסימה מוחלטת</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <svg class="chess-pattern" id="ws-ftr-svg" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"></svg>
+    <span>Loteman Games © 2026</span>
+  </footer>
+</div>
+
+<!-- ════════════ BARRICADE PAGE ════════════ -->
+<div id="page-bar" class="page">
+  <header>
+    <svg class="chess-pattern" id="bar-hdr-svg" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"></svg>
+    <h1>🚧 חסימת שערים</h1>
+  </header>
+  <div style="background:#fff;border-bottom:1px solid #f1f5f9;padding:10px 20px;">
+    <button onclick="goHome()" style="background:none;border:none;cursor:pointer;color:#94a3b8;font-family:inherit;font-size:0.85rem;font-weight:600;display:flex;align-items:center;gap:6px;padding:4px 0;transition:color 0.15s;" onmouseover="this.style.color='#1a2035'" onmouseout="this.style.color='#94a3b8'">← חזרה לדף הבית</button>
+  </div>
+
+  <div class="game-main">
+    <!-- Board area -->
+    <div class="board-section">
+      <!-- Orange player bar (top) -->
+      <div class="player-bar" id="bar-player-top">
+        <div class="player-avatar" style="background:#ea580c;font-size:1.1rem;width:32px;height:32px">🟠</div>
+        <div style="flex:1">
+          <div class="player-name">כתום <span class="turn-indicator" id="bar-turn-orange"></span></div>
+          <div class="player-side">מטרה: שורה תחתונה</div>
+        </div>
+        <span class="bar-wall-badge" style="background:rgba(234,88,12,0.1);color:#c2410c" id="bar-walls-orange">🚧 10</span>
+      </div>
+
+      <!-- Turn banner (matches chess/ws style) -->
+      <div id="bar-turn-strip" class="turn-banner bar-blue">
+        <span class="tb-dot" id="bar-ts-dot" style="background:#2563eb;border:2px solid #93c5fd"></span>
+        <span id="bar-ts-text">תור הכחול</span>
+      </div>
+
+      <!-- Action bar embedded in board section -->
+      <div class="bar-action-bar" id="bar-action-bar-inline">
+        <span class="bar-action-label">פעולה:</span>
+        <button class="mode-pill active" id="bar-action-move" onclick="barSetAction('move')">🚶 זוז</button>
+        <button class="mode-pill" id="bar-action-wall" onclick="barSetAction('wall')">🚧 חומה</button>
+        <div id="bar-wall-orient-wrap" style="display:none;margin-right:8px">
+          <button class="mode-pill active" id="bar-orient-h" onclick="barSetOrient('H')">— אופקית</button>
+          <button class="mode-pill" id="bar-orient-v" onclick="barSetOrient('V')">| אנכית</button>
+        </div>
+      </div>
+
+      <!-- Board canvas -->
+      <div style="padding:12px;background:#fff;display:flex;justify-content:center;align-items:center;">
+        <canvas id="bar-canvas" style="touch-action:none;cursor:pointer;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.1)"></canvas>
+      </div>
+
+      <!-- Blue player bar (bottom) -->
+      <div class="player-bar bottom" id="bar-player-bot">
+        <div class="player-avatar" style="background:#2563eb;font-size:1.1rem;width:32px;height:32px">🔵</div>
+        <div style="flex:1">
+          <div class="player-name">כחול <span class="turn-indicator" id="bar-turn-blue"></span></div>
+          <div class="player-side">מטרה: שורה עליונה</div>
+        </div>
+        <span class="bar-wall-badge" style="background:rgba(37,99,235,0.1);color:#1d4ed8" id="bar-walls-blue">🚧 10</span>
+      </div>
+
+      <!-- Board actions -->
+      <div class="board-actions">
+        <button class="btn btn-secondary" onclick="barUndo()" style="font-size:0.82rem">↩ בטל</button>
+        <button class="btn btn-danger" onclick="confirmNewGame('bar')" style="font-size:0.82rem">🔄 חדש</button>
+      </div>
+    </div>
+
+    <!-- Tabbed side panel -->
+    <div class="side-panel">
+      <div class="side-tabs-card">
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab('bar','game',this)">🎮 משחק</button>
+          <button class="tab-btn" onclick="switchTab('bar','settings',this)">⚙️ הגדרות</button>
+          <button class="tab-btn" onclick="switchTab('bar','history',this)">📜 היסטוריה</button>
+        </div>
+        <div id="bar-tab-game" class="tab-pane active">
+          <div id="bar-status" style="font-size:0.92rem;font-weight:600;color:#1a2035">תור הכחול</div>
+        </div>
+        <div id="bar-tab-settings" class="tab-pane">
+          <div style="font-size:0.75rem;font-weight:700;color:#b0bec5;margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">מצב משחק</div>
+          <div class="mode-pills" style="flex-wrap:wrap">
+            <button class="mode-pill active" id="bar-mode-pvp" onclick="barSetMode('pvp')">👥 שני שחקנים</button>
+            <button class="mode-pill" id="bar-mode-ai-easy" onclick="barSetMode('ai-easy')">🤖 קל</button>
+            <button class="mode-pill" id="bar-mode-ai-hard" onclick="barSetMode('ai-hard')">🤖 קשה</button>
+          </div>
+        </div>
+        <div id="bar-tab-history" class="tab-pane" style="padding:10px 12px">
+          <div id="bar-move-list"><div style="color:#94a3b8;font-size:0.82rem;">אין מהלכים עדיין</div></div>
+        </div>
+      </div>
+
+      <!-- Rules card — always visible below tabs -->
+      <div class="side-tabs-card" style="margin-top:12px">
+        <div style="padding:14px 16px">
+          <div style="font-size:0.75rem;font-weight:700;color:#b0bec5;margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em">כללי המשחק</div>
+          <div style="font-size:0.82rem;color:#475569;line-height:1.8">
+            <p>🚶 <b>זוז</b> — צעד אחד בכל כיוון</p>
+            <p>🚧 <b>חומה</b> — 10 לכל שחקן</p>
+            <p>🏆 <b>ניצחון</b> — הגע לשורת היריב</p>
+            <p style="margin-top:6px;padding:8px;background:#f8f9fb;border-radius:8px;color:#94a3b8;font-size:0.75rem;line-height:1.5">חומה לא יכולה לחסום לחלוטין את הדרך!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <svg class="chess-pattern" id="bar-ftr-svg" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"></svg>
+    <span>Loteman Games © 2026</span>
+  </footer>
+</div>
+
+
+
+<!-- Confirm new game modal -->
+<div id="confirm-modal">
+  <div class="confirm-box">
+    <div class="confirm-icon">🔄</div>
+    <h3>משחק חדש?</h3>
+    <p>כל המהלכים ייאבדו. האם להתחיל מחדש?</p>
+    <div class="confirm-btns">
+      <button class="btn btn-secondary" onclick="closeConfirm()">ביטול</button>
+      <button class="btn btn-danger" id="confirm-yes-btn" onclick="doConfirmNewGame()">כן, התחל מחדש</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════ KNIGHT TOUR PAGE ════════════ -->
+<div id="page-kt" class="page">
+  <header>
+    <svg class="chess-pattern" id="kt-hdr-svg" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"></svg>
+    <h1>♞ מסע הפרש</h1>
+  </header>
+  <div style="background:#fff;border-bottom:1px solid #f1f5f9;padding:10px 20px;">
+    <button onclick="goHome()" style="background:none;border:none;cursor:pointer;color:#94a3b8;font-family:inherit;font-size:0.85rem;font-weight:600;display:flex;align-items:center;gap:6px;padding:4px 0;transition:color 0.15s;" onmouseover="this.style.color='#1a2035'" onmouseout="this.style.color='#94a3b8'">← חזרה לדף הבית</button>
+  </div>
+
+  <div class="game-main">
+    <div class="board-section">
+
+      <!-- Stats bar -->
+      <div class="kt-stats">
+        <div class="kt-stat">♞ <span class="kt-stat-val" id="kt-moves-val">0</span><span>/64 משבצות</span></div>
+        <div class="kt-progress-bar"><div class="kt-progress-fill" id="kt-progress" style="width:0%"></div></div>
+        <div class="kt-stat">⏱ <span class="kt-stat-val" id="kt-timer-val">0:00</span></div>
+      </div>
+
+      <!-- Turn banner -->
+      <div id="kt-turn-banner" class="turn-banner kt-active" style="margin:8px 16px 4px">
+        <span class="tb-dot" id="kt-tb-dot" style="background:#7c3aed;border:2px solid #c4b5fd"></span>
+        <span id="kt-tb-text">בחר משבצת התחלה</span>
+      </div>
+
+      <!-- Board -->
+      <div class="board-wrap" style="padding:12px 8px">
+        <div class="board-container">
+          <div class="rank-labels" id="kt-rank-labels"></div>
+          <div class="file-labels-wrap">
+            <div id="kt-board"></div>
+            <div class="file-labels" id="kt-file-labels"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Board actions -->
+      <div class="board-actions">
+        <button class="btn btn-secondary" onclick="ktUndo()" id="kt-btn-undo" style="font-size:0.82rem" disabled>↩ בטל</button>
+        <button class="btn btn-secondary" onclick="ktHint()" id="kt-btn-hint" style="font-size:0.82rem">💡 רמז</button>
+        <button class="btn btn-danger" onclick="confirmNewGame('kt')" style="font-size:0.82rem">🔄 חדש</button>
+      </div>
+    </div>
+
+    <!-- Side panel -->
+    <div class="side-panel">
+      <div class="side-tabs-card">
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab('kt','game',this)">🎮 משחק</button>
+          <button class="tab-btn" onclick="switchTab('kt','settings',this)">⚙️ הגדרות</button>
+          <button class="tab-btn" onclick="switchTab('kt','history',this)">📜 היסטוריה</button>
+        </div>
+        <div id="kt-tab-game" class="tab-pane active">
+          <div id="kt-status" style="font-size:0.92rem;font-weight:600;color:#1a2035;margin-bottom:12px">בחר משבצת התחלה</div>
+          <div style="font-size:0.75rem;font-weight:700;color:#b0bec5;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">תוצאה אישית</div>
+          <div id="kt-best-score" style="font-size:0.85rem;color:#475569">אין עדיין</div>
+          <div style="font-size:0.75rem;font-weight:700;color:#b0bec5;margin-top:12px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">שיטות עזר</div>
+          <div style="font-size:0.8rem;color:#475569;line-height:1.7">
+            <span style="display:inline-flex;align-items:center;gap:4px;margin-left:8px"><span style="width:12px;height:12px;border-radius:2px;background:#c8e6c9;display:inline-block;border:1px solid #a5d6a7"></span>ביקרת</span>
+            <span style="display:inline-flex;align-items:center;gap:4px;margin-left:8px"><span style="width:12px;height:12px;border-radius:2px;background:rgba(124,58,237,0.28);display:inline-block"></span>מהלך אפשרי</span>
+            <span style="display:inline-flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:rgba(220,38,38,0.18);display:inline-block"></span>ללא מוצא</span>
+          </div>
+        </div>
+        <div id="kt-tab-settings" class="tab-pane">
+          <div style="font-size:0.75rem;font-weight:700;color:#b0bec5;margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">מצב משחק</div>
+          <div class="mode-pills" style="flex-wrap:wrap">
+            <button class="mode-pill active" id="kt-mode-free" onclick="ktSetMode('free')">🆓 חופשי</button>
+            <button class="mode-pill" id="kt-mode-timed" onclick="ktSetMode('timed')">⏱ מתוזמן</button>
+          </div>
+          <div style="font-size:0.75rem;font-weight:700;color:#b0bec5;margin-top:14px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">גודל לוח</div>
+          <div class="mode-pills" style="flex-wrap:wrap">
+            <button class="mode-pill" id="kt-size-5" onclick="ktSetSize(5)">5×5</button>
+            <button class="mode-pill" id="kt-size-6" onclick="ktSetSize(6)">6×6</button>
+            <button class="mode-pill active" id="kt-size-8" onclick="ktSetSize(8)">8×8</button>
+          </div>
+          <div style="font-size:0.75rem;color:#94a3b8;margin-top:10px;line-height:1.5">
+            💡 5×5 מומלץ למתחילים
+          </div>
+        </div>
+        <div id="kt-tab-history" class="tab-pane" style="padding:10px 12px">
+          <div id="kt-move-list"><div style="color:#94a3b8;font-size:0.82rem;">אין מהלכים עדיין</div></div>
+        </div>
+      </div>
+
+      <!-- Rules card -->
+      <div class="side-tabs-card" style="margin-top:12px">
+        <div style="padding:14px 16px">
+          <div style="font-size:0.75rem;font-weight:700;color:#b0bec5;margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em">כללי המשחק</div>
+          <div style="font-size:0.82rem;color:#475569;line-height:1.8">
+            <p>♞ <b>הפרש</b> זז בצורת L: 2+1 משבצות</p>
+            <p>✅ <b>מטרה</b> — בקר בכל 64 המשבצות</p>
+            <p>🔄 <b>סגור</b> — חזור להתחלה בסוף</p>
+            <p style="margin-top:6px;padding:8px;background:#f8f9fb;border-radius:8px;color:#94a3b8;font-size:0.75rem;line-height:1.5">כל משבצת מבוקרת מסומנת במספר הביקור שלה</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <svg class="chess-pattern" id="kt-ftr-svg" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"></svg>
+    <span>Loteman Games © 2026</span>
+  </footer>
+</div>
+
+</body></body>
+</html>
