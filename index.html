@@ -3,439 +3,485 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>שחמט של לוטמן</title>
+<title>ChessBits</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♟</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Heebo', 'Segoe UI', sans-serif;
-    background: #f4f6fb; color: #1a2035; direction: rtl;
-    -webkit-font-smoothing: antialiased; min-height: 100vh;
-    display: flex; flex-direction: column;
+  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;700;800;900&display=swap');
+
+  /* ══ Design tokens ══ */
+  :root {
+    --bg:        #080b14;
+    --bg2:       #0e1120;
+    --surface:   #111827;
+    --surface2:  #1a2035;
+    --surface3:  #1e2a45;
+    --border:    rgba(99,102,241,0.18);
+    --border2:   rgba(34,211,238,0.14);
+
+    --purple:    #818cf8;
+    --purple-d:  #4f46e5;
+    --purple-l:  #a5b4fc;
+    --cyan:      #22d3ee;
+    --cyan-d:    #0891b2;
+    --cyan-l:    #67e8f9;
+
+    --text:      #e2e8f0;
+    --text-dim:  #94a3b8;
+    --text-muted:#7a8fa8;
+
+    --green:     #34d399;
+    --red:       #f87171;
+    --orange:    #fb923c;
+
+    --glow-p: 0 0 24px rgba(99,102,241,0.4);
+    --glow-c: 0 0 24px rgba(34,211,238,0.4);
+    --glow-g: 0 0 16px rgba(52,211,153,0.4);
+    --r: 14px;
+    --r-lg: 20px;
   }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Heebo', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    direction: rtl;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    background-image:
+      radial-gradient(ellipse 100% 50% at 50% -10%, rgba(99,102,241,0.1) 0%, transparent 70%);
+  }
+
   .page { display: none; flex-direction: column; min-height: 100vh; }
   .page.active { display: flex; }
 
-  /* ── Header/Footer ── */
+  /* ══ Header ══ */
   header {
-    background: linear-gradient(135deg, #1a2035 0%, #2d3f5e 100%);
-    color: #fff; padding: 28px 24px 22px;
-    text-align: center; position: relative; overflow: hidden;
+    padding: 26px 24px 20px; text-align: center;
+    position: relative; overflow: hidden;
+    background:
+      linear-gradient(180deg, rgba(99,102,241,0.1) 0%, transparent 100%),
+      linear-gradient(135deg, rgba(99,102,241,0.07) 25%, transparent 25%) -14px 0,
+      linear-gradient(225deg, rgba(99,102,241,0.07) 25%, transparent 25%) -14px 0,
+      linear-gradient(315deg, rgba(99,102,241,0.07) 25%, transparent 25%),
+      linear-gradient(45deg,  rgba(99,102,241,0.07) 25%, transparent 25%);
+    background-size: 28px 28px;
+    background-color: var(--bg2);
+    border-bottom: 1px solid var(--border);
   }
-  .chess-pattern { position: absolute; inset: 0; pointer-events: none; opacity: 0.18; }
+  header::after {
+    content: ''; position: absolute; bottom: 0; left: 10%; right: 10%; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--purple), var(--cyan), var(--purple), transparent);
+  }
+  .chess-pattern { display: none; }
   header h1 {
-    font-size: 2rem; font-weight: 800; letter-spacing: -0.02em;
-    text-shadow: 0 0 12px rgba(0,0,0,0.6), 0 2px 4px rgba(0,0,0,0.5);
+    font-size: 2rem; font-weight: 900; letter-spacing: -0.02em;
+    background: linear-gradient(120deg, #fff 0%, var(--cyan-l) 45%, var(--purple-l) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     position: relative; z-index: 1;
   }
   header p {
-    margin-top: 6px; color: #94a3b8; font-size: 0.9rem; font-weight: 300;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.7); position: relative; z-index: 1;
+    margin-top: 6px; color: var(--text-dim); font-size: 0.9rem; font-weight: 400;
+    position: relative; z-index: 1;
   }
+
+  /* ══ Footer ══ */
   footer {
-    background: linear-gradient(135deg, #1a2035 0%, #2d3f5e 100%);
-    color: #94a3b8; padding: 18px 24px; text-align: center;
-    font-size: 0.82rem; position: relative; overflow: hidden;
+    color: var(--text-dim); padding: 16px 24px;
+    text-align: center; font-size: 0.8rem;
+    border-top: 1px solid var(--border);
+    position: relative; overflow: hidden;
+    background:
+      linear-gradient(135deg, rgba(34,211,238,0.04) 25%, transparent 25%) -14px 0,
+      linear-gradient(225deg, rgba(34,211,238,0.04) 25%, transparent 25%) -14px 0,
+      linear-gradient(315deg, rgba(34,211,238,0.04) 25%, transparent 25%),
+      linear-gradient(45deg,  rgba(34,211,238,0.04) 25%, transparent 25%);
+    background-size: 28px 28px;
+    background-color: var(--bg2);
   }
   footer span { position: relative; z-index: 1; }
 
-  /* ── Home page ── */
+  /* ══ Home ══ */
   .home-main {
     flex: 1; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; padding: 40px 20px;
+    align-items: center; justify-content: center; padding: 36px 20px;
   }
   .home-cards-row {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 340px));
-    gap: 20px;
-    width: 100%;
-    max-width: 720px;
-    justify-content: center;
+    display: grid; grid-template-columns: repeat(2, minmax(0, 340px));
+    gap: 18px; width: 100%; max-width: 720px; justify-content: center;
   }
-  /* With 4 cards: perfect 2×2. With 3 or fewer: last lone card centers */
   .home-cards-row .home-card:last-child:nth-child(odd) {
-    grid-column: 1 / -1;
-    max-width: 340px;
-    justify-self: center;
+    grid-column: 1 / -1; max-width: 340px; justify-self: center;
   }
-  /* 4 cards = even, so nth-child(odd) rule above doesn't fire — no override needed */
   .home-card {
-    background: #fff; border-radius: 20px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
-    padding: 28px 28px 24px; text-align: center; width: 100%;
-    transition: box-shadow 0.25s, transform 0.25s; cursor: pointer;
-    display: flex; flex-direction: column; align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+    padding: 26px 24px 22px; text-align: center; width: 100%;
+    transition: transform 0.22s, box-shadow 0.22s, border-color 0.22s;
+    cursor: pointer; display: flex; flex-direction: column; align-items: center;
+    position: relative; overflow: hidden;
   }
-  .home-card:hover { box-shadow: 0 10px 32px rgba(0,0,0,0.12); transform: translateY(-4px); }
-  .home-card-icon { font-size: 2.8rem; margin-bottom: 10px; display: block; }
-  .home-card h2 { font-size: 1.15rem; font-weight: 800; color: #1a2035; margin-bottom: 7px; }
-  .home-card p { font-size: 0.83rem; color: #64748b; line-height: 1.55; margin-bottom: 18px; flex: 1; }
+  .home-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--purple-d), var(--cyan), var(--purple));
+    opacity: 0; transition: opacity 0.25s;
+  }
+  .home-card:hover { transform: translateY(-5px); box-shadow: 0 14px 40px rgba(0,0,0,0.6), var(--glow-p); border-color: rgba(99,102,241,0.4); }
+  .home-card:hover::before { opacity: 1; }
+  .home-card-icon { font-size: 2.6rem; margin-bottom: 10px; display: block; }
+  .home-card h2 { font-size: 1.1rem; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+  .home-card p { font-size: 0.82rem; color: var(--text-dim); line-height: 1.55; margin-bottom: 18px; flex: 1; }
+
   .btn-home {
-    display: inline-block; padding: 10px 22px; background: #1a2035; color: #fff;
-    border-radius: 12px; font-size: 0.88rem; font-family: inherit; font-weight: 700;
-    border: none; cursor: pointer; box-shadow: 0 2px 10px rgba(26,32,53,0.2);
-    transition: all 0.18s; white-space: nowrap;
+    display: inline-block; padding: 10px 22px;
+    background: linear-gradient(135deg, var(--purple-d), var(--purple));
+    color: #fff; border-radius: 10px; font-size: 0.87rem; font-family: inherit;
+    font-weight: 700; border: none; cursor: pointer;
+    box-shadow: 0 2px 12px rgba(99,102,241,0.45); transition: all 0.18s;
   }
-  .btn-home:hover { background: #2d3f5e; box-shadow: 0 4px 18px rgba(26,32,53,0.3); }
+  .btn-home:hover { filter: brightness(1.15); box-shadow: var(--glow-p); transform: translateY(-1px); }
+  .btn-home-green  { background: linear-gradient(135deg, #065f46, #10b981); box-shadow: 0 2px 12px rgba(16,185,129,0.4); }
+  .btn-home-green:hover  { box-shadow: var(--glow-g); }
+  .btn-home-orange { background: linear-gradient(135deg, #92400e, #f97316); box-shadow: 0 2px 12px rgba(249,115,22,0.4); }
+  .btn-home-orange:hover { box-shadow: 0 0 22px rgba(249,115,22,0.5); }
+  .btn-home-purple { background: linear-gradient(135deg, #3b0764, #a855f7); box-shadow: 0 2px 12px rgba(168,85,247,0.4); }
+  .btn-home-purple:hover { box-shadow: 0 0 22px rgba(168,85,247,0.5); }
+  .btn-home-teal { background: linear-gradient(135deg, #0f4c5c, #06b6d4); box-shadow: 0 2px 12px rgba(6,182,212,0.4); }
+  .btn-home-teal:hover { box-shadow: 0 0 22px rgba(6,182,212,0.5); }
+
+  /* ── Four Pawns 4×4 board ── */
+  #fp-board {
+    display: grid; grid-template-columns: repeat(4, 72px);
+    border: 2px solid var(--border); border-radius: 4px; overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  }
+  .fp-sq {
+    width: 72px; height: 72px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; position: relative; transition: background 0.12s; user-select: none;
+  }
+  .fp-sq.light { background: #e8d5c4; }
+  .fp-sq.dark  { background: #9b7653; }
+  .fp-sq.blocked { background: #3a2a1a !important; cursor: default !important;
+    background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 3px, transparent 3px, transparent 8px) !important; }
+  .fp-sq.selected { background: rgba(99,102,241,0.65) !important; }
+  .fp-sq.movable  { background: rgba(34,211,238,0.38) !important; cursor: pointer; }
+  .fp-sq.capturable { background: rgba(248,113,113,0.5) !important; }
+  .fp-sq .fp-dot {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: rgba(34,211,238,0.55); box-shadow: 0 0 12px rgba(34,211,238,0.7); pointer-events: none;
+  }
+  .fp-piece { font-size: 2.6rem; line-height: 1; pointer-events: none; }
+  .fp-sq.white-sq .fp-piece { color: #f8f8ff; text-shadow: 0 0 2px #000, 0 1px 4px rgba(0,0,0,0.9); }
+  .fp-sq.black-sq .fp-piece { color: #0f0f1a; text-shadow: 0 1px 2px rgba(255,255,255,0.2); }
+  .fp-piece-white { color: #f8f8ff !important; text-shadow: 0 0 2px #000, 0 1px 4px rgba(0,0,0,0.9) !important; }
+  .fp-piece-black { color: #111 !important; }
+  @keyframes fpCapture { 0%{transform:scale(1.5);opacity:.5} 100%{transform:scale(0);opacity:0} }
+  .fp-capture-anim { animation: fpCapture 0.3s ease-out forwards; }
+  @media (max-width: 500px) {
+    #fp-board { grid-template-columns: repeat(4, 58px); }
+    .fp-sq { width: 58px; height: 58px; }
+    .fp-piece { font-size: 2.1rem; }
+  }
+  @media (max-width: 380px) {
+    #fp-board { grid-template-columns: repeat(4, 48px); }
+    .fp-sq { width: 48px; height: 48px; }
+    .fp-piece { font-size: 1.75rem; }
+  }
+  .fp-rank-label {
+    height: 72px; width: 20px; display: flex; align-items: center; justify-content: flex-end;
+    padding-right: 4px; font-size: 0.7rem; color: var(--text-muted); font-weight: 600;
+  }
+  .fp-file-label {
+    width: 72px; height: 20px; display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; color: var(--text-muted); font-weight: 600;
+  }
+  .fp-dot {
+    border-radius: 50%; background: rgba(34,211,238,0.55);
+    box-shadow: 0 0 10px rgba(34,211,238,0.7); pointer-events: none;
+  }
+
   @media (max-width: 560px) {
     .home-cards-row { grid-template-columns: 1fr; max-width: 380px; }
     .home-cards-row .home-card:last-child:nth-child(odd) { grid-column: auto; max-width: 100%; justify-self: auto; }
   }
-  .btn-home-green { background: #166534; }
-  .btn-home-green:hover { background: #14532d; box-shadow: 0 4px 18px rgba(22,101,52,0.3); }
-  .btn-home-orange { background: #c2410c; }
-  .btn-home-orange:hover { background: #9a3412; box-shadow: 0 4px 18px rgba(194,65,12,0.3); }
-  .btn-home-purple { background: #7c3aed; }
-  .btn-home-purple:hover { background: #6d28d9; box-shadow: 0 4px 18px rgba(124,58,237,0.3); }
 
-  /* ── Knight Tour board ── */
-  #kt-board {
-    display: grid; grid-template-columns: repeat(8, 62px);
-    border: 3px solid #1a2035; border-radius: 4px; overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  /* ══ Back nav ══ */
+  .nav-back-bar {
+    background: var(--surface2); border-bottom: 1px solid var(--border); padding: 8px 20px;
+    display: flex; align-items: center; justify-content: space-between;
   }
-  .kt-sq {
-    width: 62px; height: 62px; display: flex; align-items: center; justify-content: center;
-    cursor: pointer; position: relative; transition: background 0.12s; user-select: none;
-    flex-direction: column;
+  .nav-game-title {
+    font-size: 1rem; font-weight: 800; color: var(--text);
+    display: flex; align-items: center; gap: 6px;
+    position: absolute; left: 50%; transform: translateX(-50%);
   }
-  .kt-sq.light { background: #f0d9b5; }
-  .kt-sq.dark  { background: #b58863; }
-  .kt-sq.visited {
-    background: #c8e6c9 !important;
-  }
-  .kt-sq.visited.dark { background: #81c784 !important; }
-  .kt-sq.current { background: #7c3aed !important; box-shadow: inset 0 0 0 3px #4c1d95; }
-  .kt-sq.hint    { background: rgba(124,58,237,0.28) !important; }
-  .kt-sq.hint.dark { background: rgba(124,58,237,0.45) !important; }
-  .kt-sq.dead-end { background: rgba(220,38,38,0.18) !important; }
-  .kt-sq.dead-end.dark { background: rgba(220,38,38,0.35) !important; }
-  .kt-sq-num {
-    font-size: 0.62rem; font-weight: 800; color: #1a2035; line-height: 1;
-    pointer-events: none; opacity: 0.7;
-  }
-  .kt-sq.dark .kt-sq-num { color: #fff; }
-  .kt-sq.current .kt-sq-num { color: #fff; opacity: 1; }
-  .kt-piece { font-size: 2.2rem; line-height: 1; pointer-events: none; }
-  .kt-sq.current .kt-piece { filter: brightness(10); }
+  .nav-back-bar { position: relative; }
 
-  /* ── KT turn banner (purple) ── */
-  .turn-banner.kt-active { background: rgba(124,58,237,0.08); color: #6d28d9; }
-  .turn-banner.kt-done   { background: rgba(34,197,94,0.1);  color: #15803d; }
-  .turn-banner.kt-fail   { background: rgba(220,38,38,0.08); color: #dc2626; }
-
-  /* ── KT stats bar ── */
-  .kt-stats {
-    display: flex; gap: 16px; padding: 10px 18px;
-    background: #fafafa; border-bottom: 1px solid #f1f5f9;
-    font-size: 0.82rem; font-weight: 600; color: #64748b;
-    align-items: center; flex-wrap: wrap;
-  }
-  .kt-stat { display: flex; align-items: center; gap: 5px; }
-  .kt-stat-val { font-size: 1rem; font-weight: 800; color: #1a2035; }
-  .kt-progress-bar {
-    flex: 1; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; min-width: 60px;
-  }
-  .kt-progress-fill {
-    height: 100%; background: linear-gradient(90deg, #7c3aed, #a78bfa);
-    border-radius: 3px; transition: width 0.3s;
-  }
-
-  @media (max-width: 740px) {
-    #kt-board { grid-template-columns: repeat(8, 44px); }
-    .kt-sq { width: 44px; height: 44px; }
-    .kt-piece { font-size: 1.65rem; }
-    .kt-sq-num { font-size: 0.55rem; }
-  }
-  @media (max-width: 440px) {
-    #kt-board { grid-template-columns: repeat(8, 36px); }
-    .kt-sq { width: 36px; height: 36px; }
-    .kt-piece { font-size: 1.3rem; }
-  }
-  /* ── Game layout ── */
+  /* ══ Game layout ══ */
   .game-main {
     flex: 1; max-width: 1120px; margin: 0 auto;
-    padding: 24px 20px 48px; width: 100%;
-    display: grid; grid-template-columns: 1fr 260px; gap: 24px; align-items: start;
-  }
-  .board-section {
-    background: #fff; border-radius: 18px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.07); overflow: hidden;
-    border: 1px solid rgba(0,0,0,0.04);
+    padding: 20px 16px 40px; width: 100%;
+    display: grid; grid-template-columns: 1fr 265px; gap: 20px; align-items: start;
   }
 
-  /* ── Player bar ── */
+  /* ══ Board section card ══ */
+  .board-section {
+    background: var(--surface); border-radius: 18px;
+    box-shadow: 0 4px 28px rgba(0,0,0,0.5); overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  /* ══ Player bar ══ */
   .player-bar {
     display: flex; align-items: center; gap: 12px;
-    padding: 12px 18px; background: #f8fafc; border-bottom: 1px solid #f1f5f9;
+    padding: 11px 16px; background: var(--surface2);
+    border-bottom: 1px solid var(--border);
   }
-  .player-bar.bottom { border-bottom: none; border-top: 1px solid #f1f5f9; }
+  .player-bar.bottom { border-bottom: none; border-top: 1px solid var(--border); }
   .player-avatar {
-    width: 36px; height: 36px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
-    background: #1a2035;
+    width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+    background: var(--surface3); border: 1.5px solid var(--border);
   }
-  .player-avatar.white-player { background: #e2e8f0; }
-  .player-name { font-weight: 700; font-size: 0.95rem; flex: 1; }
-  .player-side { font-size: 0.75rem; color: #94a3b8; font-weight: 500; }
-  .captured-pieces { font-size: 0.82rem; display: flex; flex-wrap: wrap; gap: 1px; align-items: center; min-height: 22px; }
+  .player-avatar.white-player { background: rgba(226,232,240,0.1); }
+  .player-name { font-weight: 700; font-size: 0.9rem; flex: 1; color: var(--text); }
+  .player-side { font-size: 0.73rem; color: var(--text-muted); font-weight: 500; }
+  .captured-pieces { font-size: 0.8rem; display: flex; flex-wrap: wrap; gap: 1px; align-items: center; min-height: 20px; }
   .turn-indicator {
-    display: inline-block; width: 10px; height: 10px; border-radius: 50%;
-    background: #e2e8f0; transition: background 0.3s; margin-right: 4px;
+    display: inline-block; width: 9px; height: 9px; border-radius: 50%;
+    background: var(--surface3); transition: background 0.3s; margin-right: 4px;
+    border: 1.5px solid var(--border);
   }
-  .turn-indicator.active { background: #6366f1; box-shadow: 0 0 6px rgba(99,102,241,0.5); }
+  .turn-indicator.active { background: var(--cyan); border-color: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
 
-  /* ── Pieces — explicit black/white color ── */
-  .piece {
-    font-size: 2.4rem; line-height: 1; display: block; pointer-events: none;
+  @keyframes turnGlow {
+    0%,100% { box-shadow: inset 3px 0 0 var(--cyan); }
+    50%      { box-shadow: inset 3px 0 0 var(--cyan), 0 0 14px rgba(34,211,238,0.18); }
   }
-  .white-piece {
-    color: #ffffff;
-    text-shadow: 0 0 2px #333, 0 1px 4px rgba(0,0,0,0.85), 1px 1px 0 #444, -1px -1px 0 #555;
+  .player-bar.is-turn {
+    border-right: 3px solid var(--cyan);
+    background: rgba(34,211,238,0.06);
+    animation: turnGlow 2.2s ease-in-out infinite;
   }
-  .black-piece {
-    color: #111111;
-    text-shadow: 0 0 1px rgba(255,255,255,0.3), 0 1px 3px rgba(0,0,0,0.25), 1px 1px 0 #333;
-  }
+  .player-bar.bottom.is-turn { border-right: 3px solid var(--cyan); border-top-color: var(--border); }
 
-  /* ── Board ── */
-  .board-wrap { padding: 12px 8px; background: #fff; display: flex; justify-content: center; }
-  .board-container { display: flex; flex-direction: row; align-items: center; gap: 4px; }
-  .rank-labels { display: flex; flex-direction: column; font-size: 0.7rem; color: #94a3b8; font-weight: 600; margin-left: 4px; }
-  .file-labels-wrap { display: flex; flex-direction: column; align-items: center; }
-  .file-labels { display: flex; flex-direction: row; font-size: 0.7rem; color: #94a3b8; font-weight: 600; margin-top: 4px; }
-  .rank-label-item { height: 62px; display: flex; align-items: center; justify-content: center; width: 18px; }
-  .file-label-item { width: 62px; display: flex; align-items: center; justify-content: center; height: 18px; }
+  /* ══ Piece styles ══ */
+  .piece { font-size: 2.4rem; line-height: 1; display: block; pointer-events: none; }
+  .white-piece { color: #f8f8ff; text-shadow: 0 0 2px #000, 0 1px 4px rgba(0,0,0,0.9), 1px 1px 0 #333; }
+  .black-piece { color: #0f0f1a; text-shadow: 0 1px 2px rgba(255,255,255,0.2); }
+  @keyframes pieceLand { 0%{transform:scale(1.35);opacity:.7} 60%{transform:scale(.9);opacity:1} 100%{transform:scale(1);opacity:1} }
+  .piece-anim { animation: pieceLand 0.22s cubic-bezier(.4,0,.2,1); }
 
-  #board, #ws-board {
-    display: grid; grid-template-columns: repeat(8, 62px);
-    border: 3px solid #1a2035; border-radius: 4px; overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-  }
-  .sq {
-    width: 62px; height: 62px; display: flex; align-items: center; justify-content: center;
-    cursor: pointer; position: relative; transition: background 0.1s; user-select: none;
-  }
-  .sq.light { background: #f0d9b5; }
-  .sq.ws-light-disabled { opacity: 0.5; pointer-events: none; }
-  .sq.dark  { background: #b58863; }
-  .sq.selected { background: #f6f669 !important; box-shadow: inset 0 0 0 3px #aaa800; }
-  .sq.highlight::after {
-    content: ''; position: absolute; width: 30px; height: 30px;
-    border-radius: 50%; background: rgba(0,0,0,0.18); pointer-events: none; z-index: 2;
-  }
-  .sq.highlight.has-piece::after { display: none; }
-  .sq.highlight.has-piece { box-shadow: inset 0 0 0 4px rgba(0,0,0,0.35) !important; }
-  .sq.last-move-from { background: rgba(155,199,0,0.41) !important; }
-  .sq.last-move-to   { background: rgba(155,199,0,0.41) !important; }
-  .sq.in-check { background: rgba(220,0,0,0.55) !important; }
+  /* ══ Board squares ══ */
+  #board, #ws-board { display: grid; grid-template-columns: repeat(8, 62px); }
+  .sq { width: 62px; height: 62px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; transition: background 0.1s; }
+  .sq.light { background: #e8d5c4; }
+  .sq.dark  { background: #9b7653; }
+  .sq.selected  { background: rgba(99,102,241,0.6) !important; }
+  .sq.highlight { background: rgba(34,211,238,0.42) !important; }
+  .sq.last-from { background: rgba(99,102,241,0.3) !important; }
+  .sq.last-to   { background: rgba(99,102,241,0.38) !important; }
+  .sq.check     { background: rgba(248,113,113,0.6) !important; }
+  .sq .move-dot { width: 22px; height: 22px; border-radius: 50%; background: rgba(34,211,238,0.6); box-shadow: 0 0 10px rgba(34,211,238,0.7); pointer-events: none; }
+  .sq .cap-dot  { position: absolute; inset: 4px; border-radius: 50%; border: 3px solid rgba(34,211,238,0.75); box-shadow: 0 0 8px rgba(34,211,238,0.5); pointer-events: none; }
 
-  /* ── Side panel ── */
-  .side-panel { display: flex; flex-direction: column; gap: 12px; width: 260px; }
-  .panel-card {
-    background: #fff; border-radius: 16px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.04); overflow: hidden; transition: box-shadow 0.25s;
-    border: 1px solid #f1f5f9;
-  }
-  .panel-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
-  .panel-card-header {
-    background: #fff; padding: 11px 16px; border-bottom: 1px solid #f8fafc;
-    font-size: 0.75rem; font-weight: 700; color: #b0bec5;
-    letter-spacing: 0.06em; text-transform: uppercase;
-  }
-  .panel-card-body { padding: 13px 16px; }
-  #status-text { font-size: 0.92rem; font-weight: 600; color: #1a2035; line-height: 1.5; }
-  #status-text.check { color: #dc2626; }
-  #status-text.checkmate { color: #dc2626; font-size: 1rem; font-weight: 800; }
-  #status-text.draw { color: #7c3aed; }
+  /* ══ Board wrap ══ */
+  .board-wrap { padding: 12px 8px; display: flex; justify-content: center; }
+  .board-container { display: flex; }
+  .rank-labels { display: flex; flex-direction: column; padding-bottom: 20px; }
+  .rank-label-item { width: 20px; height: 62px; display: flex; align-items: center; justify-content: flex-end; padding-right: 4px; font-size: 0.7rem; color: var(--text-muted); font-weight: 600; flex-shrink: 0; }
+  .file-labels-wrap { display: flex; flex-direction: column; }
+  .file-labels { display: flex; }
+  .file-label-item { width: 62px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: var(--text-muted); font-weight: 600; flex-shrink: 0; }
 
-  .btn {
-    display: block; width: 100%; padding: 9px 16px; border-radius: 10px;
-    font-size: 0.88rem; font-family: inherit; font-weight: 600;
-    cursor: pointer; border: 1.5px solid; transition: all 0.18s; text-align: center; margin-bottom: 8px;
-  }
-  .btn:last-child { margin-bottom: 0; }
-  .btn-primary { background: #1a2035; color: #fff; border-color: #1a2035; box-shadow: 0 2px 8px rgba(26,32,53,0.18); }
-  .btn-primary:hover { background: #2d3f5e; border-color: #2d3f5e; }
-  .btn-secondary { background: #fff; color: #475569; border-color: #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-  .btn-secondary:hover { background: #f8fafc; border-color: #cbd5e1; }
-
-  #move-list {
-    max-height: 200px; overflow-y: auto; font-size: 0.82rem; color: #475569;
-    scrollbar-width: thin; scrollbar-color: #e2e8f0 transparent;
-  }
-  .move-pair { display: flex; gap: 4px; padding: 3px 0; border-bottom: 1px solid #f8fafc; align-items: center; }
-  .move-num { color: #94a3b8; font-weight: 600; min-width: 22px; }
-  .move-token { padding: 1px 7px; border-radius: 5px; font-weight: 500; flex: 1; }
-  .move-token.current { background: #1a2035; color: #fff; }
-
-  .mode-pills { display: flex; gap: 6px; flex-wrap: wrap; }
-  .mode-pill {
-    padding: 5px 13px; border: 1.5px solid #e2e8f0; border-radius: 20px;
-    background: #f8fafc; color: #475569; font-size: 0.78rem;
-    font-family: inherit; font-weight: 600; cursor: pointer; transition: all 0.15s;
-  }
-  .mode-pill:hover { background: #f1f5f9; }
-  .mode-pill.active { background: #1a2035; color: #fff; border-color: #1a2035; }
-
-  /* ── Modals ── */
-  #promo-modal, #game-over {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.55); z-index: 1000;
-    align-items: center; justify-content: center;
-  }
-  #promo-modal.open, #game-over.open { display: flex; }
-  .promo-box {
-    background: #fff; border-radius: 16px; box-shadow: 0 8px 40px rgba(0,0,0,0.22);
-    padding: 24px; text-align: center;
-  }
-  .promo-box h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 16px; color: #1a2035; }
-  .promo-pieces { display: flex; gap: 10px; justify-content: center; }
-  .promo-piece {
-    width: 64px; height: 64px; border-radius: 12px; border: 2px solid #e2e8f0;
-    background: #f8fafc; display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: all 0.15s;
-  }
-  .promo-piece:hover { border-color: #1a2035; transform: scale(1.06); }
-  .promo-piece .piece { font-size: 2.4rem; }
-  .promo-piece.dark-bg { background: #b58863; }
-  .game-over-box {
-    background: #fff; border-radius: 20px; box-shadow: 0 8px 40px rgba(0,0,0,0.25);
-    padding: 32px 40px; text-align: center; max-width: 360px;
-  }
-  .game-over-box .go-icon { font-size: 3.5rem; margin-bottom: 12px; }
-  .game-over-box h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: 8px; color: #1a2035; }
-  .game-over-box p { font-size: 0.95rem; color: #64748b; margin-bottom: 20px; }
-
-  @media (max-width: 860px) {
-    .game-main {
-      grid-template-columns: 1fr;
-      padding: 16px 12px 32px;
-    }
-    .side-panel { width: 100%; }
-  }
-  @media (max-width: 600px) {
-    /* Mobile: side panel collapses - only tabs card shows, rules/history hidden by default */
-    .side-panel > .side-tabs-card:nth-child(n+2) { display: none; }
-    .sq { width: 42px; height: 42px; }
-    #board, #ws-board { grid-template-columns: repeat(8, 42px); }
-    .piece { font-size: 1.55rem; }
-    .rank-label-item { height: 42px; }
-    .file-label-item { width: 42px; }
-    .board-actions { flex-wrap: nowrap; }
-    .turn-banner { margin: 0 10px 10px; font-size: 0.88rem; }
-    header h1 { font-size: 1.5rem; }
-  }
-  @media (max-width: 440px) {
-    .sq { width: 36px; height: 36px; }
-    #board, #ws-board { grid-template-columns: repeat(8, 36px); }
-    .piece { font-size: 1.3rem; }
-    .rank-label-item { height: 36px; }
-    .file-label-item { width: 36px; }
-  }
-
-  /* ── Turn Banner ── */
-  .turn-banner {
-    display: flex; align-items: center; justify-content: center;
-    gap: 10px; padding: 11px 18px; font-size: 0.95rem; font-weight: 700;
-    border-radius: 12px; margin: 0 16px 12px; text-align: center;
-    transition: background 0.3s, color 0.3s;
-  }
-  .turn-banner.white { background: #f1f5f9; color: #1a2035; }
-  .turn-banner.black { background: #1a2035; color: #fff; }
-  .turn-banner.wolf  { background: rgba(127,29,29,0.08); color: #7f1d1d; }
-  .turn-banner.sheep { background: #f1f5f9; color: #1a2035; }
-  .turn-banner .tb-dot { width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0; }
-
-  /* ── Tab sidebar ── */
-  .side-panel { display: flex; flex-direction: column; gap: 0; width: 260px; }
-  .side-tabs-card {
-    background: #fff; border-radius: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow: hidden;
-  }
-  .tab-bar {
-    display: flex; border-bottom: 1.5px solid #f1f5f9; background: #fafafa;
-  }
-  .tab-btn {
-    flex: 1; padding: 11px 4px; background: none; border: none;
-    font-family: inherit; font-size: 0.78rem; font-weight: 700; color: #94a3b8;
-    cursor: pointer; transition: all 0.15s;
-    border-bottom: 2.5px solid transparent; margin-bottom: -1.5px;
-  }
-  .tab-btn:hover { color: #475569; background: #f1f5f9; }
-  .tab-btn.active { color: #1a2035; border-bottom-color: #1a2035; background: #fff; }
-  .tab-pane { display: none; padding: 16px; }
-  .tab-pane.active { display: block; }
-
-  /* ── Action row below board ── */
+  /* ══ Board actions ══ */
   .board-actions {
     display: flex; gap: 8px; padding: 12px 16px;
-    background: #fafafa; border-top: 1px solid #f1f5f9; flex-wrap: wrap;
+    background: var(--surface2); border-top: 1px solid var(--border); flex-wrap: wrap;
   }
   .board-actions .btn { margin-bottom: 0; flex: 1; min-width: 80px; }
 
-  /* ── Danger button ── */
-  .btn-danger { background: #fff5f5; color: #dc2626; border-color: #fecaca; }
-  .btn-danger:hover { background: #fee2e2; border-color: #fca5a5; }
-
-  /* ── Barricade turn — reuses .turn-banner ── */
-  .turn-banner.bar-blue   { background: #f1f5f9; color: #1a2035; }
-  .turn-banner.bar-orange { background: #f1f5f9; color: #1a2035; }
-  .bar-wall-badge {
-    display: inline-flex; align-items: center; gap: 4px;
-    padding: 3px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  /* ══ Buttons ══ */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+    padding: 8px 16px; border-radius: 10px; font-family: inherit; font-size: 0.84rem;
+    font-weight: 700; cursor: pointer; border: 1.5px solid; transition: all 0.15s;
   }
-
-  /* ── Active player bar highlight ── */
-  .player-bar.is-turn { border-right: 3px solid #6366f1; background: #f8f9ff; }
-  .player-bar.bottom.is-turn { border-right: 3px solid #6366f1; border-top-color: #f1f5f9; background: #f8f9ff; }
-
-  /* ── Piece move animation ── */
-  @keyframes pieceLand {
-    0%   { transform: scale(1.35); opacity:0.7 }
-    60%  { transform: scale(0.9); opacity:1 }
-    100% { transform: scale(1); opacity:1 }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--purple-d), var(--purple));
+    color: #fff; border-color: var(--purple);
+    box-shadow: 0 2px 12px rgba(99,102,241,0.4);
   }
-  .piece-anim { animation: pieceLand 0.22s cubic-bezier(.4,0,.2,1); }
+  .btn-primary:hover { filter: brightness(1.12); box-shadow: var(--glow-p); }
+  .btn-secondary { background: var(--surface2); color: var(--text-dim); border-color: var(--border); }
+  .btn-secondary:hover { color: var(--text); border-color: var(--purple); background: rgba(99,102,241,0.1); }
+  .btn-danger { background: rgba(248,113,113,0.1); color: #fca5a5; border-color: rgba(248,113,113,0.3); }
+  .btn-danger:hover { background: rgba(248,113,113,0.2); border-color: rgba(248,113,113,0.5); }
 
-  /* ── Turn pulse on active player bar ── */
-  @keyframes turnGlow {
-    0%, 100% { box-shadow: inset 3px 0 0 #6366f1; }
-    50%       { box-shadow: inset 3px 0 0 #818cf8, 0 0 12px rgba(99,102,241,0.15); }
+  /* ══ Turn banner ══ */
+  .turn-banner {
+    display: flex; align-items: center; justify-content: center;
+    gap: 10px; padding: 10px 16px; font-size: 0.92rem; font-weight: 700;
+    border-radius: 10px; margin: 0 14px 12px;
+    transition: all 0.3s; direction: rtl;
+    border: 1px solid;
   }
-  .player-bar.is-turn { animation: turnGlow 2s ease-in-out infinite; }
+  .turn-banner .tb-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .turn-banner.white   { background: rgba(226,232,240,0.07); color: var(--text); border-color: rgba(226,232,240,0.12); }
+  .turn-banner.black   { background: rgba(99,102,241,0.12); color: var(--purple-l); border-color: rgba(99,102,241,0.25); }
+  .turn-banner.wolf    { background: rgba(248,113,113,0.1); color: #fca5a5; border-color: rgba(248,113,113,0.25); }
+  .turn-banner.sheep   { background: rgba(226,232,240,0.07); color: var(--text); border-color: rgba(226,232,240,0.12); }
+  .turn-banner.bar-blue   { background: rgba(34,211,238,0.1); color: var(--cyan-l); border-color: rgba(34,211,238,0.25); }
+  .turn-banner.bar-orange { background: rgba(251,146,60,0.1); color: #fdba74; border-color: rgba(251,146,60,0.25); }
+  .turn-banner.kt-active  { background: rgba(99,102,241,0.1); color: var(--purple-l); border-color: rgba(99,102,241,0.25); }
+  .turn-banner.kt-done    { background: rgba(52,211,153,0.1); color: #6ee7b7; border-color: rgba(52,211,153,0.25); }
+  .turn-banner.kt-fail    { background: rgba(248,113,113,0.1); color: #fca5a5; border-color: rgba(248,113,113,0.25); }
 
-  /* ── Barricade wall/move pulse ── */
+  /* ══ Barricade ══ */
+  .turn-banner.bar-blue   { background: rgba(34,211,238,0.1); color: var(--cyan-l); border-color: rgba(34,211,238,0.25); }
+  .turn-banner.bar-orange { background: rgba(251,146,60,0.1); color: #fdba74; border-color: rgba(251,146,60,0.25); }
+  .bar-wall-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 0.77rem; font-weight: 700; }
+  .bar-action-bar {
+    display: flex; gap: 8px; padding: 10px 14px;
+    background: var(--surface2); border-bottom: 1px solid var(--border);
+    align-items: center; flex-wrap: wrap;
+  }
+  .bar-action-label { font-size: 0.74rem; font-weight: 700; color: var(--text-muted); margin-left: auto; }
   @keyframes barFlash { 0%{opacity:0} 30%{opacity:1} 100%{opacity:1} }
   .bar-placed { animation: barFlash 0.25s ease-out; }
 
-  /* ── Confirm modal ── */
-  #confirm-modal {
+  /* ══ Side panel ══ */
+  .side-panel { display: flex; flex-direction: column; gap: 12px; width: 265px; }
+  .side-tabs-card {
+    background: var(--surface); border-radius: var(--r);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4); overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .tab-bar { display: flex; border-bottom: 1px solid var(--border); background: var(--surface2); }
+  .tab-btn {
+    flex: 1; padding: 10px 4px; background: none; border: none;
+    font-family: inherit; font-size: 0.76rem; font-weight: 700; color: #8899b8;
+    cursor: pointer; transition: all 0.15s;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  .tab-btn:hover { color: var(--text); background: rgba(99,102,241,0.07); }
+  .tab-btn.active { color: var(--purple-l); border-bottom-color: var(--purple); background: transparent; }
+  .tab-pane { display: none; padding: 14px; }
+  .tab-pane.active { display: block; }
+
+  /* ══ Settings ══ */
+  .settings-section { margin-bottom: 14px; }
+  .settings-section:last-child { margin-bottom: 0; }
+  .settings-label { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 7px; }
+  .settings-difficulty { margin-top: 14px; transition: opacity 0.2s; }
+  .settings-difficulty.hidden { opacity: 0.3; pointer-events: none; }
+
+  /* ══ Mode pills ══ */
+  .mode-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+  .mode-pill {
+    padding: 5px 13px; border: 1.5px solid var(--border); border-radius: 20px;
+    background: var(--surface2); color: var(--text-dim); font-size: 0.77rem;
+    font-family: inherit; font-weight: 600; cursor: pointer; transition: all 0.15s;
+  }
+  .mode-pill:hover { border-color: var(--purple); color: var(--text); background: rgba(99,102,241,0.1); }
+  .mode-pill.active { background: rgba(99,102,241,0.18); color: var(--purple-l); border-color: rgba(99,102,241,0.5); }
+
+  /* ══ Move list ══ */
+  .move-pair { display: flex; gap: 4px; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.04); align-items: center; }
+  .move-num { color: var(--text-dim); font-weight: 600; min-width: 22px; font-size: 0.75rem; }
+  .move-token { padding: 1px 7px; border-radius: 5px; font-weight: 500; flex: 1; font-size: 0.8rem; color: var(--text-dim); }
+  .move-token.current { background: rgba(99,102,241,0.2); color: var(--purple-l); }
+
+  /* ══ Modals ══ */
+  #promo-modal, #game-over, #confirm-modal {
     display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.45); z-index: 2000;
+    background: rgba(0,0,0,0.75); z-index: 1000;
     align-items: center; justify-content: center;
+    backdrop-filter: blur(6px);
   }
-  #confirm-modal.open { display: flex; }
-  .confirm-box {
-    background: #fff; border-radius: 20px;
-    box-shadow: 0 12px 48px rgba(0,0,0,0.22);
-    padding: 32px 36px; text-align: center; max-width: 320px; width: 90%;
+  #promo-modal.open, #game-over.open, #confirm-modal.open { display: flex; }
+
+  .promo-box, .game-over-box, .confirm-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r-lg); padding: 28px 32px; text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.7), var(--glow-p);
+    max-width: 340px; width: 90%;
   }
-  .confirm-box .confirm-icon { font-size: 2.8rem; margin-bottom: 12px; }
-  .confirm-box h3 { font-size: 1.2rem; font-weight: 800; margin-bottom: 8px; color: #1a2035; }
-  .confirm-box p  { font-size: 0.88rem; color: #64748b; margin-bottom: 20px; }
+  .promo-box h3, .confirm-box h3 { font-size: 1.15rem; font-weight: 800; color: var(--text); margin-bottom: 16px; }
+  .promo-pieces { display: flex; gap: 12px; justify-content: center; }
+  .promo-piece {
+    width: 62px; height: 62px; border-radius: 12px; border: 1.5px solid var(--border);
+    background: var(--surface2); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .promo-piece:hover { border-color: var(--purple); box-shadow: var(--glow-p); transform: scale(1.07); }
+  .promo-piece .piece { font-size: 2.4rem; }
+  .promo-piece.dark-bg { background: rgba(155,118,83,0.3); }
+  .game-over-box .go-icon { font-size: 3.2rem; margin-bottom: 10px; display: block; }
+  .game-over-box h2 { font-size: 1.55rem; font-weight: 900; margin-bottom: 8px; background: linear-gradient(120deg, #fff, var(--cyan-l)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .game-over-box p { font-size: 0.92rem; color: var(--text-dim); margin-bottom: 20px; }
+  .confirm-box .confirm-icon { font-size: 2.6rem; margin-bottom: 10px; display: block; }
+  .confirm-box p { font-size: 0.87rem; color: var(--text-dim); margin-bottom: 18px; }
   .confirm-btns { display: flex; gap: 10px; }
   .confirm-btns .btn { flex: 1; margin: 0; }
 
-  /* ── Barricade: action selector embedded in board ── */
-  .bar-action-bar {
-    display: flex; gap: 8px; padding: 10px 16px;
-    background: #fafafa; border-bottom: 1px solid #f1f5f9;
-    align-items: center; flex-wrap: wrap;
+  /* ══ KT board ══ */
+  #kt-board {
+    display: grid; grid-template-columns: repeat(8, 62px);
+    border: 2px solid var(--border); border-radius: 4px; overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.5);
   }
-  .bar-action-label { font-size: 0.75rem; font-weight: 700; color: #94a3b8; margin-left: auto; }
+  .kt-sq {
+    width: 62px; height: 62px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; position: relative; transition: background 0.12s; user-select: none; flex-direction: column;
+  }
+  .kt-sq.light { background: #e8d5c4; }
+  .kt-sq.dark  { background: #9b7653; }
+  .kt-sq.visited { background: rgba(34,211,238,0.22) !important; }
+  .kt-sq.visited.dark { background: rgba(34,211,238,0.38) !important; }
+  .kt-sq.current { background: var(--purple) !important; box-shadow: inset 0 0 0 3px var(--purple-d), 0 0 18px rgba(99,102,241,0.6); }
+  .kt-sq.hint    { background: rgba(99,102,241,0.28) !important; }
+  .kt-sq.hint.dark { background: rgba(99,102,241,0.44) !important; }
+  .kt-sq.dead-end { background: rgba(248,113,113,0.18) !important; }
+  .kt-sq.dead-end.dark { background: rgba(248,113,113,0.32) !important; }
+  .kt-sq-num { font-size: 0.6rem; font-weight: 800; color: #1a1a1a; line-height: 1; pointer-events: none; opacity: 0.85; }
+  .kt-sq.dark .kt-sq-num { color: #fff; }
+  .kt-sq.current .kt-sq-num, .kt-sq.visited .kt-sq-num { color: #fff; opacity: 1; }
+  .kt-sq.current .kt-sq-num { color: #fff; }
+  .kt-sq.visited .kt-sq-num { color: rgba(34,211,238,0.9); }
+  .kt-piece { font-size: 2.1rem; line-height: 1; pointer-events: none; }
+  .kt-sq.current .kt-piece { filter: brightness(12); }
 
+  .kt-stats {
+    display: flex; gap: 14px; padding: 10px 16px;
+    background: var(--surface2); border-bottom: 1px solid var(--border);
+    font-size: 0.81rem; font-weight: 600; color: var(--text-dim); align-items: center; flex-wrap: wrap;
+  }
+  .kt-stat { display: flex; align-items: center; gap: 5px; }
+  .kt-stat-val { font-size: 1rem; font-weight: 800; color: var(--text); }
+  .kt-progress-bar { flex: 1; height: 5px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; min-width: 50px; }
+  .kt-progress-fill { height: 100%; background: linear-gradient(90deg, var(--purple), var(--cyan)); border-radius: 3px; transition: width 0.3s; }
+
+  @media (max-width: 740px) { #kt-board { grid-template-columns: repeat(8,44px); } .kt-sq { width:44px;height:44px; } .kt-piece{font-size:1.6rem;} .kt-sq-num{font-size:.52rem;} }
+  @media (max-width: 440px) { #kt-board { grid-template-columns: repeat(8,36px); } .kt-sq { width:36px;height:36px; } .kt-piece{font-size:1.28rem;} }
+
+  /* ══ Responsive ══ */
+  @media (max-width: 860px) { .game-main { grid-template-columns: 1fr; padding: 14px 12px 30px; } .side-panel { width: 100%; } }
+  @media (max-width: 600px) {
+    .side-panel > .side-tabs-card:nth-child(n+2) { display: none; }
+    .sq { width: 42px; height: 42px; } #board, #ws-board { grid-template-columns: repeat(8,42px); }
+    .piece { font-size: 1.52rem; } .rank-label-item { height: 42px; } .file-label-item { width: 42px; }
+    .board-actions { flex-wrap: nowrap; } .turn-banner { margin: 0 10px 10px; font-size: 0.86rem; } header h1 { font-size: 1.5rem; }
+  }
+  @media (max-width: 440px) {
+    .sq { width: 36px; height: 36px; } #board, #ws-board { grid-template-columns: repeat(8,36px); }
+    .piece { font-size: 1.28rem; } .rank-label-item { height: 36px; } .file-label-item { width: 36px; }
+  }
 </style>
 </head>
 <body>
@@ -443,15 +489,14 @@
 <!-- ════════════ HOME PAGE ════════════ -->
 <div id="page-home" class="page active">
   <header>
-    <svg class="chess-pattern" id="home-hdr-svg" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"></svg>
-    <h1>♟ שחמט של לוטמן</h1>
-    <p>הבית של משחק השחמט הקלאסי</p>
+    <h1>♞ ChessBits</h1>
+    <p id="home-tagline"></p>
   </header>
   <div class="home-main">
     <div class="home-cards-row">
       <div class="home-card" id="home-card-chess">
         <span class="home-card-icon">♟</span>
-        <h2>משחק שחמט רגיל</h2>
+        <h2>שחמט רגיל</h2>
         <p>שחק שחמט קלאסי — נגד חבר על אותו המסך, או מול המחשב ברמות קושי שונות. כולל כל כללי השחמט המלאים.</p>
         <button class="btn-home" id="btn-go-game">▶ למשחק שחמט רגיל</button>
       </div>
@@ -473,24 +518,27 @@
         <p>אתגר בודד קלאסי — הוליך את הפרש על פני כל 64 המשבצות, כל אחת בדיוק פעם אחת. תוכל לחזור לנקודת ההתחלה?</p>
         <button class="btn-home btn-home-purple" id="btn-go-kt">▶ למסע הפרש</button>
       </div>
+      <div class="home-card" id="home-card-fp">
+        <span class="home-card-icon">🎯</span>
+        <h2>ארבעת הרגלים</h2>
+        <p>לוח 4×4 עם 16 כלים — הזז כלים לבנים לפי כללי שחמט עד שהפרש לוכד את כל 4 הרגלים השחורים!</p>
+        <button class="btn-home btn-home-teal" id="btn-go-fp">▶ למשחק ארבעת הרגלים</button>
+      </div>
     </div>
   </div>
   <footer>
-    <svg class="chess-pattern" id="home-ftr-svg" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"></svg>
-    <span>Loteman Games © 2026</span>
+    <span>ChessBits © 2026</span>
   </footer>
 </div>
 
 <!-- ════════════ GAME PAGE ════════════ -->
 <div id="page-game" class="page">
   <header>
-    <svg class="chess-pattern" id="game-hdr-svg" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"></svg>
-    <h1>♟ שחמט של לוטמן</h1>
+    <h1>♞ ChessBits</h1>
   </header>
-  <div style="background:#fff;border-bottom:1px solid #f1f5f9;padding:10px 20px;">
-    <button onclick="goHome()" style="background:none;border:none;cursor:pointer;color:#94a3b8;font-family:inherit;font-size:0.85rem;font-weight:600;display:flex;align-items:center;gap:6px;padding:4px 0;transition:color 0.15s;" onmouseover="this.style.color='#1a2035'" onmouseout="this.style.color='#94a3b8'">
-      ← חזרה לדף הבית
-    </button>
+  <div class="nav-back-bar">
+    <button onclick="goHome()" style="background:none;border:none;cursor:pointer;color:var(--text-dim);font-family:inherit;font-size:0.85rem;font-weight:600;display:flex;align-items:center;gap:6px;padding:4px 0;transition:color 0.15s;" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color='#94a3b8'">← חזרה לדף הבית</button>
+    <span class="nav-game-title">♟ שחמט</span>
   </div>
 
   <div class="game-main">
@@ -548,30 +596,39 @@
           <button class="tab-btn" onclick="switchTab('chess','history',this)">📜 היסטוריה</button>
         </div>
         <div id="chess-tab-game" class="tab-pane active">
-          <div id="status-text" style="font-size:0.92rem;font-weight:600;color:#1a2035;margin-bottom:12px;">תור הלבן</div>
-          <div style="font-size:0.75rem;font-weight:700;color:#b0bec5;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">כלים שבויים — שחור</div>
-          <div style="font-size:0.82rem;color:#475569;min-height:20px;margin-bottom:10px" id="cap-black-tab"></div>
-          <div style="font-size:0.75rem;font-weight:700;color:#b0bec5;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">כלים שבויים — לבן</div>
-          <div style="font-size:0.82rem;color:#475569;min-height:20px" id="cap-white-tab"></div>
+          <div id="status-text" style="font-size:0.92rem;font-weight:600;color:var(--text);margin-bottom:12px;">תור הלבן</div>
+          <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em">כלים שבויים — שחור</div>
+          <div style="font-size:0.82rem;color:var(--text-dim);min-height:20px;margin-bottom:10px" id="cap-black-tab"></div>
+          <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em">כלים שבויים — לבן</div>
+          <div style="font-size:0.82rem;color:var(--text-dim);min-height:20px" id="cap-white-tab"></div>
         </div>
         <div id="chess-tab-settings" class="tab-pane">
-          <div style="font-size:0.75rem;font-weight:700;color:#b0bec5;margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">מצב משחק</div>
-          <div class="mode-pills" style="margin-bottom:0">
-            <button class="mode-pill active" id="mode-pvp" onclick="setMode('pvp')">👥 שני שחקנים</button>
-            <button class="mode-pill" id="mode-ai-easy" onclick="setMode('ai-easy')">🤖 קל</button>
-            <button class="mode-pill" id="mode-ai-hard" onclick="setMode('ai-hard')">🤖 קשה</button>
+          <div class="settings-section">
+            <div class="settings-label">מצב משחק</div>
+            <div class="mode-pills">
+              <button class="mode-pill active" id="chess-vs-pvp" onclick="chessSetVs('pvp')">👥 שני שחקנים</button>
+              <button class="mode-pill" id="chess-vs-ai" onclick="chessSetVs('ai')">🤖 נגד מחשב</button>
+            </div>
+          </div>
+          <div class="settings-difficulty hidden" id="chess-difficulty">
+            <div class="settings-label">רמת קושי</div>
+            <div class="mode-pills">
+              <button class="mode-pill active" id="chess-diff-easy" onclick="chessSetDiff('easy')">קל</button>
+              <button class="mode-pill" id="chess-diff-medium" onclick="chessSetDiff('medium')">בינוני</button>
+              <button class="mode-pill" id="chess-diff-hard" onclick="chessSetDiff('hard')">קשה</button>
+            </div>
           </div>
         </div>
         <div id="chess-tab-history" class="tab-pane" style="padding:10px 12px">
-          <div id="move-list"><div style="color:#94a3b8;font-size:0.82rem;padding:4px 0">אין מהלכים עדיין</div></div>
+          <div id="move-list"><div style="color:var(--text-muted);font-size:0.82rem;padding:4px 0">אין מהלכים עדיין</div></div>
         </div>
       </div>
 
       <!-- Rules card — always visible below tabs -->
       <div class="side-tabs-card" style="margin-top:12px">
         <div style="padding:14px 16px">
-          <div style="font-size:0.75rem;font-weight:700;color:#b0bec5;margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em">כללי המשחק</div>
-          <div style="font-size:0.82rem;color:#475569;line-height:1.8">
+          <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.07em">כללי המשחק</div>
+          <div style="font-size:0.82rem;color:var(--text-dim);line-height:1.8">
             <p>♟ <b>זוז</b> — כלי זזים לפי כללי שחמט</p>
             <p>♟ <b>אנפסון</b> — לכידת רץ אויב</p>
             <p>♟ <b>הצרחה</b> — מלך ורגלי בו זמנית</p>
@@ -584,8 +641,7 @@
   </div>
 
   <footer>
-    <svg class="chess-pattern" id="game-ftr-svg" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"></svg>
-    <span>Loteman Games © 2026</span>
+    <span>ChessBits © 2026</span>
   </footer>
 </div>
 
@@ -655,7 +711,11 @@ function drawChessPattern(svgEl) {
 }
 
 function drawAllPatterns() {
+  // SVG patterns removed
+  return;
   document.querySelectorAll('.chess-pattern').forEach(drawChessPattern);
+  const fpH = document.getElementById('fp-hdr-svg');
+
 }
 
 // Draw on load and on resize
@@ -668,6 +728,7 @@ window.addEventListener('resize', drawAllPatterns);
 function goToGame() {
   document.getElementById('page-home').classList.remove('active');
   document.getElementById('page-game').classList.add('active');
+  history.pushState({ screen: 'chess' }, '');
   // Re-draw patterns now that game page is visible and has real dimensions
   requestAnimationFrame(() => {
     document.querySelectorAll('#page-game .chess-pattern').forEach(drawChessPattern);
@@ -679,6 +740,8 @@ function goHome() {
   document.getElementById('page-ws').classList.remove('active');
   document.getElementById('page-bar').classList.remove('active');
   document.getElementById('page-kt').classList.remove('active');
+  document.getElementById('page-fp').classList.remove('active');
+  document.getElementById('page-fp').classList.remove('active');
   document.getElementById('page-home').classList.add('active');
   ktStopTimer();
 }
@@ -701,8 +764,8 @@ const INIT_BOARD = [
   ['wR','wN','wB','wQ','wK','wB','wN','wR']
 ];
 
-let board, turn, selected, highlights, legalMoves, history, moveNotations;
-let flipped = false, gameMode = 'pvp', gameOver = false;
+let board, turn, selected, highlights, legalMoves, chessHistory, moveNotations;
+let flipped = true, gameMode = 'pvp', gameOver = false;
 let enPassant = null;   // [row, col] of the square a pawn can capture INTO via e.p.
 let castlingRights, lastFrom = null, lastTo = null, pendingPromotion = null;
 
@@ -820,15 +883,13 @@ function hasAnyLegal(col, brd, ep, cR) {
 function newGame() {
   board = INIT_BOARD.map(r=>[...r]);
   turn='w'; selected=null; highlights=[]; legalMoves=[];
-  history=[]; moveNotations=[]; gameOver=false; enPassant=null;
+  chessHistory=[]; moveNotations=[]; gameOver=false; enPassant=null;
   castlingRights={wK:true,wQ:true,bK:true,bQ:true};
   lastFrom=null; lastTo=null;
   renderBoard(); updateStatus(); updateMoveList(); updateCaptures();
 }
 function setMode(m) {
-  gameMode=m;
-  document.querySelectorAll('.mode-pill').forEach(p=>p.classList.remove('active'));
-  document.getElementById('mode-'+m).classList.add('active');
+  gameMode = m;
   newGame();
 }
 function flipBoard() { flipped=!flipped; renderBoard(); }
@@ -977,7 +1038,7 @@ function applyMove(fr,fc,tr,tc,promo,ai=false) {
   const epPrev=enPassant;
 
   // Save state for undo
-  history.push({
+  chessHistory.push({
     board:board.map(r=>[...r]), turn, enPassant:enPassant?[...enPassant]:null,
     castlingRights:{...castlingRights}, lastFrom:lastFrom?[...lastFrom]:null,
     lastTo:lastTo?[...lastTo]:null, moveNotations:[...moveNotations]
@@ -1053,11 +1114,11 @@ function applyMove(fr,fc,tr,tc,promo,ai=false) {
 }
 
 function undoMove() {
-  if(history.length===0) return;
-  const steps=(gameMode!=='pvp'&&history.length>=2)?2:1;
+  if(chessHistory.length===0) return;
+  const steps=(gameMode!=='pvp'&&chessHistory.length>=2)?2:1;
   for(let i=0;i<steps;i++){
-    if(history.length===0) break;
-    const h=history.pop();
+    if(chessHistory.length===0) break;
+    const h=chessHistory.pop();
     board=h.board.map(r=>[...r]); turn=h.turn;
     enPassant=h.enPassant?[...h.enPassant]:null;
     castlingRights={...h.castlingRights};
@@ -1072,7 +1133,7 @@ function undoMove() {
 // ── AI ──
 function aiMove() {
   if(gameOver||turn!=='b') return;
-  const depth=gameMode==='ai-hard'?3:1;
+  const depth = chessDiff === 'hard' ? 3 : chessDiff === 'medium' ? 2 : 1;
   const mv=bestMove(board,'b',depth,enPassant,castlingRights);
   if(mv) doMove(mv.fr,mv.fc,mv.tr,mv.tc,true);
 }
@@ -1123,7 +1184,7 @@ function updateStatus(){
 }
 function updateMoveList(){
   const el=document.getElementById('move-list');
-  if(!moveNotations.length){el.innerHTML='<div style="color:#94a3b8;font-size:0.82rem;">אין מהלכים עדיין</div>';return;}
+  if(!moveNotations.length){el.innerHTML='<div style="color:var(--text-muted);font-size:0.82rem;">אין מהלכים עדיין</div>';return;}
   let html='';
   for(let i=0;i<moveNotations.length;i+=2){
     const num=Math.floor(i/2)+1;
@@ -1149,8 +1210,8 @@ function updateCaptures(){
   document.getElementById('cap-white').innerHTML = cwHtml;
   const cbt = document.getElementById('cap-black-tab');
   const cwt = document.getElementById('cap-white-tab');
-  if (cbt) cbt.innerHTML = cbHtml || '<span style="color:#94a3b8;font-size:0.78rem">אין כלים שבויים</span>';
-  if (cwt) cwt.innerHTML = cwHtml || '<span style="color:#94a3b8;font-size:0.78rem">אין כלים שבויים</span>';
+  if (cbt) cbt.innerHTML = cbHtml || '<span style="color:var(--text-muted);font-size:0.78rem">אין כלים שבויים</span>';
+  if (cwt) cwt.innerHTML = cwHtml || '<span style="color:var(--text-muted);font-size:0.78rem">אין כלים שבויים</span>';
 }
 function showPromoModal(col){
   const pcs=col==='w'?[{t:'Q',s:'♕'},{t:'R',s:'♖'},{t:'B',s:'♗'},{t:'N',s:'♘'}]:[{t:'Q',s:'♛'},{t:'R',s:'♜'},{t:'B',s:'♝'},{t:'N',s:'♞'}];
@@ -1193,6 +1254,7 @@ let wsHighlights = [];
 let wsHistory = [];
 let wsMoveLog = [];
 let wsMode = 'pvp';  // pvp | ai-wolf | ai-sheep
+let wsAiDifficulty = 'easy';  // easy | medium | hard
 let wsOver = false;
 
 function wsNewGame() {
@@ -1224,8 +1286,6 @@ function wsNewGame() {
 
 function wsSetMode(m) {
   wsMode = m;
-  document.querySelectorAll('[id^="ws-mode-"]').forEach(p => p.classList.remove('active'));
-  document.getElementById('ws-mode-' + m).classList.add('active');
   wsNewGame();
 }
 
@@ -1261,7 +1321,7 @@ function wsRender() {
     rankLabelsId: 'ws-rank-labels',
     fileLabelsId: 'ws-file-labels',
     size: 8,
-    flipped: false,
+    flipped: true,
     rankLabel: ri => 8 - ri,
     getCellClass(r, c) {
       const dark = (r + c) % 2 === 1;
@@ -1398,7 +1458,7 @@ function wsUpdateStatus() {
 function wsUpdateMoveList() {
   const el = document.getElementById('ws-move-list');
   if (!el) return;
-  if (!wsMoveLog.length) { el.innerHTML='<div style="color:#94a3b8;font-size:0.82rem;">אין מהלכים עדיין</div>'; return; }
+  if (!wsMoveLog.length) { el.innerHTML='<div style="color:var(--text-muted);font-size:0.82rem;">אין מהלכים עדיין</div>'; return; }
   el.innerHTML = wsMoveLog.map((n,i)=>
     `<div class="move-pair"><span class="move-num">${i+1}.</span><span class="move-token" style="font-size:0.78rem">${n}</span></div>`
   ).join('');
@@ -1493,7 +1553,7 @@ function wsAiMove() {
   const isWolf = wsTurn === 'wolf';
   const moves = wsAllMovesBoard(wsBoard, wsTurn);
   if (!moves.length) return;
-  const depth = 5;
+  const depth = wsAiDifficulty === 'hard' ? 7 : wsAiDifficulty === 'medium' ? 4 : 2;
   let bestScore = isWolf ? -Infinity : Infinity;
   let bestMove = moves[0];
   for (const m of moves) {
@@ -1507,6 +1567,7 @@ function wsAiMove() {
 function goToWS() {
   document.getElementById('page-home').classList.remove('active');
   document.getElementById('page-ws').classList.add('active');
+  history.pushState({ screen: 'ws' }, '');
   requestAnimationFrame(() => {
     document.querySelectorAll('#page-ws .chess-pattern').forEach(drawChessPattern);
   });
@@ -1542,6 +1603,7 @@ let barAction = 'move';   // 'move' | 'wall'
 let barOrient = 'H';      // 'H' | 'V'
 let barOver = false;
 let barMode = 'pvp';
+let barAiDifficulty = 'easy';  // easy | medium | hard
 let barHistory = [];
 let barHover = null;      // {r,c} for wall preview
 let barCanvas, barCtx;
@@ -1578,8 +1640,6 @@ function barNewGame() {
 
 function barSetMode(m) {
   barMode = m;
-  document.querySelectorAll('[id^="bar-mode-"]').forEach(p => p.classList.remove('active'));
-  document.getElementById('bar-mode-' + m).classList.add('active');
   barNewGame();
 }
 
@@ -1732,7 +1792,7 @@ function barDraw() {
   ctx.scale(scale, scale);
 
   // Background
-  ctx.fillStyle = '#f8f9fb';
+  ctx.fillStyle = '#0e1120';
   ctx.fillRect(0, 0, S, S);
 
   const blueGoalRow = 0, orangeGoalRow = 8;
@@ -1743,16 +1803,16 @@ function barDraw() {
       const {x, y} = barCellPx(r, c);
       // Goal rows
       if (r === blueGoalRow) {
-        ctx.fillStyle = 'rgba(37,99,235,0.12)';
+        ctx.fillStyle = 'rgba(34,211,238,0.12)';
       } else if (r === orangeGoalRow) {
-        ctx.fillStyle = 'rgba(234,88,12,0.12)';
+        ctx.fillStyle = 'rgba(251,146,60,0.12)';
       } else {
-        ctx.fillStyle = '#ffffff';
+        ctx.fillStyle = '#1a2035';
       }
       ctx.beginPath();
       ctx.roundRect(x, y, BAR_CELL, BAR_CELL, 4);
       ctx.fill();
-      ctx.strokeStyle = '#e2e8f0';
+      ctx.strokeStyle = 'rgba(99,102,241,0.15)';
       ctx.lineWidth = 1;
       ctx.stroke();
     }
@@ -1762,12 +1822,12 @@ function barDraw() {
   if (barAction === 'wall' && barHover && !barOver) {
     const {r, c} = barHover;
     const valid = barWallValid(r, c, barOrient) && barWallsLeft[barTurn] > 0;
-    ctx.fillStyle = valid ? 'rgba(99,102,241,0.55)' : 'rgba(220,38,38,0.45)';
+    ctx.fillStyle = valid ? 'rgba(34,211,238,0.6)' : 'rgba(248,113,113,0.5)';
     barDrawWallShape(ctx, r, c, barOrient);
   }
 
   // Draw placed walls
-  ctx.fillStyle = '#2563eb';
+  ctx.fillStyle = '#22d3ee';
   // We'll draw H walls orange, V walls blue — actually use color by... 
   // We don't track who placed each wall, just draw them all nicely
   barWallsH.forEach(key => {
@@ -1807,8 +1867,8 @@ function barDraw() {
   }
 
   // Draw pawns
-  barDrawPawn(ctx, barPos.blue[0], barPos.blue[1], '#2563eb', '#1d4ed8');
-  barDrawPawn(ctx, barPos.orange[0], barPos.orange[1], '#ea580c', '#c2410c');
+  barDrawPawn(ctx, barPos.blue[0], barPos.blue[1], '#2563eb', '#0891b2');
+  barDrawPawn(ctx, barPos.orange[0], barPos.orange[1], '#f97316', '#ea580c');
   ctx.restore();
 }
 
@@ -1852,7 +1912,7 @@ function barDrawPawn(ctx, r, c, fill, stroke) {
   // white highlight
   ctx.beginPath();
   ctx.arc(cx - radius*0.25, cy - radius*0.25, radius*0.3, 0, Math.PI*2);
-  ctx.fillStyle = 'rgba(255,255,255,0.45)';
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
   ctx.fill();
 }
 
@@ -1886,11 +1946,21 @@ function barCanvasXYtoWall(px, py, orient) {
 
 function barGetEventPos(e) {
   const rect = barCanvas.getBoundingClientRect();
-  // Convert from CSS pixels to logical canvas coordinates (before DPR scale)
   const displayScale = barCanvas._displayScale || 1;
   const cssToLogical = 1 / displayScale;
-  const clientX = e.touches ? e.touches[0].clientX : (e.changedTouches ? e.changedTouches[0].clientX : e.clientX);
-  const clientY = e.touches ? e.touches[0].clientY : (e.changedTouches ? e.changedTouches[0].clientY : e.clientY);
+  // On touchend, e.touches is empty — must use changedTouches
+  // On touchmove/touchstart, use e.touches[0]
+  let clientX, clientY;
+  if (e.changedTouches && e.changedTouches.length > 0) {
+    clientX = e.changedTouches[0].clientX;
+    clientY = e.changedTouches[0].clientY;
+  } else if (e.touches && e.touches.length > 0) {
+    clientX = e.touches[0].clientX;
+    clientY = e.touches[0].clientY;
+  } else {
+    clientX = e.clientX;
+    clientY = e.clientY;
+  }
   return {
     px: (clientX - rect.left) * cssToLogical,
     py: (clientY - rect.top)  * cssToLogical
@@ -1919,6 +1989,8 @@ function barOnClick(e) {
 
 function barHandleInput(px, py) {
   if (barOver) return;
+  // Guard: ensure game is initialized
+  if (!barPos || !barPos.blue || !barPos.orange) return;
   if (barAction === 'move') {
     const {r, c} = barCanvasXYtoRC(px, py);
     if (r < 0 || r >= BAR_N || c < 0 || c >= BAR_N) return;
@@ -2047,7 +2119,8 @@ function barEval() {
 
 function barAiMove() {
   if (barOver || barTurn !== 'orange') return;
-  const hard = barMode === 'ai-hard';
+  const hard = barAiDifficulty === 'hard';
+  const medium = barAiDifficulty === 'medium';
 
   // Collect all possible moves
   const cur = [...barPos.orange], other = [...barPos.blue];
@@ -2068,7 +2141,7 @@ function barAiMove() {
   }
 
   // Evaluate wall placements (only in hard mode and if walls left)
-  if (hard && barWallsLeft.orange > 0) {
+  if ((hard || (medium && Math.random() > 0.5)) && barWallsLeft.orange > 0) {
     const orients = ['H', 'V'];
     // Try a sample of wall positions near blue player
     const [br, bc] = barPos.blue;
@@ -2103,6 +2176,7 @@ function barAiMove() {
 function goToBar() {
   document.getElementById('page-home').classList.remove('active');
   document.getElementById('page-bar').classList.add('active');
+  history.pushState({ screen: 'bar' }, '');
   // Two rAF frames: first lets the page render & get real dimensions,
   // second draws after canvas has actual layout size
   requestAnimationFrame(() => {
@@ -2147,9 +2221,10 @@ function barInitCanvas() {
     };
   }
   barCanvas.onclick     = barOnClick;
-  barCanvas.ontouchend  = (e) => { e.preventDefault(); barOnClick(e); }; // uses changedTouches
+  barCanvas.ontouchstart = (e) => { e.preventDefault(); }; // prevent ghost mouse clicks
+  barCanvas.ontouchend  = (e) => { e.preventDefault(); barOnClick(e); };
   barCanvas.onmousemove = barOnMouseMove;
-  barCanvas.ontouchmove = (e) => { e.preventDefault(); barOnMouseMove(e); };
+  barCanvas.ontouchmove = (e) => { e.preventDefault(); if (e.touches && e.touches.length > 0) barOnMouseMove(e); };
   barCanvas.onmouseleave = () => { barHover = null; barDraw(); };
 }
 
@@ -2191,13 +2266,14 @@ function switchTab(game, pane, btn) {
 // ══════════════════════════════════════
 let _pendingNewGame = null;
 function confirmNewGame(which) {
-  _pendingNewGame = which;
+  const map = { chess: newGame, ws: wsNewGame, bar: barNewGame, kt: ktNewGame, fp: fpNewGame };
+  _pendingNewGame = map[which] || null;
   document.getElementById('confirm-modal').classList.add('open');
 }
 
 function handleGameOverNewGame() {
-  // Determine which game is active
-  if (document.getElementById('page-kt').classList.contains('active')) ktNewGame();
+  if (document.getElementById('page-fp').classList.contains('active')) fpNewGame();
+  else if (document.getElementById('page-kt').classList.contains('active')) ktNewGame();
   else if (document.getElementById('page-ws').classList.contains('active')) wsNewGame();
   else if (document.getElementById('page-bar').classList.contains('active')) barNewGame();
   else newGame();
@@ -2208,10 +2284,7 @@ function closeConfirm() {
 }
 function doConfirmNewGame() {
   closeConfirm();
-  if (_pendingNewGame === 'chess') newGame();
-  else if (_pendingNewGame === 'ws')  wsNewGame();
-  else if (_pendingNewGame === 'bar') barNewGame();
-  else if (_pendingNewGame === 'kt')  ktNewGame();
+  if (typeof _pendingNewGame === 'function') _pendingNewGame();
 }
 
 // ══════════════════════════════════════
@@ -2283,7 +2356,7 @@ function updateBarTurnStrip(t, over) {
     if (pbB) pbB.classList.add('is-turn'); if (pbT) pbT.classList.remove('is-turn');
   } else {
     strip.className = 'turn-banner bar-orange';
-    dot.style.background = '#ea580c'; dot.style.borderColor = '#fdba74';
+    dot.style.background = '#f97316'; dot.style.borderColor = '#fdba74';
     txt.textContent = 'תור הכתום';
     if (pbT) pbT.classList.add('is-turn'); if (pbB) pbB.classList.remove('is-turn');
   }
@@ -2341,8 +2414,10 @@ function ktNewGame() {
   ktBoard = Array.from({length: ktSize}, () => Array(ktSize).fill(-1));
   ktPos = null; ktMoves = 0; ktHistory = []; ktOver = false; ktSeconds = 0;
   ktUpdateTimerDisplay();
-  ktRender();
-  ktUpdateStatus('בחר משבצת התחלה');
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    ktRender();
+    ktUpdateStatus('בחר משבצת התחלה');
+  }));
   ktUpdateMoveList();
   const undoBtn = document.getElementById('kt-btn-undo');
   const hintBtn = document.getElementById('kt-btn-hint');
@@ -2443,8 +2518,7 @@ function ktHint() {
 function ktRender(highlightHint) {
   const boardEl = document.getElementById('kt-board');
   if (!boardEl) return;
-  boardEl.style.gridTemplateColumns = `repeat(${ktSize}, 62px)`;
-  boardEl.innerHTML = '';
+  boardEl.innerHTML = ''; // size set dynamically at the bottom
 
   // Labels
   const rl = document.getElementById('kt-rank-labels');
@@ -2529,11 +2603,21 @@ function ktRender(highlightHint) {
   if (prog) prog.style.width = pct + '%';
   if (movesVal) movesVal.textContent = ktMoves;
 
-  // Update square size for smaller boards
-  const sqSize = ktSize === 5 ? 74 : ktSize === 6 ? 66 : 62;
+  // Compute square size — measure page-kt width (most reliable on mobile)
+  const pageEl = document.getElementById('page-kt');
+  const pageW = pageEl ? pageEl.clientWidth : window.innerWidth;
+  // subtract: game-main padding (20px×2) + rank-labels (22px) + board-wrap padding (16px)
+  const availW = pageW - 40 - 22 - 16;
+  const maxSqDefault = ktSize === 5 ? 80 : ktSize === 6 ? 72 : 62;
+  const sqSize = Math.max(28, Math.min(maxSqDefault, Math.floor(availW / ktSize)));
   boardEl.style.gridTemplateColumns = `repeat(${ktSize}, ${sqSize}px)`;
   boardEl.querySelectorAll('.kt-sq').forEach(sq => {
     sq.style.width = sq.style.height = sqSize + 'px';
+    // Scale piece and number font too
+    const piece = sq.querySelector('.kt-piece');
+    if (piece) piece.style.fontSize = Math.max(sqSize * 0.55, 18) + 'px';
+    const num = sq.querySelector('.kt-sq-num');
+    if (num) num.style.fontSize = Math.max(sqSize * 0.22, 9) + 'px';
   });
   if (rl) rl.querySelectorAll('.rank-label-item').forEach(d => d.style.height = sqSize+'px');
   if (fl) fl.querySelectorAll('.file-label-item').forEach(d => d.style.width = sqSize+'px');
@@ -2561,7 +2645,7 @@ function ktUpdateMoveList() {
   const el = document.getElementById('kt-move-list');
   if (!el) return;
   if (ktHistory.length === 0) {
-    el.innerHTML = '<div style="color:#94a3b8;font-size:0.82rem;">אין מהלכים עדיין</div>'; return;
+    el.innerHTML = '<div style="color:var(--text-muted);font-size:0.82rem;">אין מהלכים עדיין</div>'; return;
   }
   const items = ktHistory.map((p,i) =>
     `<div class="move-pair"><span class="move-num">${i+1}.</span><span class="move-token${i===ktHistory.length-1?' current':''}">${F[p.c]}${ktSize-p.r}</span></div>`
@@ -2634,13 +2718,523 @@ function ktSetSize(s) {
 function goToKT() {
   document.getElementById('page-home').classList.remove('active');
   document.getElementById('page-kt').classList.add('active');
-  requestAnimationFrame(() => {
+  history.pushState({ screen: 'kt' }, '');
+  requestAnimationFrame(() => requestAnimationFrame(() => {
     document.querySelectorAll('#page-kt .chess-pattern').forEach(drawChessPattern);
     ktNewGame();
-  });
+  }));
+}
+// Resize KT board when window resizes
+window.addEventListener('resize', () => {
+  if (document.getElementById('page-kt').classList.contains('active')) {
+    requestAnimationFrame(() => ktRender());
+  }
+});
+
+
+// ══════════════════════════════════════════════════════════
+//  SETTINGS CONTROLLERS
+// ══════════════════════════════════════════════════════════
+
+// ── Helper: show/hide difficulty panel ──
+function showDifficulty(prefix, show) {
+  const el = document.getElementById(prefix + '-difficulty');
+  if (!el) return;
+  if (show) el.classList.remove('hidden');
+  else      el.classList.add('hidden');
+}
+function setActivePill(prefix, group, val) {
+  document.querySelectorAll(`[id^="${prefix}-${group}-"]`).forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById(`${prefix}-${group}-${val}`);
+  if (btn) btn.classList.add('active');
 }
 
+// ══════════ CHESS ══════════
+let chessVs   = 'pvp';   // 'pvp' | 'ai'
+let chessDiff = 'easy';  // 'easy' | 'medium' | 'hard'
+
+function chessSetVs(v) {
+  chessVs = v;
+  setActivePill('chess', 'vs', v);
+  showDifficulty('chess', v === 'ai');
+  // Map to existing gameMode values
+  const m = v === 'pvp' ? 'pvp' : (chessDiff === 'hard' ? 'ai-hard' : 'ai-easy');
+  setMode(m);
+}
+function chessSetDiff(d) {
+  chessDiff = d;
+  setActivePill('chess', 'diff', d);
+  // Map: easy/medium → ai-easy, hard → ai-hard
+  const m = d === 'hard' ? 'ai-hard' : 'ai-easy';
+  setMode(m);
+}
+
+// ══════════ WOLF & SHEEP ══════════
+let wsVs   = 'pvp';   // 'pvp' | 'ai'
+let wsSide = 'wolf';  // 'wolf' | 'sheep'  (which side the HUMAN plays)
+let wsDiff = 'easy';  // 'easy' | 'medium' | 'hard'
+
+function wsSetVs(v) {
+  wsVs = v;
+  setActivePill('ws', 'vs', v);
+  showDifficulty('ws', v === 'ai');
+  if (v === 'pvp') wsSetMode('pvp');
+  else wsApplyAiMode();
+}
+function wsSetSide(s) {
+  wsSide = s;
+  setActivePill('ws', 'side', s);
+  wsApplyAiMode();
+}
+function wsSetDiff(d) {
+  wsDiff = d;
+  setActivePill('ws', 'diff', d);
+  wsApplyAiMode();
+}
+function wsApplyAiMode() {
+  // Human plays wsSide → AI plays the other side
+  // wsMode: 'ai-wolf' means computer IS the wolf, human IS the sheep
+  const aiSide = wsSide === 'wolf' ? 'sheep' : 'wolf'; // AI plays opposite
+  // Difficulty affects AI depth — pass via global wsAiDifficulty
+  wsAiDifficulty = wsDiff;
+  wsSetMode('ai-' + aiSide);
+}
+
+// ══════════ BARRICADE ══════════
+let barVs   = 'pvp';   // 'pvp' | 'ai'
+let barDiff = 'easy';  // 'easy' | 'medium' | 'hard'
+
+function barSetVs(v) {
+  barVs = v;
+  setActivePill('bar', 'vs', v);
+  showDifficulty('bar', v === 'ai');
+  if (v === 'pvp') barSetMode('pvp');
+  else barApplyAiMode();
+}
+function barSetDiff(d) {
+  barDiff = d;
+  setActivePill('bar', 'diff', d);
+  barApplyAiMode();
+}
+function barApplyAiMode() {
+  barAiDifficulty = barDiff;
+  const m = barDiff === 'hard' ? 'ai-hard' : 'ai-easy';
+  barSetMode(m);
+}
+
+
+// ════════════════════════════════════════════════════════
+//  FOUR PAWNS ENGINE
+//  4 cols (a-d) × 5 rows (1-5, row 5 = top)
+//  Pieces: WN=white knight, WR=white rook, WB=white bishop,
+//          WP=white pawn, BP=black pawn (target)
+//  ONLY white knight can capture black pawns
+// ════════════════════════════════════════════════════════
+
+// Board is fpBoard[row][col], row 0=row5(top), row 4=row1(bottom)
+let fpBoard      = [];
+let fpSelected   = null;   // {r,c} or null
+let fpCaptured   = 0;
+let fpMoves      = 0;
+let fpOver       = false;
+let fpDiff       = 'easy';  // easy | medium | hard
+let fpHistory    = [];      // [{board, sel, captured, moves}]
+let fpMoveLog    = [];      // strings for history tab
+let fpBest       = null;    // best move count
+
+// ── Initial board layout ──
+// Row 0 (top):    BP BP BP BP   — 4 black pawns
+// Row 1:          XX XX XX XX   — blocked row (no piece can land here)
+// Row 2:          WB WB WB WB   — 4 bishops (רצים)
+// Row 3:          WR WR WR WR   — 4 rooks (צריחים)
+// Row 4:          WP WP WP XX   — 3 white pawns + 1 blocked
+// Row 5 (bottom): WN XX XX XX   — 1 knight + 3 blocked
+const FP_INIT = [
+  ['BP','BP','BP','BP'],
+  ['XX','XX','XX','XX'],
+  ['WB','WB','WB','WB'],
+  ['WR','WR','WR','WR'],
+  [null,'WP','WP','WP'],
+  ['WN','XX','XX','XX'],
+];
+
+const FP_PIECE_GLYPH = {
+  WN:'♞', WR:'♜', WB:'♝', WP:'♟', BP:'♟'
+};
+
+function fpNewGame() {
+  fpBoard    = FP_INIT.map(row => [...row]);
+  fpSelected = null;
+  fpCaptured = 0;
+  fpMoves    = 0;
+  fpOver     = false;
+  fpHistory  = [];
+  fpMoveLog  = [];
+  fpRender();
+  fpUpdateUI();
+  fpUpdateMoveList();
+}
+
+function fpReset() {
+  // Reset to initial position, keep score
+  fpNewGame();
+}
+
+// ── Piece movement rules ──
+function fpGetMoves(board, r, c) {
+  const piece = board[r][c];
+  if (!piece || piece[0] !== 'W') return [];
+  const type = piece[1];
+  const moves = [];
+  const ROWS = 6, COLS = 4;
+  const isWhite   = p => p && p[0] === 'W';
+  const isBlack   = p => p && p[0] === 'B';
+  const isBlocked = p => p === 'XX';
+  const inBounds  = (r,c) => r>=0 && r<ROWS && c>=0 && c<COLS;
+  const canLand   = (nr,nc,tp) => {
+    if (!inBounds(nr,nc)) return false;
+    const t = board[nr][nc];
+    if (isBlocked(t)) return false;        // can never land on blocked square
+    if (!t) return true;                    // empty — ok
+    if (isWhite(t)) return false;           // own piece
+    if (isBlack(t)) return tp === 'N';     // only knight captures black
+    return false;
+  };
+  // For sliding pieces: XX acts as a wall — stops sliding and can't be captured
+  const blocksSlide = t => t && (isWhite(t) || isBlocked(t));
+
+  if (type === 'N') { // Knight — L-shape, jumps over everything
+    [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]]
+      .forEach(([dr,dc]) => { if (canLand(r+dr,c+dc,'N')) moves.push([r+dr,c+dc]); });
+  } else if (type === 'R') { // Rook — straight lines, blocked by any piece or XX
+    [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dr,dc]) => {
+      let nr=r+dr, nc=c+dc;
+      while (inBounds(nr,nc)) {
+        const t = board[nr][nc];
+        if (blocksSlide(t)) break;         // wall — stop
+        moves.push([nr,nc]);
+        nr+=dr; nc+=dc;
+      }
+    });
+  } else if (type === 'B') { // Bishop — diagonals, blocked by any piece or XX
+    [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dr,dc]) => {
+      let nr=r+dr, nc=c+dc;
+      while (inBounds(nr,nc)) {
+        const t = board[nr][nc];
+        if (blocksSlide(t)) break;
+        moves.push([nr,nc]);
+        nr+=dr; nc+=dc;
+      }
+    });
+  } else if (type === 'P') { // White pawn — moves up (row decreases)
+    if (inBounds(r-1,c) && !board[r-1][c]) moves.push([r-1,c]);
+  }
+  return moves;
+}
+
+function fpClickSquare(r, c) {
+  if (fpOver) return;
+  const piece = fpBoard[r][c];
+
+  // If a white piece is selected
+  if (fpSelected) {
+    const {r: sr, c: sc} = fpSelected;
+    const legalMoves = fpGetMoves(fpBoard, sr, sc);
+    const isLegal = legalMoves.some(([mr,mc]) => mr===r && mc===c);
+
+    if (isLegal) {
+      // Execute move
+      fpDoMove(sr, sc, r, c);
+      return;
+    }
+    // Clicked another white piece — switch selection
+    if (piece && piece[0] === 'W') {
+      fpSelected = {r, c};
+      fpRender();
+      return;
+    }
+    // Clicked elsewhere — deselect
+    fpSelected = null;
+    fpRender();
+    return;
+  }
+
+  // No selection — select white piece
+  if (piece && piece[0] === 'W') {
+    fpSelected = {r, c};
+    fpRender();
+  }
+}
+
+function fpDoMove(fr, fc, tr, tc) {
+  // Save state for undo
+  fpHistory.push({
+    board: fpBoard.map(r=>[...r]),
+    captured: fpCaptured,
+    moves: fpMoves,
+    log: [...fpMoveLog],
+  });
+
+  const movingPiece = fpBoard[fr][fc];
+  const targetPiece = fpBoard[tr][tc];
+  const isCapture   = targetPiece === 'BP';
+
+  fpBoard[tr][tc] = movingPiece;
+  fpBoard[fr][fc] = null;
+  fpSelected = null;
+
+  const colNames = ['a','b','c','d'];
+  const rowNum = r => 6 - r;
+  const pieceName = {WN:'♞',WR:'♜',WB:'♝',WP:'♟'}[movingPiece] || movingPiece;
+  const moveStr = `${pieceName} ${colNames[fc]}${rowNum(fr)}→${colNames[tc]}${rowNum(tr)}${isCapture ? ' ✓' : ''}`;
+  fpMoveLog.push(moveStr);
+
+  fpMoves++;
+  if (isCapture) {
+    fpCaptured++;
+    fpCheckWin();
+  } else {
+    fpRender();
+    fpUpdateUI();
+    fpUpdateMoveList();
+  }
+  // Hard mode: check move limit
+  if (fpDiff === 'hard' && fpMoves >= 25 && !fpOver) {
+    fpOver = true;
+    fpSetBanner('נגמרו המהלכים! (25/25)', 'kt-fail');
+    document.getElementById('fp-status').textContent = '❌ נגמרו המהלכים';
+    setTimeout(() => showGameOverFP(false), 500);
+  } else {
+    fpRender();
+    fpUpdateUI();
+    fpUpdateMoveList();
+  }
+}
+
+function fpCheckWin() {
+  if (fpCaptured < 4) return;
+  fpOver = true;
+  if (!fpBest || fpMoves < fpBest) {
+    fpBest = fpMoves;
+    document.getElementById('fp-best-score').textContent = `🏆 ${fpBest} מהלכים`;
+  }
+  fpSetBanner('🎉 כל הרגלים נלכדו!', 'kt-done');
+  setTimeout(() => showGameOverFP(true), 400);
+}
+
+function showGameOverFP(won) {
+  const el = document.getElementById('game-over');
+  document.getElementById('go-icon').textContent = won ? '🎯' : '💀';
+  document.getElementById('go-title').textContent = won ? 'כל הרגלים נלכדו!' : 'נגמרו המהלכים';
+  document.getElementById('go-desc').textContent  = won
+    ? `ניצחת ב-${fpMoves} מהלכים!`
+    : 'נסה שוב עם פחות מהלכים';
+  el.classList.add('open');
+  window._pendingNewGame = () => { fpNewGame(); };
+}
+
+function fpUndo() {
+  if (!fpHistory.length) return;
+  const state = fpHistory.pop();
+  fpBoard    = state.board;
+  fpCaptured = state.captured;
+  fpMoves    = state.moves;
+  fpMoveLog  = state.log;
+  fpSelected = null;
+  fpOver     = false;
+  fpRender();
+  fpUpdateUI();
+  fpUpdateMoveList();
+}
+
+function fpSetDiff(d) {
+  fpDiff = d;
+  document.querySelectorAll('[id^="fp-diff-"]').forEach(b=>b.classList.remove('active'));
+  document.getElementById('fp-diff-'+d).classList.add('active');
+  fpNewGame();
+}
+
+// ── Render ──
+function fpRender() {
+  const boardEl = document.getElementById('fp-board');
+  if (!boardEl) return;
+
+  const selectedMoves = fpSelected
+    ? fpGetMoves(fpBoard, fpSelected.r, fpSelected.c) : [];
+
+  // Knight position for easy mode hint
+  let knightPos = null;
+  if (fpDiff === 'easy') {
+    for (let r=0;r<6;r++) for (let c=0;c<4;c++) {
+      if (fpBoard[r][c]==='WN') { knightPos={r,c}; break; }
+    }
+  }
+  const knightMoves = (knightPos && fpDiff==='easy')
+    ? fpGetMoves(fpBoard, knightPos.r, knightPos.c) : [];
+
+  boardEl.innerHTML = '';
+  boardEl.style.gridTemplateColumns = 'repeat(4, var(--fp-sq-size, 72px))';
+
+  const pageFP = document.getElementById('page-fp');
+  const pageW = pageFP ? pageFP.clientWidth : 0;
+  const boardSection = pageFP ? pageFP.querySelector('.board-section') : null;
+  const availW = boardSection ? boardSection.clientWidth - 60 : (pageW > 0 ? pageW - 60 : 320);
+  const sz = Math.max(52, Math.min(72, Math.floor(availW / 4)));
+  boardEl.style.setProperty('--fp-sq-size', sz + 'px');
+  boardEl.style.gridTemplateColumns = `repeat(4, ${sz}px)`;
+
+  // Update rank label heights
+  document.querySelectorAll('.fp-rank-label').forEach(el => { el.style.height = sz + 'px'; });
+  document.querySelectorAll('.fp-file-label').forEach(el => { el.style.width = sz + 'px'; });
+
+  for (let r=0;r<6;r++) {
+    for (let c=0;c<4;c++) {
+      const sq = document.createElement('div');
+      const piece = fpBoard[r][c];
+      const isXX = piece === 'XX';
+
+      if (isXX) {
+        sq.className = 'fp-sq blocked';
+        sq.style.width = sq.style.height = sz + 'px';
+        boardEl.appendChild(sq);
+        continue;
+      }
+
+      const isLight = (r+c)%2===0;
+      sq.className = 'fp-sq ' + (isLight ? 'light' : 'dark');
+      sq.style.width = sq.style.height = sz + 'px';
+
+      const isSelected  = fpSelected && fpSelected.r===r && fpSelected.c===c;
+      const isMovable   = selectedMoves.some(([mr,mc])=>mr===r&&mc===c);
+      const isCapture   = isMovable && piece==='BP';
+      const isKnightHint= !fpSelected && knightMoves.some(([mr,mc])=>mr===r&&mc===c);
+
+      if (isSelected) sq.classList.add('selected');
+      else if (isCapture) sq.classList.add('capturable');
+      else if (isMovable) sq.classList.add('movable');
+      else if (isKnightHint && piece==='BP') sq.classList.add('capturable');
+
+      sq.onclick = () => fpClickSquare(r,c);
+
+      if (piece) {
+        const pEl = document.createElement('span');
+        pEl.className = 'fp-piece';
+        pEl.style.fontSize = Math.round(sz * 0.6) + 'px';
+        pEl.textContent = FP_PIECE_GLYPH[piece];
+        if (piece === 'BP') {
+          pEl.style.color = '#111';
+          pEl.style.textShadow = '0 1px 2px rgba(255,255,255,0.2)';
+        } else {
+          pEl.style.color = '#f8f8ff';
+          pEl.style.textShadow = '0 0 2px #000, 0 1px 4px rgba(0,0,0,0.9), 1px 1px 0 #333';
+        }
+        // Highlight knight in easy mode
+        if (piece==='WN' && fpDiff==='easy') {
+          pEl.style.filter = 'drop-shadow(0 0 6px rgba(34,211,238,0.9))';
+        }
+        sq.appendChild(pEl);
+      } else if (isMovable && !isCapture) {
+        const dot = document.createElement('div');
+        dot.className = 'fp-dot';
+        dot.style.width = dot.style.height = Math.round(sz*0.3)+'px';
+        sq.appendChild(dot);
+      }
+
+      boardEl.appendChild(sq);
+    }
+  }
+}
+
+function fpUpdateUI() {
+  const capEl = document.getElementById('fp-captured-val');
+  const movEl = document.getElementById('fp-moves-val');
+  const prog  = document.getElementById('fp-progress');
+  const stEl  = document.getElementById('fp-status');
+  const capDisp = document.getElementById('fp-captured-display');
+  if (capEl) capEl.textContent = fpCaptured;
+  if (movEl) movEl.textContent = fpMoves;
+  if (prog)  prog.style.width = (fpCaptured/4*100)+'%';
+  // Captured display
+  const captured = '♟'.repeat(fpCaptured) + '♙'.repeat(4-fpCaptured);
+  if (capDisp) capDisp.innerHTML = captured.split('').map((c,i)=>
+    `<span style="color:${i<fpCaptured?'var(--cyan)':'var(--text-muted)'}">${c}</span>`
+  ).join('');
+  // Move limit warning in hard mode
+  if (fpDiff==='hard' && !fpOver) {
+    const rem = 25 - fpMoves;
+    if (stEl) stEl.textContent = rem <= 5 ? `⚠️ נותרו ${rem} מהלכים!` : `נותרו ${rem} מהלכים`;
+    fpSetBanner(rem <= 5 ? `⚠️ נותרו ${rem} מהלכים` : `בחר כלי לבן`,
+      rem<=3 ? 'wolf' : 'bar-blue');
+  } else if (!fpOver) {
+    if (stEl) stEl.textContent = fpSelected ? 'בחר יעד' : 'בחר כלי לבן להזזה';
+    fpSetBanner(fpSelected ? 'בחר יעד' : 'בחר כלי לבן', 'bar-blue');
+  }
+  // Undo button
+  const undoBtn = document.getElementById('fp-undo-btn');
+  if (undoBtn) undoBtn.disabled = fpHistory.length === 0;
+}
+
+function fpSetBanner(text, cls) {
+  const b = document.getElementById('fp-turn-banner');
+  if (!b) return;
+  b.className = 'turn-banner ' + cls;
+  b.style.margin = '8px 16px 4px';
+  document.getElementById('fp-tb-text').textContent = text;
+}
+
+function fpUpdateMoveList() {
+  const el = document.getElementById('fp-move-list');
+  if (!el) return;
+  if (!fpMoveLog.length) {
+    el.innerHTML = '<div style="color:var(--text-muted);font-size:0.82rem;">אין מהלכים עדיין</div>';
+    return;
+  }
+  el.innerHTML = fpMoveLog.slice().reverse().map((m,i)=>
+    `<div style="display:flex;gap:8px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.79rem;">
+      <span style="color:var(--text-muted);min-width:22px;font-weight:600">${fpMoveLog.length-i}.</span>
+      <span style="color:var(--text-dim)">${m}</span>
+    </div>`
+  ).join('');
+}
+
+function goToFP() {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-fp').classList.add('active');
+  history.pushState({ screen: 'fp' }, '');
+  // Double rAF ensures layout is settled before measuring board dimensions
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    drawAllPatterns();
+    fpNewGame();
+    // Force re-render after layout settles so board size calculation is correct
+    setTimeout(() => fpRender(), 50);
+  }));
+}
+
+
+// ── Rotating tagline (random on each page load) ──
+const CHESSBITS_TAGLINES = [
+  "Small Board. Big Brain.",
+  "Mini Games. Maximum Strategy.",
+  "Tiny Boards. Endless Tactics."
+];
+(function() {
+  const el = document.getElementById('home-tagline');
+  if (el) el.textContent = CHESSBITS_TAGLINES[Math.floor(Math.random() * CHESSBITS_TAGLINES.length)];
+})();
+
 document.addEventListener('DOMContentLoaded', function() {
+  // Push initial home state so back button returns here instead of leaving the site
+  history.replaceState({ screen: 'home' }, '');
+
+  // Handle browser back/forward button
+  window.addEventListener('popstate', function(e) {
+    if (!e.state || e.state.screen === 'home') {
+      goHome();
+    }
+  });
+  // Set tagline (fallback for if IIFE ran before element existed)
+  const tEl = document.getElementById('home-tagline');
+  if (tEl && !tEl.textContent) tEl.textContent = CHESSBITS_TAGLINES[Math.floor(Math.random() * CHESSBITS_TAGLINES.length)];
   var card = document.getElementById('home-card-chess');
   var btn  = document.getElementById('btn-go-game');
   if (card) card.addEventListener('click', goToGame);
@@ -2661,6 +3255,11 @@ document.addEventListener('DOMContentLoaded', function() {
   if (ktCard) ktCard.addEventListener('click', goToKT);
   if (ktBtn)  ktBtn.addEventListener('click', function(e){ e.stopPropagation(); goToKT(); });
 
+  var fpCard = document.getElementById('home-card-fp');
+  var fpBtn  = document.getElementById('btn-go-fp');
+  if (fpCard) fpCard.addEventListener('click', goToFP);
+  if (fpBtn)  fpBtn.addEventListener('click', function(e){ e.stopPropagation(); goToFP(); });
+
   drawAllPatterns();
 });
 </script>
@@ -2668,11 +3267,11 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- ════════════ WOLF & SHEEP PAGE ════════════ -->
 <div id="page-ws" class="page">
   <header>
-    <svg class="chess-pattern" id="ws-hdr-svg" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"></svg>
-    <h1>🐺 זאב וכבשים</h1>
+    <h1>♞ ChessBits</h1>
   </header>
-  <div style="background:#fff;border-bottom:1px solid #f1f5f9;padding:10px 20px;">
-    <button onclick="goHome()" style="background:none;border:none;cursor:pointer;color:#94a3b8;font-family:inherit;font-size:0.85rem;font-weight:600;display:flex;align-items:center;gap:6px;padding:4px 0;transition:color 0.15s;" onmouseover="this.style.color='#1a2035'" onmouseout="this.style.color='#94a3b8'">← חזרה לדף הבית</button>
+  <div class="nav-back-bar">
+    <button onclick="goHome()" style="background:none;border:none;cursor:pointer;color:var(--text-dim);font-family:inherit;font-size:0.85rem;font-weight:600;display:flex;align-items:center;gap:6px;padding:4px 0;transition:color 0.15s;" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color='#94a3b8'">← חזרה לדף הבית</button>
+    <span class="nav-game-title">🐺 זאב וכבשים</span>
   </div>
 
   <div class="game-main">
@@ -2728,26 +3327,40 @@ document.addEventListener('DOMContentLoaded', function() {
           <button class="tab-btn" onclick="switchTab('ws','history',this)">📜 היסטוריה</button>
         </div>
         <div id="ws-tab-game" class="tab-pane active">
-          <div id="ws-status" style="font-size:0.92rem;font-weight:600;color:#1a2035">תור הזאב</div>
+          <div id="ws-status" style="font-size:0.92rem;font-weight:600;color:var(--text)">תור הזאב</div>
         </div>
         <div id="ws-tab-settings" class="tab-pane">
-          <div style="font-size:0.75rem;font-weight:700;color:#b0bec5;margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">מצב משחק</div>
-          <div class="mode-pills">
-            <button class="mode-pill active" id="ws-mode-pvp" onclick="wsSetMode('pvp')">👥 שני שחקנים</button>
-            <button class="mode-pill" id="ws-mode-ai-wolf" onclick="wsSetMode('ai-wolf')">🤖 מחשב=זאב</button>
-            <button class="mode-pill" id="ws-mode-ai-sheep" onclick="wsSetMode('ai-sheep')">🤖 מחשב=כבשים</button>
+          <div class="settings-section">
+            <div class="settings-label">מצב משחק</div>
+            <div class="mode-pills">
+              <button class="mode-pill active" id="ws-vs-pvp" onclick="wsSetVs('pvp')">👥 שני שחקנים</button>
+              <button class="mode-pill" id="ws-vs-ai" onclick="wsSetVs('ai')">🤖 נגד מחשב</button>
+            </div>
+          </div>
+          <div class="settings-difficulty hidden" id="ws-difficulty">
+            <div class="settings-label">אני משחק בתור</div>
+            <div class="mode-pills" style="margin-bottom:8px">
+              <button class="mode-pill active" id="ws-side-wolf" onclick="wsSetSide('wolf')">🐺 זאב</button>
+              <button class="mode-pill" id="ws-side-sheep" onclick="wsSetSide('sheep')">🐑 כבשים</button>
+            </div>
+            <div class="settings-label" style="margin-top:8px">רמת קושי</div>
+            <div class="mode-pills">
+              <button class="mode-pill active" id="ws-diff-easy" onclick="wsSetDiff('easy')">קל</button>
+              <button class="mode-pill" id="ws-diff-medium" onclick="wsSetDiff('medium')">בינוני</button>
+              <button class="mode-pill" id="ws-diff-hard" onclick="wsSetDiff('hard')">קשה</button>
+            </div>
           </div>
         </div>
         <div id="ws-tab-history" class="tab-pane" style="padding:10px 12px">
-          <div id="ws-move-list"><div style="color:#94a3b8;font-size:0.82rem;">אין מהלכים עדיין</div></div>
+          <div id="ws-move-list"><div style="color:var(--text-muted);font-size:0.82rem;">אין מהלכים עדיין</div></div>
         </div>
       </div>
 
       <!-- Rules card — always visible below tabs -->
       <div class="side-tabs-card" style="margin-top:12px">
         <div style="padding:14px 16px">
-          <div style="font-size:0.75rem;font-weight:700;color:#b0bec5;margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em">כללי המשחק</div>
-          <div style="font-size:0.82rem;color:#475569;line-height:1.8">
+          <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.07em">כללי המשחק</div>
+          <div style="font-size:0.82rem;color:var(--text-dim);line-height:1.8">
             <p>🐺 <b>זאב</b> — זז אלכסונית לכל כיוון</p>
             <p>🐑 <b>כבשים</b> — זזות מטה בלבד</p>
             <p style="margin-top:6px">🏆 זאב מנצח בהגעה לשורה 1</p>
@@ -2759,19 +3372,18 @@ document.addEventListener('DOMContentLoaded', function() {
   </div>
 
   <footer>
-    <svg class="chess-pattern" id="ws-ftr-svg" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"></svg>
-    <span>Loteman Games © 2026</span>
+    <span>ChessBits © 2026</span>
   </footer>
 </div>
 
 <!-- ════════════ BARRICADE PAGE ════════════ -->
 <div id="page-bar" class="page">
   <header>
-    <svg class="chess-pattern" id="bar-hdr-svg" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"></svg>
-    <h1>🚧 חסימת שערים</h1>
+    <h1>♞ ChessBits</h1>
   </header>
-  <div style="background:#fff;border-bottom:1px solid #f1f5f9;padding:10px 20px;">
-    <button onclick="goHome()" style="background:none;border:none;cursor:pointer;color:#94a3b8;font-family:inherit;font-size:0.85rem;font-weight:600;display:flex;align-items:center;gap:6px;padding:4px 0;transition:color 0.15s;" onmouseover="this.style.color='#1a2035'" onmouseout="this.style.color='#94a3b8'">← חזרה לדף הבית</button>
+  <div class="nav-back-bar">
+    <button onclick="goHome()" style="background:none;border:none;cursor:pointer;color:var(--text-dim);font-family:inherit;font-size:0.85rem;font-weight:600;display:flex;align-items:center;gap:6px;padding:4px 0;transition:color 0.15s;" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color='#94a3b8'">← חזרה לדף הבית</button>
+    <span class="nav-game-title">🚧 חסימת שערים</span>
   </div>
 
   <div class="game-main">
@@ -2784,7 +3396,7 @@ document.addEventListener('DOMContentLoaded', function() {
           <div class="player-name">כתום <span class="turn-indicator" id="bar-turn-orange"></span></div>
           <div class="player-side">מטרה: שורה תחתונה</div>
         </div>
-        <span class="bar-wall-badge" style="background:rgba(234,88,12,0.1);color:#c2410c" id="bar-walls-orange">🚧 10</span>
+        <span class="bar-wall-badge" style="background:rgba(251,146,60,0.1);color:#fdba74" id="bar-walls-orange">🚧 10</span>
       </div>
 
       <!-- Turn banner (matches chess/ws style) -->
@@ -2805,7 +3417,7 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
 
       <!-- Board canvas -->
-      <div style="padding:12px;background:#fff;display:flex;justify-content:center;align-items:center;">
+      <div style="padding:12px;background:var(--surface);display:flex;justify-content:center;align-items:center;">
         <canvas id="bar-canvas" style="touch-action:none;cursor:pointer;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.1)"></canvas>
       </div>
 
@@ -2816,7 +3428,7 @@ document.addEventListener('DOMContentLoaded', function() {
           <div class="player-name">כחול <span class="turn-indicator" id="bar-turn-blue"></span></div>
           <div class="player-side">מטרה: שורה עליונה</div>
         </div>
-        <span class="bar-wall-badge" style="background:rgba(37,99,235,0.1);color:#1d4ed8" id="bar-walls-blue">🚧 10</span>
+        <span class="bar-wall-badge" style="background:rgba(34,211,238,0.1);color:var(--cyan-l)" id="bar-walls-blue">🚧 10</span>
       </div>
 
       <!-- Board actions -->
@@ -2835,30 +3447,39 @@ document.addEventListener('DOMContentLoaded', function() {
           <button class="tab-btn" onclick="switchTab('bar','history',this)">📜 היסטוריה</button>
         </div>
         <div id="bar-tab-game" class="tab-pane active">
-          <div id="bar-status" style="font-size:0.92rem;font-weight:600;color:#1a2035">תור הכחול</div>
+          <div id="bar-status" style="font-size:0.92rem;font-weight:600;color:var(--text)">תור הכחול</div>
         </div>
         <div id="bar-tab-settings" class="tab-pane">
-          <div style="font-size:0.75rem;font-weight:700;color:#b0bec5;margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">מצב משחק</div>
-          <div class="mode-pills" style="flex-wrap:wrap">
-            <button class="mode-pill active" id="bar-mode-pvp" onclick="barSetMode('pvp')">👥 שני שחקנים</button>
-            <button class="mode-pill" id="bar-mode-ai-easy" onclick="barSetMode('ai-easy')">🤖 קל</button>
-            <button class="mode-pill" id="bar-mode-ai-hard" onclick="barSetMode('ai-hard')">🤖 קשה</button>
+          <div class="settings-section">
+            <div class="settings-label">מצב משחק</div>
+            <div class="mode-pills">
+              <button class="mode-pill active" id="bar-vs-pvp" onclick="barSetVs('pvp')">👥 שני שחקנים</button>
+              <button class="mode-pill" id="bar-vs-ai" onclick="barSetVs('ai')">🤖 נגד מחשב</button>
+            </div>
+          </div>
+          <div class="settings-difficulty hidden" id="bar-difficulty">
+            <div class="settings-label">רמת קושי</div>
+            <div class="mode-pills">
+              <button class="mode-pill active" id="bar-diff-easy" onclick="barSetDiff('easy')">קל</button>
+              <button class="mode-pill" id="bar-diff-medium" onclick="barSetDiff('medium')">בינוני</button>
+              <button class="mode-pill" id="bar-diff-hard" onclick="barSetDiff('hard')">קשה</button>
+            </div>
           </div>
         </div>
         <div id="bar-tab-history" class="tab-pane" style="padding:10px 12px">
-          <div id="bar-move-list"><div style="color:#94a3b8;font-size:0.82rem;">אין מהלכים עדיין</div></div>
+          <div id="bar-move-list"><div style="color:var(--text-muted);font-size:0.82rem;">אין מהלכים עדיין</div></div>
         </div>
       </div>
 
       <!-- Rules card — always visible below tabs -->
       <div class="side-tabs-card" style="margin-top:12px">
         <div style="padding:14px 16px">
-          <div style="font-size:0.75rem;font-weight:700;color:#b0bec5;margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em">כללי המשחק</div>
-          <div style="font-size:0.82rem;color:#475569;line-height:1.8">
+          <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.07em">כללי המשחק</div>
+          <div style="font-size:0.82rem;color:var(--text-dim);line-height:1.8">
             <p>🚶 <b>זוז</b> — צעד אחד בכל כיוון</p>
             <p>🚧 <b>חומה</b> — 10 לכל שחקן</p>
             <p>🏆 <b>ניצחון</b> — הגע לשורת היריב</p>
-            <p style="margin-top:6px;padding:8px;background:#f8f9fb;border-radius:8px;color:#94a3b8;font-size:0.75rem;line-height:1.5">חומה לא יכולה לחסום לחלוטין את הדרך!</p>
+            <p style="margin-top:6px;padding:8px;background:rgba(255,255,255,0.04);border-radius:8px;color:var(--text-muted);font-size:0.75rem;line-height:1.5">חומה לא יכולה לחסום לחלוטין את הדרך!</p>
           </div>
         </div>
       </div>
@@ -2866,8 +3487,7 @@ document.addEventListener('DOMContentLoaded', function() {
   </div>
 
   <footer>
-    <svg class="chess-pattern" id="bar-ftr-svg" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"></svg>
-    <span>Loteman Games © 2026</span>
+    <span>ChessBits © 2026</span>
   </footer>
 </div>
 
@@ -2890,11 +3510,11 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- ════════════ KNIGHT TOUR PAGE ════════════ -->
 <div id="page-kt" class="page">
   <header>
-    <svg class="chess-pattern" id="kt-hdr-svg" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"></svg>
-    <h1>♞ מסע הפרש</h1>
+    <h1>♞ ChessBits</h1>
   </header>
-  <div style="background:#fff;border-bottom:1px solid #f1f5f9;padding:10px 20px;">
-    <button onclick="goHome()" style="background:none;border:none;cursor:pointer;color:#94a3b8;font-family:inherit;font-size:0.85rem;font-weight:600;display:flex;align-items:center;gap:6px;padding:4px 0;transition:color 0.15s;" onmouseover="this.style.color='#1a2035'" onmouseout="this.style.color='#94a3b8'">← חזרה לדף הבית</button>
+  <div class="nav-back-bar">
+    <button onclick="goHome()" style="background:none;border:none;cursor:pointer;color:var(--text-dim);font-family:inherit;font-size:0.85rem;font-weight:600;display:flex;align-items:center;gap:6px;padding:4px 0;transition:color 0.15s;" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color='#94a3b8'">← חזרה לדף הבית</button>
+    <span class="nav-game-title">♞ מסע הפרש</span>
   </div>
 
   <div class="game-main">
@@ -2941,46 +3561,48 @@ document.addEventListener('DOMContentLoaded', function() {
           <button class="tab-btn" onclick="switchTab('kt','history',this)">📜 היסטוריה</button>
         </div>
         <div id="kt-tab-game" class="tab-pane active">
-          <div id="kt-status" style="font-size:0.92rem;font-weight:600;color:#1a2035;margin-bottom:12px">בחר משבצת התחלה</div>
-          <div style="font-size:0.75rem;font-weight:700;color:#b0bec5;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">תוצאה אישית</div>
-          <div id="kt-best-score" style="font-size:0.85rem;color:#475569">אין עדיין</div>
-          <div style="font-size:0.75rem;font-weight:700;color:#b0bec5;margin-top:12px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">שיטות עזר</div>
-          <div style="font-size:0.8rem;color:#475569;line-height:1.7">
-            <span style="display:inline-flex;align-items:center;gap:4px;margin-left:8px"><span style="width:12px;height:12px;border-radius:2px;background:#c8e6c9;display:inline-block;border:1px solid #a5d6a7"></span>ביקרת</span>
+          <div id="kt-status" style="font-size:0.92rem;font-weight:600;color:var(--text);margin-bottom:12px">בחר משבצת התחלה</div>
+          <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em">תוצאה אישית</div>
+          <div id="kt-best-score" style="font-size:0.85rem;color:var(--text-dim)">אין עדיין</div>
+          <div style="font-size:0.75rem;font-weight:700;color:var(--text-muted);margin-top:12px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">שיטות עזר</div>
+          <div style="font-size:0.8rem;color:var(--text-dim);line-height:1.7">
+            <span style="display:inline-flex;align-items:center;gap:4px;margin-left:8px"><span style="width:12px;height:12px;border-radius:2px;background:rgba(34,211,238,0.25);display:inline-block;border:1px solid rgba(34,211,238,0.4)"></span>ביקרת</span>
             <span style="display:inline-flex;align-items:center;gap:4px;margin-left:8px"><span style="width:12px;height:12px;border-radius:2px;background:rgba(124,58,237,0.28);display:inline-block"></span>מהלך אפשרי</span>
             <span style="display:inline-flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:rgba(220,38,38,0.18);display:inline-block"></span>ללא מוצא</span>
           </div>
         </div>
         <div id="kt-tab-settings" class="tab-pane">
-          <div style="font-size:0.75rem;font-weight:700;color:#b0bec5;margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">מצב משחק</div>
-          <div class="mode-pills" style="flex-wrap:wrap">
-            <button class="mode-pill active" id="kt-mode-free" onclick="ktSetMode('free')">🆓 חופשי</button>
-            <button class="mode-pill" id="kt-mode-timed" onclick="ktSetMode('timed')">⏱ מתוזמן</button>
+          <div class="settings-section">
+            <div class="settings-label">מצב משחק</div>
+            <div class="mode-pills">
+              <button class="mode-pill active" id="kt-mode-free" onclick="ktSetMode('free')">🆓 חופשי</button>
+              <button class="mode-pill" id="kt-mode-timed" onclick="ktSetMode('timed')">⏱ מתוזמן</button>
+            </div>
           </div>
-          <div style="font-size:0.75rem;font-weight:700;color:#b0bec5;margin-top:14px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">גודל לוח</div>
-          <div class="mode-pills" style="flex-wrap:wrap">
-            <button class="mode-pill" id="kt-size-5" onclick="ktSetSize(5)">5×5</button>
-            <button class="mode-pill" id="kt-size-6" onclick="ktSetSize(6)">6×6</button>
-            <button class="mode-pill active" id="kt-size-8" onclick="ktSetSize(8)">8×8</button>
-          </div>
-          <div style="font-size:0.75rem;color:#94a3b8;margin-top:10px;line-height:1.5">
-            💡 5×5 מומלץ למתחילים
+          <div class="settings-section">
+            <div class="settings-label">גודל לוח</div>
+            <div class="mode-pills">
+              <button class="mode-pill" id="kt-size-5" onclick="ktSetSize(5)">5×5</button>
+              <button class="mode-pill" id="kt-size-6" onclick="ktSetSize(6)">6×6</button>
+              <button class="mode-pill active" id="kt-size-8" onclick="ktSetSize(8)">8×8</button>
+            </div>
+            <div style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;line-height:1.5">💡 5×5 מומלץ למתחילים</div>
           </div>
         </div>
         <div id="kt-tab-history" class="tab-pane" style="padding:10px 12px">
-          <div id="kt-move-list"><div style="color:#94a3b8;font-size:0.82rem;">אין מהלכים עדיין</div></div>
+          <div id="kt-move-list"><div style="color:var(--text-muted);font-size:0.82rem;">אין מהלכים עדיין</div></div>
         </div>
       </div>
 
       <!-- Rules card -->
       <div class="side-tabs-card" style="margin-top:12px">
         <div style="padding:14px 16px">
-          <div style="font-size:0.75rem;font-weight:700;color:#b0bec5;margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em">כללי המשחק</div>
-          <div style="font-size:0.82rem;color:#475569;line-height:1.8">
+          <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.07em">כללי המשחק</div>
+          <div style="font-size:0.82rem;color:var(--text-dim);line-height:1.8">
             <p>♞ <b>הפרש</b> זז בצורת L: 2+1 משבצות</p>
             <p>✅ <b>מטרה</b> — בקר בכל 64 המשבצות</p>
             <p>🔄 <b>סגור</b> — חזור להתחלה בסוף</p>
-            <p style="margin-top:6px;padding:8px;background:#f8f9fb;border-radius:8px;color:#94a3b8;font-size:0.75rem;line-height:1.5">כל משבצת מבוקרת מסומנת במספר הביקור שלה</p>
+            <p style="margin-top:6px;padding:8px;background:rgba(255,255,255,0.04);border-radius:8px;color:var(--text-muted);font-size:0.75rem;line-height:1.5">כל משבצת מבוקרת מסומנת במספר הביקור שלה</p>
           </div>
         </div>
       </div>
@@ -2988,10 +3610,238 @@ document.addEventListener('DOMContentLoaded', function() {
   </div>
 
   <footer>
-    <svg class="chess-pattern" id="kt-ftr-svg" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"></svg>
-    <span>Loteman Games © 2026</span>
+    <span>ChessBits © 2026</span>
   </footer>
 </div>
 
-</body></body>
+
+<!-- ════════════ FOUR PAWNS PAGE ════════════ -->
+<div id="page-fp" class="page">
+  <header>
+    <h1>♞ ChessBits</h1>
+    
+  </header>
+
+  <div class="nav-back-bar">
+    <button onclick="goHome()" style="background:none;border:none;cursor:pointer;color:var(--text-dim);font-family:inherit;font-size:0.85rem;font-weight:600;display:flex;align-items:center;gap:6px;padding:4px 0;transition:color 0.15s;" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color='#94a3b8'">← חזרה לדף הבית</button>
+    <span class="nav-game-title">🎯 ארבעת הרגלים</span>
+  </div>
+
+  <div class="game-main">
+    <div class="board-section">
+
+      <!-- Stats bar -->
+      <div class="kt-stats">
+        <div class="kt-stat">🎯<span id="fp-captured-val" class="kt-stat-val">0</span><span>/4</span></div>
+        <div class="kt-progress-bar"><div class="kt-progress-fill" id="fp-progress" style="width:0%"></div></div>
+        <div class="kt-stat">🔢<span id="fp-moves-val" class="kt-stat-val">0</span><span> מהלכים</span></div>
+      </div>
+
+      <!-- Turn banner -->
+      <div id="fp-turn-banner" class="turn-banner bar-blue" style="margin:8px 16px 4px">
+        <span class="tb-dot" style="background:var(--cyan);border:2px solid var(--cyan-l)"></span>
+        <span id="fp-tb-text">בחר כלי לבן להזזה</span>
+      </div>
+
+      <!-- Board -->
+      <div class="board-wrap" style="padding:14px 8px">
+        <div style="display:inline-block">
+          <div style="display:flex">
+            <!-- Row labels -->
+            <div style="display:flex;flex-direction:column">
+              <div class="fp-rank-label">6</div>
+              <div class="fp-rank-label">5</div>
+              <div class="fp-rank-label">4</div>
+              <div class="fp-rank-label">3</div>
+              <div class="fp-rank-label">2</div>
+              <div class="fp-rank-label">1</div>
+            </div>
+            <div>
+              <div id="fp-board"></div>
+              <div style="display:flex;padding-top:4px">
+                <div class="fp-file-label">a</div>
+                <div class="fp-file-label">b</div>
+                <div class="fp-file-label">c</div>
+                <div class="fp-file-label">d</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="board-actions">
+        <button class="btn btn-secondary" onclick="fpUndo()" id="fp-undo-btn" style="font-size:0.82rem">↩ בטל</button>
+        <button class="btn btn-danger" onclick="confirmNewGame('fp')" style="font-size:0.82rem">🔄 חדש</button>
+      </div>
+    </div>
+
+    <!-- Side panel -->
+    <div class="side-panel">
+      <div class="side-tabs-card">
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab('fp','game',this)">🎮 משחק</button>
+          <button class="tab-btn" onclick="switchTab('fp','settings',this)">⚙️ הגדרות</button>
+          <button class="tab-btn" onclick="switchTab('fp','history',this)">📜 היסטוריה</button>
+        </div>
+        <div id="fp-tab-game" class="tab-pane active">
+          <div id="fp-status" style="font-size:0.9rem;font-weight:600;color:var(--text);margin-bottom:12px">בחר כלי לבן להזזה</div>
+          <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em">רגלים שנלכדו</div>
+          <div id="fp-captured-display" style="font-size:1.5rem;min-height:30px;letter-spacing:3px;margin-bottom:12px">♙♙♙♙</div>
+          <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.07em">שיא אישי</div>
+          <div id="fp-best-score" style="font-size:0.85rem;color:var(--text-dim)">אין עדיין</div>
+        </div>
+        <div id="fp-tab-settings" class="tab-pane">
+          <div class="settings-section">
+            <div class="settings-label">רמת קושי</div>
+            <div class="mode-pills">
+              <button class="mode-pill active" id="fp-diff-easy"   onclick="fpSetDiff('easy')">קל</button>
+              <button class="mode-pill"        id="fp-diff-medium" onclick="fpSetDiff('medium')">בינוני</button>
+              <button class="mode-pill"        id="fp-diff-hard"   onclick="fpSetDiff('hard')">קשה</button>
+            </div>
+            <div style="font-size:0.74rem;color:var(--text-muted);margin-top:8px;line-height:1.5">
+              קל: הפרש מסומן תמיד<br>בינוני: ללא הדגשות<br>קשה: מגבלת 25 מהלכים
+            </div>
+          </div>
+        </div>
+        <div id="fp-tab-history" class="tab-pane" style="padding:10px 12px">
+          <div id="fp-move-list"><div style="color:var(--text-muted);font-size:0.82rem;">אין מהלכים עדיין</div></div>
+        </div>
+      </div>
+      <!-- Rules -->
+      <div class="side-tabs-card" style="margin-top:12px">
+        <div style="padding:14px 16px">
+          <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.07em">כללי המשחק</div>
+          <div style="font-size:0.82rem;color:var(--text-dim);line-height:1.9">
+            <p>🎯 <b>מטרה</b> — לכוד 4 רגלים שחורים</p>
+            <p>♞ <b>רק הפרש לוכד</b> רגלים שחורים</p>
+            <p>♜ <b>צריח</b> — ישר (אופקי/אנכי)</p>
+            <p>♝ <b>רץ</b> — אלכסונית</p>
+            <p>♟ <b>רגלי</b> — קדימה, לוכד אלכסוני</p>
+            <p style="margin-top:8px;padding:7px 9px;background:rgba(255,255,255,0.04);border-radius:8px;color:var(--text-muted);font-size:0.74rem;line-height:1.5">💡 הזז כלים לבנים כדי לפנות דרך לפרש</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span>ChessBits © 2026</span>
+  </footer>
+</div>
+</body>
+<!-- ════════════ FOUR PAWNS PAGE ════════════ -->
+<div id="page-fp" class="page">
+  <header>
+    <h1>♞ ChessBits</h1>
+    <p>הסיע את הפרש הלבן ולכוד את כל 4 הרגלים השחורים</p>
+  </header>
+
+  <div class="nav-back-bar">
+    <button onclick="goHome()" style="background:none;border:none;cursor:pointer;color:var(--text-dim);font-family:inherit;font-size:0.85rem;font-weight:600;display:flex;align-items:center;gap:6px;padding:4px 0;transition:color 0.15s;" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color='#94a3b8'">← חזרה לדף הבית</button>
+  </div>
+
+  <div class="game-main">
+    <div class="board-section">
+
+      <!-- Stats bar -->
+      <div class="kt-stats">
+        <div class="kt-stat">🎯<span id="fp-captured-val" class="kt-stat-val">0</span><span>/4</span></div>
+        <div class="kt-progress-bar"><div class="kt-progress-fill" id="fp-progress" style="width:0%"></div></div>
+        <div class="kt-stat">🔢<span id="fp-moves-val" class="kt-stat-val">0</span><span> מהלכים</span></div>
+      </div>
+
+      <!-- Turn banner -->
+      <div id="fp-turn-banner" class="turn-banner bar-blue" style="margin:8px 16px 4px">
+        <span class="tb-dot" style="background:var(--cyan);border:2px solid var(--cyan-l)"></span>
+        <span id="fp-tb-text">בחר כלי לבן להזזה</span>
+      </div>
+
+      <!-- Board -->
+      <div class="board-wrap" style="padding:14px 8px">
+        <div style="display:inline-block">
+          <div style="display:flex">
+            <!-- Row labels -->
+            <div style="display:flex;flex-direction:column">
+              <div class="fp-rank-label">6</div>
+              <div class="fp-rank-label">5</div>
+              <div class="fp-rank-label">4</div>
+              <div class="fp-rank-label">3</div>
+              <div class="fp-rank-label">2</div>
+              <div class="fp-rank-label">1</div>
+            </div>
+            <div>
+              <div id="fp-board"></div>
+              <div style="display:flex;padding-top:4px">
+                <div class="fp-file-label">a</div>
+                <div class="fp-file-label">b</div>
+                <div class="fp-file-label">c</div>
+                <div class="fp-file-label">d</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="board-actions">
+        <button class="btn btn-secondary" onclick="fpUndo()" id="fp-undo-btn" style="font-size:0.82rem">↩ בטל</button>
+        <button class="btn btn-danger" onclick="confirmNewGame('fp')" style="font-size:0.82rem">🔄 חדש</button>
+      </div>
+    </div>
+
+    <!-- Side panel -->
+    <div class="side-panel">
+      <div class="side-tabs-card">
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab('fp','game',this)">🎮 משחק</button>
+          <button class="tab-btn" onclick="switchTab('fp','settings',this)">⚙️ הגדרות</button>
+          <button class="tab-btn" onclick="switchTab('fp','history',this)">📜 היסטוריה</button>
+        </div>
+        <div id="fp-tab-game" class="tab-pane active">
+          <div id="fp-status" style="font-size:0.9rem;font-weight:600;color:var(--text);margin-bottom:12px">בחר כלי לבן להזזה</div>
+          <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em">רגלים שנלכדו</div>
+          <div id="fp-captured-display" style="font-size:1.5rem;min-height:30px;letter-spacing:3px;margin-bottom:12px">♙♙♙♙</div>
+          <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.07em">שיא אישי</div>
+          <div id="fp-best-score" style="font-size:0.85rem;color:var(--text-dim)">אין עדיין</div>
+        </div>
+        <div id="fp-tab-settings" class="tab-pane">
+          <div class="settings-section">
+            <div class="settings-label">רמת קושי</div>
+            <div class="mode-pills">
+              <button class="mode-pill active" id="fp-diff-easy"   onclick="fpSetDiff('easy')">קל</button>
+              <button class="mode-pill"        id="fp-diff-medium" onclick="fpSetDiff('medium')">בינוני</button>
+              <button class="mode-pill"        id="fp-diff-hard"   onclick="fpSetDiff('hard')">קשה</button>
+            </div>
+            <div style="font-size:0.74rem;color:var(--text-muted);margin-top:8px;line-height:1.5">
+              קל: הפרש מסומן תמיד<br>בינוני: ללא הדגשות<br>קשה: מגבלת 25 מהלכים
+            </div>
+          </div>
+        </div>
+        <div id="fp-tab-history" class="tab-pane" style="padding:10px 12px">
+          <div id="fp-move-list"><div style="color:var(--text-muted);font-size:0.82rem;">אין מהלכים עדיין</div></div>
+        </div>
+      </div>
+      <!-- Rules -->
+      <div class="side-tabs-card" style="margin-top:12px">
+        <div style="padding:14px 16px">
+          <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.07em">כללי המשחק</div>
+          <div style="font-size:0.82rem;color:var(--text-dim);line-height:1.9">
+            <p>🎯 <b>מטרה</b> — לכוד 4 רגלים שחורים</p>
+            <p>♞ <b>רק הפרש לוכד</b> רגלים שחורים</p>
+            <p>♜ <b>צריח</b> — ישר (אופקי/אנכי)</p>
+            <p>♝ <b>רץ</b> — אלכסונית</p>
+            <p>♟ <b>רגלי</b> — קדימה, לוכד אלכסוני</p>
+            <p style="margin-top:8px;padding:7px 9px;background:rgba(255,255,255,0.04);border-radius:8px;color:var(--text-muted);font-size:0.74rem;line-height:1.5">💡 הזז כלים לבנים כדי לפנות דרך לפרש</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span>ChessBits © 2026</span>
+  </footer>
+</div>
+</body>
 </html>
