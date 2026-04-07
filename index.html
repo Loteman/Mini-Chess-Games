@@ -235,7 +235,22 @@
   .page-game-name {
     margin-top: 5px; font-size: 0.95rem; font-weight: 700;
     color: var(--text-dim); position: relative; z-index: 1;
+    display: inline-block; padding: 2px 14px 3px;
   }
+  .page-game-name::before {
+    content: ''; position: absolute; inset: 0;
+    transform: skewX(-12deg); border-radius: 3px; z-index: -1;
+  }
+  #page-game .page-game-name { color: var(--cyan-l); }
+  #page-game .page-game-name::before { background: rgba(34,211,238,0.10); }
+  #page-ws  .page-game-name { color: var(--green); }
+  #page-ws  .page-game-name::before { background: rgba(16,185,129,0.13); }
+  #page-bar .page-game-name { color: var(--orange); }
+  #page-bar .page-game-name::before { background: rgba(249,115,22,0.13); }
+  #page-kt  .page-game-name { color: var(--purple-l); }
+  #page-kt  .page-game-name::before { background: rgba(168,85,247,0.13); }
+  #page-fp  .page-game-name { color: var(--cyan); }
+  #page-fp  .page-game-name::before { background: rgba(6,182,212,0.13); }
 
   /* ══ Logo icon in h1 ══ */
   .logo-icon { font-size: 2rem; width: 1em; height: 1em; vertical-align: middle; pointer-events: none;
@@ -410,6 +425,7 @@
   .settings-section { margin-bottom: 14px; }
   .settings-section:last-child { margin-bottom: 0; }
   .settings-label { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 7px; }
+  .hard-mode-notice { font-size: 0.76rem; color: var(--text-muted); margin: 6px 0 0; opacity: 0.85; }
   .settings-difficulty { margin-top: 14px; transition: opacity 0.2s; }
   .settings-difficulty.hidden { opacity: 0.3; pointer-events: none; }
 
@@ -528,31 +544,31 @@
   <div class="home-main">
     <div class="home-cards-row">
       <div class="home-card" id="home-card-chess">
-        <span class="home-card-icon">♟</span>
+        <span class="home-card-icon"><iconify-icon icon="material-symbols-light:chess-pawn"></iconify-icon></span>
         <h2>שחמט רגיל</h2>
         <p>שחק שחמט קלאסי — נגד חבר על אותו המסך, או מול המחשב ברמות קושי שונות. כולל כל כללי השחמט המלאים.</p>
         <button class="btn-home" id="btn-go-game" type="button"><iconify-icon icon="material-symbols-light:chess-pawn"></iconify-icon> שחמט רגיל</button>
       </div>
       <div class="home-card" id="home-card-ws">
-        <span class="home-card-icon">🐺</span>
+        <span class="home-card-icon"><iconify-icon icon="mdi:sheep"></iconify-icon><iconify-icon icon="mdi:dog-side"></iconify-icon></span>
         <h2>זאב וכבשים</h2>
         <p>משחק אסטרטגי א-סימטרי — זאב אחד מול 4 כבשים על ריבועים כהים. הזאב מנסה לחצות; הכבשים מנסות לחסום.</p>
         <button class="btn-home btn-home-green" id="btn-go-ws" type="button"><iconify-icon icon="mdi:dog-side"></iconify-icon> זאב וכבשים</button>
       </div>
       <div class="home-card" id="home-card-bar">
-        <span class="home-card-icon">🚧</span>
-        <h2>חסימת שערים</h2>
+        <span class="home-card-icon"><iconify-icon icon="tabler:barrier-block"></iconify-icon></span>
+        <h2>המבוך</h2>
         <p>מרוץ אסטרטגי על לוח 9×9 — הגע לצד השני לפני יריבך. בכל תור: זוז צעד אחד <b>או</b> הנח חומה לחסימה.</p>
-        <button class="btn-home btn-home-orange" id="btn-go-bar" type="button"><iconify-icon icon="mdi:barrier"></iconify-icon> חסימת שערים</button>
+        <button class="btn-home btn-home-orange" id="btn-go-bar" type="button"><iconify-icon icon="tabler:barrier-block"></iconify-icon> המבוך</button>
       </div>
       <div class="home-card" id="home-card-kt">
-        <span class="home-card-icon">♞</span>
+        <span class="home-card-icon"><iconify-icon icon="material-symbols-light:chess-knight"></iconify-icon></span>
         <h2>מסע הפרש</h2>
         <p>אתגר בודד קלאסי — הוליך את הפרש על פני כל 64 המשבצות, כל אחת בדיוק פעם אחת. תוכל לחזור לנקודת ההתחלה?</p>
         <button class="btn-home btn-home-purple" id="btn-go-kt" type="button"><iconify-icon icon="material-symbols-light:chess-knight"></iconify-icon> מסע הפרש</button>
       </div>
       <div class="home-card" id="home-card-fp">
-        <span class="home-card-icon">🎯</span>
+        <span class="home-card-icon"><iconify-icon icon="mdi:target"></iconify-icon></span>
         <h2>ארבעת הרגלים</h2>
         <p>לוח 4×4 עם 16 כלים — הזז כלים לבנים לפי כללי שחמט עד שהפרש לוכד את כל 4 הרגלים השחורים!</p>
         <button class="btn-home btn-home-teal" id="btn-go-fp" type="button"><iconify-icon icon="mdi:target"></iconify-icon> ארבעת הרגלים</button>
@@ -615,7 +631,7 @@
 
       <!-- Board actions -->
       <div class="board-actions">
-        <button class="btn btn-secondary" onclick="undoMove()" style="font-size:0.82rem" type="button"><iconify-icon icon="mdi:undo-variant"></iconify-icon> בטל</button>
+        <button class="btn btn-secondary" onclick="undoMove()" style="font-size:0.82rem" type="button" id="chess-undo-btn"><iconify-icon icon="mdi:undo-variant"></iconify-icon> בטל</button>
         <button class="btn btn-secondary" onclick="flipBoard()" style="font-size:0.82rem" type="button"><iconify-icon icon="mdi:swap-vertical"></iconify-icon> הפוך</button>
         <button class="btn btn-danger" onclick="confirmNewGame('chess')" style="font-size:0.82rem" type="button"><iconify-icon icon="mdi:refresh"></iconify-icon> חדש</button>
       </div>
@@ -672,10 +688,11 @@
           <div class="settings-difficulty" id="chess-difficulty">
             <div class="settings-label">רמת קושי</div>
             <div class="mode-pills">
-              <button class="mode-pill active" id="chess-diff-easy" onclick="chessSetDiff('easy')">קל</button>
-              <button class="mode-pill" id="chess-diff-medium" onclick="chessSetDiff('medium')">בינוני</button>
+              <button class="mode-pill" id="chess-diff-easy" onclick="chessSetDiff('easy')">קל</button>
+              <button class="mode-pill active" id="chess-diff-medium" onclick="chessSetDiff('medium')">בינוני</button>
               <button class="mode-pill" id="chess-diff-hard" onclick="chessSetDiff('hard')">קשה</button>
             </div>
+            <p id="chess-hard-notice" class="hard-mode-notice" style="display:none"><iconify-icon icon="mdi:lock-outline" style="vertical-align:middle"></iconify-icon> במצב קשה: "בטל" אינו זמין</p>
           </div>
         </div>
         <div id="chess-tab-history" class="tab-pane" style="padding:10px 12px">
@@ -705,7 +722,10 @@
     <div class="go-icon" id="go-icon">♟</div>
     <h2 id="go-title"></h2>
     <p id="go-desc"></p>
-    <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="handleGameOverNewGame();closeGameOver()">משחק חדש</button>
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn btn-secondary" style="flex:1" onclick="viewCurrentGame()"><iconify-icon icon="mdi:eye-outline"></iconify-icon> צפה במשחק</button>
+      <button class="btn btn-primary" style="flex:1" onclick="handleGameOverNewGame();closeGameOver()"><iconify-icon icon="mdi:refresh"></iconify-icon> משחק חדש</button>
+    </div>
   </div>
 </div>
 
@@ -770,13 +790,31 @@ const GAME_PLAYER_MODE = {
   chess: 'dual', ws: 'dual', bar: 'dual', kt: 'single', fp: 'single'
 };
 
+const SCREEN_HASH = {
+  'page-home': '', 'page-game': 'chess', 'page-ws': 'wolf',
+  'page-bar': 'barrier', 'page-kt': 'knight', 'page-fp': 'fourlegs',
+};
+let _inPopState = false;
+
 function showScreen(id) {
   SCREEN_IDS.forEach(sid => {
     const el = document.getElementById(sid);
     if (el) el.style.display = (sid === id) ? 'flex' : 'none';
   });
   try { window.scrollTo(0, 0); } catch(e) {}
+  if (!_inPopState) {
+    const hash = SCREEN_HASH[id] ?? '';
+    history.pushState({screen: id}, '', hash ? '#' + hash : location.pathname + location.search);
+  }
 }
+
+window.addEventListener('popstate', function() {
+  _inPopState = true;
+  const hash = location.hash.replace(/^#/, '');
+  const nav = {chess: goToGame, wolf: goToWS, barrier: goToBar, knight: goToKT, fourlegs: goToFP};
+  if (nav[hash]) nav[hash](); else goHome();
+  _inPopState = false;
+});
 
 function goToGame() {
   showScreen('page-game');
@@ -933,6 +971,7 @@ function hasAnyLegal(col, brd, ep, cR) {
 
 // ── Game state ──
 function newGame() {
+  boardFrozen = false;
   board = INIT_BOARD.map(r=>[...r]);
   turn='w'; selected=null; highlights=[]; legalMoves=[];
   chessHistory=[]; moveNotations=[]; gameOver=false; enPassant=null;
@@ -1170,7 +1209,7 @@ function applyMove(fr,fc,tr,tc,promo,ai=false) {
 }
 
 function undoMove() {
-  if(chessHistory.length===0) return;
+  if(boardFrozen || chessDiff === 'hard' || chessHistory.length===0) return;
   const steps=(gameMode!=='pvp'&&chessHistory.length>=2)?2:1;
   for(let i=0;i<steps;i++){
     if(chessHistory.length===0) break;
@@ -1287,6 +1326,11 @@ function showGameOver(title,desc,icon){
   document.getElementById('game-over').classList.add('open');
 }
 function closeGameOver(){ document.getElementById('game-over').classList.remove('open'); }
+let boardFrozen = false;
+function viewCurrentGame() {
+  boardFrozen = true;
+  closeGameOver();
+}
 
 
 // ══════════════════════════════════════
@@ -1309,11 +1353,12 @@ let wsSelected = null;
 let wsHighlights = [];
 let wsHistory = [];
 let wsMoveLog = [];
-let wsMode = 'ai-easy';  // pvp | ai-wolf | ai-sheep
+let wsMode = 'ai-sheep'; // pvp | ai-wolf | ai-sheep  (default: human=wolf, AI=sheep)
 let wsAiDifficulty = 'easy';  // easy | medium | hard
 let wsOver = false;
 
 function wsNewGame() {
+  boardFrozen = false;
   wsBoard = {};
   // Wolf starts at row 0 col 4 (dark square: 0+4=4... wait need odd)
   // Dark squares: (r+c) % 2 === 1
@@ -1493,7 +1538,7 @@ function wsDoMove(fr, fc, tr, tc, ai=false) {
 }
 
 function wsUndo() {
-  if (wsHistory.length === 0) return;
+  if (boardFrozen || wsDiff === 'hard' || wsHistory.length === 0) return;
   const steps = (wsMode !== 'pvp' && wsHistory.length >= 2) ? 2 : 1;
   for (let i = 0; i < steps; i++) {
     if (!wsHistory.length) break;
@@ -1648,8 +1693,8 @@ const BAR_PAD = 28;       // padding
 
 // State
 let barPos = {};          // {blue:[r,c], orange:[r,c]}
-let barWallsH = new Set();// "r,c" = horizontal wall BELOW row r between col c and c+1 (blocks r↔r+1)
-let barWallsV = new Set();// "r,c" = vertical wall RIGHT of col c between row r and r+1 (blocks c↔c+1)
+let barWallsH = new Map();// "r,c" → player ('blue'|'orange') horizontal wall BELOW row r (blocks r↔r+1)
+let barWallsV = new Map();// "r,c" → player ('blue'|'orange') vertical wall RIGHT of col c (blocks c↔c+1)
 let barWallsLeft = {};    // {blue:10, orange:10}
 let barTurn = 'blue';
 let barAction = 'move';   // 'move' | 'wall'
@@ -1660,6 +1705,7 @@ let barAiDifficulty = 'easy';  // easy | medium | hard
 let barHistory = [];
 let barHover = null;      // {r,c} for wall preview
 let barCanvas, barCtx;
+let barAnimPiece = null; // {r, c, t} — canvas piece landing animation
 
 function barCellPx(r, c) {
   // Returns top-left pixel of cell (r,c) on canvas
@@ -1673,9 +1719,10 @@ function barCanvasSize() {
 }
 
 function barNewGame() {
+  boardFrozen = false;
   barPos = { blue: [8, 4], orange: [0, 4] };
-  barWallsH = new Set();
-  barWallsV = new Set();
+  barWallsH = new Map();
+  barWallsV = new Map();
   barWallsLeft = { blue: 10, orange: 10 };
   barTurn = 'blue';
   barAction = 'move';
@@ -1700,7 +1747,7 @@ function barSetAction(a) {
   barAction = a;
   document.getElementById('bar-action-move').classList.toggle('active', a === 'move');
   document.getElementById('bar-action-wall').classList.toggle('active', a === 'wall');
-  document.getElementById('bar-wall-orient-wrap').style.display = a === 'wall' ? 'block' : 'none';
+  document.getElementById('bar-wall-orient-wrap').style.display = 'none';
   barHover = null;
   barDraw();
 }
@@ -1814,10 +1861,10 @@ function barWallValid(r, c, orient) {
     if (barWallsH.has(r + ',' + c)) return false;
   }
   // Test path connectivity
-  const testH = new Set(barWallsH);
-  const testV = new Set(barWallsV);
-  if (orient === 'H') testH.add(r + ',' + c);
-  else testV.add(r + ',' + c);
+  const testH = new Map(barWallsH);
+  const testV = new Map(barWallsV);
+  if (orient === 'H') testH.set(r + ',' + c, 'test');
+  else testV.set(r + ',' + c, 'test');
   const bp = barPos.blue, op = barPos.orange;
   if (!barHasPath(bp[0], bp[1], 0, testH, testV, op)) return false;
   if (!barHasPath(op[0], op[1], 8, testH, testV, bp)) return false;
@@ -1828,8 +1875,8 @@ function barWallValid(r, c, orient) {
 function barPlaceWall(r, c, orient, player) {
   if (!barWallValid(r, c, orient)) return false;
   if (barWallsLeft[player] <= 0) return false;
-  if (orient === 'H') barWallsH.add(r + ',' + c);
-  else barWallsV.add(r + ',' + c);
+  if (orient === 'H') barWallsH.set(r + ',' + c, player);
+  else barWallsV.set(r + ',' + c, player);
   barWallsLeft[player]--;
   return true;
 }
@@ -1879,17 +1926,16 @@ function barDraw() {
     barDrawWallShape(ctx, r, c, barOrient);
   }
 
-  // Draw placed walls
-  ctx.fillStyle = '#22d3ee';
-  // We'll draw H walls orange, V walls blue — actually use color by... 
-  // We don't track who placed each wall, just draw them all nicely
-  barWallsH.forEach(key => {
+  // Draw placed walls — colored by the player who placed them
+  barWallsH.forEach((player, key) => {
     const [r, c] = key.split(',').map(Number);
-    barDrawWallShape(ctx, r, c, 'H', '#e85d04');
+    const color = player === 'blue' ? '#2563eb' : '#e85d04';
+    barDrawWallShape(ctx, r, c, 'H', color);
   });
-  barWallsV.forEach(key => {
+  barWallsV.forEach((player, key) => {
     const [r, c] = key.split(',').map(Number);
-    barDrawWallShape(ctx, r, c, 'V', '#2563eb');
+    const color = player === 'blue' ? '#2563eb' : '#e85d04';
+    barDrawWallShape(ctx, r, c, 'V', color);
   });
 
   // Draw valid move highlights
@@ -1920,8 +1966,13 @@ function barDraw() {
   }
 
   // Draw pawns
-  barDrawPawn(ctx, barPos.blue[0], barPos.blue[1], '#2563eb', '#0891b2');
-  barDrawPawn(ctx, barPos.orange[0], barPos.orange[1], '#f97316', '#ea580c');
+  const _animNow = barAnimPiece ? performance.now() - barAnimPiece.t : -1;
+  const _blueScale = (barAnimPiece && barAnimPiece.r === barPos.blue[0] && barAnimPiece.c === barPos.blue[1])
+    ? barPawnAnimScale(_animNow) : 1;
+  const _orangeScale = (barAnimPiece && barAnimPiece.r === barPos.orange[0] && barAnimPiece.c === barPos.orange[1])
+    ? barPawnAnimScale(_animNow) : 1;
+  barDrawPawn(ctx, barPos.blue[0], barPos.blue[1], '#2563eb', '#0891b2', _blueScale);
+  barDrawPawn(ctx, barPos.orange[0], barPos.orange[1], '#f97316', '#ea580c', _orangeScale);
   ctx.restore();
 }
 
@@ -1950,11 +2001,29 @@ function barDrawWallShape(ctx, r, c, orient, color) {
   }
 }
 
-function barDrawPawn(ctx, r, c, fill, stroke) {
+function barPawnAnimScale(dt) {
+  const t = Math.min(dt / 220, 1);
+  if (t < 0.6) return 1.35 - 0.45 * (t / 0.6); // 1.35 → 0.9
+  return 0.9 + 0.1 * ((t - 0.6) / 0.4);          // 0.9 → 1.0
+}
+
+function barAnimFrame() {
+  if (!barAnimPiece) return;
+  const dt = performance.now() - barAnimPiece.t;
+  if (dt >= 220) { barAnimPiece = null; barDraw(); return; }
+  barDraw();
+  requestAnimationFrame(barAnimFrame);
+}
+
+function barDrawPawn(ctx, r, c, fill, stroke, scale = 1) {
   const {x, y} = barCellPx(r, c);
   const cx = x + BAR_CELL / 2;
   const cy = y + BAR_CELL / 2;
   const radius = BAR_CELL * 0.32;
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.scale(scale, scale);
+  ctx.translate(-cx, -cy);
   ctx.beginPath();
   ctx.arc(cx, cy, radius, 0, Math.PI * 2);
   ctx.fillStyle = fill;
@@ -1967,6 +2036,7 @@ function barDrawPawn(ctx, r, c, fill, stroke) {
   ctx.arc(cx - radius*0.25, cy - radius*0.25, radius*0.3, 0, Math.PI*2);
   ctx.fillStyle = 'rgba(255,255,255,0.2)';
   ctx.fill();
+  ctx.restore();
 }
 
 // ── Input handling ──
@@ -1975,6 +2045,18 @@ function barCanvasXYtoRC(px, py) {
   const c = Math.floor((px - BAR_PAD) / (BAR_CELL + BAR_GAP));
   const r = Math.floor((py - BAR_PAD) / (BAR_CELL + BAR_GAP));
   return {r, c};
+}
+
+// Auto-detect wall orientation from click position:
+// compare distance to nearest H-gap vs V-gap center
+function barAutoOrient(px, py) {
+  const step = BAR_CELL + BAR_GAP;
+  const gapCenter = BAR_CELL + BAR_GAP / 2;
+  const modX = ((px - BAR_PAD) % step + step) % step;
+  const modY = ((py - BAR_PAD) % step + step) % step;
+  const dV = Math.abs(modX - gapCenter); // distance to nearest V-gap center
+  const dH = Math.abs(modY - gapCenter); // distance to nearest H-gap center
+  return dV <= dH ? 'V' : 'H';
 }
 
 function barCanvasXYtoWall(px, py, orient) {
@@ -2024,6 +2106,7 @@ function barOnMouseMove(e) {
   if (barOver) return;
   const {px, py} = barGetEventPos(e);
   if (barAction === 'wall') {
+    barOrient = barAutoOrient(px, py);
     const {r, c} = barCanvasXYtoWall(px, py, barOrient);
     barHover = {r, c};
   } else {
@@ -2054,6 +2137,7 @@ function barHandleInput(px, py) {
       barDoMove(r, c);
     }
   } else {
+    barOrient = barAutoOrient(px, py);
     const {r, c} = barCanvasXYtoWall(px, py, barOrient);
     if (barWallsLeft[barTurn] > 0 && barWallValid(r, c, barOrient)) {
       barDoWall(r, c, barOrient);
@@ -2064,8 +2148,8 @@ function barHandleInput(px, py) {
 function barSaveHistory() {
   barHistory.push({
     pos: { blue: [...barPos.blue], orange: [...barPos.orange] },
-    wallsH: new Set(barWallsH),
-    wallsV: new Set(barWallsV),
+    wallsH: new Map(barWallsH),
+    wallsV: new Map(barWallsV),
     wallsLeft: { ...barWallsLeft },
     turn: barTurn
   });
@@ -2077,7 +2161,9 @@ function barDoMove(r, c) {
   // Check win
   const won = (barTurn === 'blue' && r === 0) || (barTurn === 'orange' && r === 8);
   barTurn = barTurn === 'blue' ? 'orange' : 'blue';
+  barAnimPiece = {r, c, t: performance.now()};
   barDraw();
+  requestAnimationFrame(barAnimFrame);
   barUpdateUI();
   if (won) {
     barOver = true;
@@ -2085,7 +2171,7 @@ function barDoMove(r, c) {
     setTimeout(() => {
       document.getElementById('go-title').textContent = winner + ' ניצח!';
       document.getElementById('go-desc').textContent = 'הגיע לצד השני!';
-      document.getElementById('go-icon').textContent = winner === 'כחול' ? '🔵' : '🟠';
+      document.getElementById('go-icon').innerHTML = '<iconify-icon icon="material-symbols-light:person" style="font-size:2.5rem;color:' + (winner === 'כחול' ? '#60a5fa' : '#fb923c') + '"></iconify-icon>';
       document.getElementById('game-over').classList.add('open');
     }, 150);
     return;
@@ -2105,14 +2191,14 @@ function barDoWall(r, c, orient, ai = false) {
 }
 
 function barUndo() {
-  if (barHistory.length === 0) return;
+  if (boardFrozen || barDiff === 'hard' || barHistory.length === 0) return;
   const steps = (barMode !== 'pvp' && barHistory.length >= 2) ? 2 : 1;
   for (let i = 0; i < steps; i++) {
     if (!barHistory.length) break;
     const h = barHistory.pop();
     barPos = { blue: [...h.pos.blue], orange: [...h.pos.orange] };
-    barWallsH = new Set(h.wallsH);
-    barWallsV = new Set(h.wallsV);
+    barWallsH = new Map(h.wallsH);
+    barWallsV = new Map(h.wallsV);
     barWallsLeft = { ...h.wallsLeft };
     barTurn = h.turn;
   }
@@ -2123,15 +2209,18 @@ function barUndo() {
 
 function barUpdateUI() {
   const el = document.getElementById('bar-status');
-  if (el) el.textContent = barOver ? '' : 'תור ה' + (barTurn === 'blue' ? 'כחול 🔵' : 'כתום 🟠');
+  if (el) el.innerHTML = barOver ? '' : 'תור ה' + (barTurn === 'blue'
+    ? '<span style="color:#60a5fa">כחול</span>'
+    : '<span style="color:#fb923c">כתום</span>');
   const bw = document.getElementById('bar-walls-blue');
   const ow = document.getElementById('bar-walls-orange');
-  if (bw) bw.textContent = '🚧 ' + barWallsLeft.blue;
-  if (ow) ow.textContent = '🚧 ' + barWallsLeft.orange;
+  const _fenceIcon = '<iconify-icon icon="tabler:barrier-block" style="vertical-align:middle"></iconify-icon>';
+  if (bw) bw.innerHTML = _fenceIcon + ' ' + barWallsLeft.blue;
+  if (ow) ow.innerHTML = _fenceIcon + ' ' + barWallsLeft.orange;
   const bwStat = document.getElementById('bar-walls-blue-stat');
   const owStat = document.getElementById('bar-walls-orange-stat');
-  if (bwStat) bwStat.textContent = '🔵 חומות: ' + barWallsLeft.blue;
-  if (owStat) owStat.textContent = '🟠 חומות: ' + barWallsLeft.orange;
+  if (bwStat) bwStat.innerHTML = _fenceIcon + ' חומות: ' + barWallsLeft.blue;
+  if (owStat) owStat.innerHTML = _fenceIcon + ' חומות: ' + barWallsLeft.orange;
   const tb = document.getElementById('bar-turn-blue');
   const to = document.getElementById('bar-turn-orange');
   if (tb) tb.classList.toggle('active', barTurn === 'blue' && !barOver);
@@ -2208,8 +2297,8 @@ function barAiMove() {
           const wr = br + dr, wc = bc + dc;
           if (!barWallValid(wr, wc, orient)) continue;
           // Temporarily place wall
-          if (orient === 'H') barWallsH.add(wr + ',' + wc);
-          else barWallsV.add(wr + ',' + wc);
+          if (orient === 'H') barWallsH.set(wr + ',' + wc, 'orange');
+          else barWallsV.set(wr + ',' + wc, 'orange');
           barWallsLeft.orange--;
           const score = barEval() + (Math.random() * 0.3);
           if (orient === 'H') barWallsH.delete(wr + ',' + wc);
@@ -2275,10 +2364,27 @@ function barInitCanvas() {
     };
   }
   barCanvas.onclick     = barOnClick;
-  barCanvas.ontouchstart = (e) => { e.preventDefault(); }; // prevent ghost mouse clicks
-  barCanvas.ontouchend  = (e) => { e.preventDefault(); barOnClick(e); };
+  let _barTouchStartX = 0, _barTouchStartY = 0;
+  barCanvas.ontouchstart = (e) => {
+    if (e.touches.length === 1) {
+      _barTouchStartX = e.touches[0].clientX;
+      _barTouchStartY = e.touches[0].clientY;
+    }
+  };
+  barCanvas.ontouchend = (e) => {
+    if (e.changedTouches.length === 1) {
+      const dx = Math.abs(e.changedTouches[0].clientX - _barTouchStartX);
+      const dy = Math.abs(e.changedTouches[0].clientY - _barTouchStartY);
+      if (dx < 12 && dy < 12) {
+        e.preventDefault(); // tap confirmed — prevent ghost click, handle as game action
+        barOnClick(e);
+      }
+    }
+    barHover = null;
+    barDraw();
+  };
+  barCanvas.ontouchmove = () => {}; // allow native scroll — no preventDefault
   barCanvas.onmousemove = barOnMouseMove;
-  barCanvas.ontouchmove = (e) => { e.preventDefault(); if (e.touches && e.touches.length > 0) barOnMouseMove(e); };
   barCanvas.onmouseleave = () => { barHover = null; barDraw(); };
 }
 
@@ -2391,8 +2497,12 @@ function updateBarTurnStrip(t, over) {
 //  UX: PIECE ANIMATION HELPER
 // ══════════════════════════════════════
 function animatePieceAt(r, c) {
-  const sq = document.querySelector(`#board [data-r="${r}"][data-c="${c}"] .piece,
-    #ws-board [data-r="${r}"][data-c="${c}"] span`);
+  const sq = document.querySelector(
+    `#board [data-r="${r}"][data-c="${c}"] .piece,` +
+    `#ws-board [data-r="${r}"][data-c="${c}"] span,` +
+    `#kt-board [data-r="${r}"][data-c="${c}"] .kt-piece,` +
+    `#fp-board [data-r="${r}"][data-c="${c}"] .fp-piece`
+  );
   if (!sq) return;
   sq.classList.remove('piece-anim');
   void sq.offsetWidth; // reflow
@@ -2404,7 +2514,7 @@ function animatePieceAt(r, c) {
 // ══════════════════════════════════════════════════════════
 //  KNIGHT'S TOUR
 // ══════════════════════════════════════════════════════════
-let ktSize = 8;            // board size (5, 6, or 8)
+let ktSize = 6;            // board size (5, 6, or 8)
 let ktBoard = [];          // -1 = unvisited, 0+ = visit order
 let ktPos = null;          // [r,c] current knight position, null = not started
 let ktMoves = 0;           // how many moves made
@@ -2435,6 +2545,7 @@ function ktWarnsdorf(r, c) {
 
 // ── Init ──
 function ktNewGame() {
+  boardFrozen = false;
   ktStopTimer();
   ktBoard = Array.from({length: ktSize}, () => Array(ktSize).fill(-1));
   ktPos = null; ktMoves = 0; ktHistory = []; ktOver = false; ktSeconds = 0;
@@ -2479,6 +2590,7 @@ function ktOnClick(r, c) {
   ktHistory.push({r, c});
   if (navigator.vibrate) navigator.vibrate(14);
   ktRender();
+  requestAnimationFrame(() => animatePieceAt(r, c));
   ktCheckWin();
   ktUpdateMoveList();
 }
@@ -2510,7 +2622,7 @@ function ktCheckWin() {
 
 // ── Undo ──
 function ktUndo() {
-  if (ktHistory.length === 0) return;
+  if (boardFrozen || ktHistory.length === 0) return;
   if (ktHistory.length === 1) {
     ktBoard[ktHistory[0].r][ktHistory[0].c] = -1;
     ktHistory = []; ktPos = null; ktMoves = 0; ktOver = false;
@@ -2582,6 +2694,7 @@ function ktRender(highlightHint) {
       const sq = document.createElement('div');
       const isLight = (r+c)%2 === 0;
       sq.className = 'kt-sq ' + (isLight ? 'light' : 'dark');
+      sq.dataset.r = r; sq.dataset.c = c;
       const key = r+','+c;
       const isVisited = ktBoard[r][c] >= 0;
       const isCurrent = ktPos && ktPos[0]===r && ktPos[1]===c;
@@ -2788,6 +2901,16 @@ window.addEventListener('resize', () => {
 //  SETTINGS CONTROLLERS
 // ══════════════════════════════════════════════════════════
 
+// ── Helper: update hard-mode notice + disable undo/hint buttons ──
+function applyHardMode(prefix, isHard) {
+  const notice = document.getElementById(prefix + '-hard-notice');
+  if (notice) notice.style.display = isHard ? '' : 'none';
+  const undoBtn = document.getElementById(prefix + '-undo-btn');
+  if (undoBtn) undoBtn.disabled = isHard;
+  const hintBtn = document.getElementById(prefix + '-btn-hint');
+  if (hintBtn) hintBtn.disabled = isHard;
+}
+
 // ── Helper: show/hide difficulty panel ──
 function showDifficulty(prefix, show) {
   const el = document.getElementById(prefix + '-difficulty');
@@ -2803,7 +2926,7 @@ function setActivePill(prefix, group, val) {
 
 // ══════════ CHESS ══════════
 let chessVs   = 'ai';    // 'pvp' | 'ai'
-let chessDiff = 'easy';  // 'easy' | 'medium' | 'hard'
+let chessDiff = 'medium';  // 'easy' | 'medium' | 'hard'
 
 function chessSetVs(v) {
   chessVs = v;
@@ -2816,6 +2939,7 @@ function chessSetVs(v) {
 function chessSetDiff(d) {
   chessDiff = d;
   setActivePill('chess', 'diff', d);
+  applyHardMode('chess', d === 'hard');
   // Map: easy/medium → ai-easy, hard → ai-hard
   const m = d === 'hard' ? 'ai-hard' : 'ai-easy';
   setMode(m);
@@ -2841,6 +2965,7 @@ function wsSetSide(s) {
 function wsSetDiff(d) {
   wsDiff = d;
   setActivePill('ws', 'diff', d);
+  applyHardMode('ws', d === 'hard');
   wsApplyAiMode();
 }
 function wsApplyAiMode() {
@@ -2866,6 +2991,7 @@ function barSetVs(v) {
 function barSetDiff(d) {
   barDiff = d;
   setActivePill('bar', 'diff', d);
+  applyHardMode('bar', d === 'hard');
   barApplyAiMode();
 }
 function barApplyAiMode() {
@@ -2926,6 +3052,7 @@ const FP_PIECE_ICON = {
 };
 
 function fpNewGame() {
+  boardFrozen = false;
   fpStopTimer();
   fpSeconds  = 0;
   fpUpdateTimerDisplay();
@@ -3076,6 +3203,7 @@ function fpDoMove(fr, fc, tr, tc) {
     setTimeout(() => showGameOverFP(false), 500);
   } else {
     fpRender();
+    requestAnimationFrame(() => animatePieceAt(tr, tc));
     fpUpdateUI();
     fpUpdateMoveList();
   }
@@ -3119,7 +3247,7 @@ function showGameOverFP(won) {
 }
 
 function fpUndo() {
-  if (!fpHistory.length) return;
+  if (boardFrozen || !fpHistory.length) return;
   const state = fpHistory.pop();
   fpBoard    = state.board;
   fpCaptured = state.captured;
@@ -3215,6 +3343,7 @@ function fpRender() {
       const isLight = (r+c)%2===0;
       sq.className = 'fp-sq ' + (isLight ? 'light' : 'dark');
       sq.style.width = sq.style.height = sz + 'px';
+      sq.dataset.r = r; sq.dataset.c = c;
 
       const isSelected  = fpSelected && fpSelected.r===r && fpSelected.c===c;
       const isMovable   = selectedMoves.some(([mr,mc])=>mr===r&&mc===c);
@@ -3350,10 +3479,15 @@ const CHESSBITS_TAGLINES = [
 })();
 
 document.addEventListener('DOMContentLoaded', function() {
+  // Init history state for back-button support
+  const _initHash = location.hash.replace(/^#/, '');
+  const _hashNav = {chess: goToGame, wolf: goToWS, barrier: goToBar, knight: goToKT, fourlegs: goToFP};
+  history.replaceState({screen: 'page-home'}, '', location.href);
   SCREEN_IDS.forEach(sid => {
     const el = document.getElementById(sid);
     if (el) el.style.display = sid === 'page-home' ? 'flex' : 'none';
   });
+  if (_hashNav[_initHash]) _hashNav[_initHash]();
 
   // Set tagline (fallback for if IIFE ran before element existed)
   const tEl = document.getElementById('home-tagline');
@@ -3436,7 +3570,7 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
 
       <div class="board-actions">
-        <button class="btn btn-secondary" onclick="wsUndo()" style="font-size:0.82rem" type="button"><iconify-icon icon="mdi:undo-variant"></iconify-icon> בטל</button>
+        <button class="btn btn-secondary" onclick="wsUndo()" style="font-size:0.82rem" type="button" id="ws-undo-btn"><iconify-icon icon="mdi:undo-variant"></iconify-icon> בטל</button>
         <button class="btn btn-danger" onclick="confirmNewGame('ws')" style="font-size:0.82rem" type="button"><iconify-icon icon="mdi:refresh"></iconify-icon> חדש</button>
       </div>
     </div>
@@ -3488,6 +3622,7 @@ document.addEventListener('DOMContentLoaded', function() {
               <button class="mode-pill" id="ws-diff-medium" onclick="wsSetDiff('medium')">בינוני</button>
               <button class="mode-pill" id="ws-diff-hard" onclick="wsSetDiff('hard')">קשה</button>
             </div>
+            <p id="ws-hard-notice" class="hard-mode-notice" style="display:none"><iconify-icon icon="mdi:lock-outline" style="vertical-align:middle"></iconify-icon> במצב קשה: "בטל" אינו זמין</p>
           </div>
         </div>
         <div id="ws-tab-history" class="tab-pane" style="padding:10px 12px">
@@ -3510,7 +3645,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <iconify-icon icon="mdi:home-outline"></iconify-icon>
     </button>
     <h1><iconify-icon icon="material-symbols-light:chess-knight" class="logo-icon"></iconify-icon> ChessBits</h1>
-    <p class="page-game-name">חסימת שערים</p>
+    <p class="page-game-name">המבוך</p>
   </header>
 
   <div class="game-main">
@@ -3518,12 +3653,12 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="board-section">
       <!-- Orange player bar (top) -->
       <div class="player-bar" id="bar-player-top">
-        <div class="player-avatar" style="background:#ea580c;font-size:1.1rem;width:32px;height:32px">🟠</div>
+        <div class="player-avatar" style="background:#ea580c;width:32px;height:32px;font-size:1.3rem;color:#fff"><iconify-icon icon="material-symbols-light:person" style="display:block;width:1em;height:1em"></iconify-icon></div>
         <div style="flex:1">
           <div class="player-name">כתום <span class="turn-indicator" id="bar-turn-orange"></span></div>
           <div class="player-side">מטרה: שורה תחתונה</div>
         </div>
-        <span class="bar-wall-badge" style="background:rgba(251,146,60,0.1);color:#fdba74" id="bar-walls-orange">🚧 10</span>
+        <span class="bar-wall-badge" style="background:rgba(251,146,60,0.1);color:#fdba74" id="bar-walls-orange"><iconify-icon icon="tabler:barrier-block" style="vertical-align:middle"></iconify-icon> 10</span>
       </div>
 
       <!-- Turn banner (matches chess/ws style) -->
@@ -3535,8 +3670,8 @@ document.addEventListener('DOMContentLoaded', function() {
       <!-- Action bar embedded in board section -->
       <div class="bar-action-bar" id="bar-action-bar-inline">
         <span class="bar-action-label">פעולה:</span>
-        <button class="mode-pill active" id="bar-action-move" onclick="barSetAction('move')">🚶 זוז</button>
-        <button class="mode-pill" id="bar-action-wall" onclick="barSetAction('wall')">🚧 חומה</button>
+        <button class="mode-pill active" id="bar-action-move" onclick="barSetAction('move')"><iconify-icon icon="material-symbols-light:directions-walk" style="vertical-align:middle"></iconify-icon> זוז</button>
+        <button class="mode-pill" id="bar-action-wall" onclick="barSetAction('wall')"><iconify-icon icon="tabler:barrier-block" style="vertical-align:middle"></iconify-icon> חומה</button>
         <div id="bar-wall-orient-wrap" style="display:none;margin-right:8px">
           <button class="mode-pill active" id="bar-orient-h" onclick="barSetOrient('H')">— אופקית</button>
           <button class="mode-pill" id="bar-orient-v" onclick="barSetOrient('V')">| אנכית</button>
@@ -3545,22 +3680,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
       <!-- Board canvas -->
       <div style="padding:12px;background:var(--surface);display:flex;justify-content:center;align-items:center;">
-        <canvas id="bar-canvas" style="touch-action:none;cursor:pointer;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.1)"></canvas>
+        <canvas id="bar-canvas" style="touch-action:manipulation;cursor:pointer;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.1)"></canvas>
       </div>
 
       <!-- Blue player bar (bottom) -->
       <div class="player-bar bottom" id="bar-player-bot">
-        <div class="player-avatar" style="background:#2563eb;font-size:1.1rem;width:32px;height:32px">🔵</div>
+        <div class="player-avatar" style="background:#2563eb;width:32px;height:32px;font-size:1.3rem;color:#fff"><iconify-icon icon="material-symbols-light:person" style="display:block;width:1em;height:1em"></iconify-icon></div>
         <div style="flex:1">
           <div class="player-name">כחול <span class="turn-indicator" id="bar-turn-blue"></span></div>
           <div class="player-side">מטרה: שורה עליונה</div>
         </div>
-        <span class="bar-wall-badge" style="background:rgba(34,211,238,0.1);color:var(--cyan-l)" id="bar-walls-blue">🚧 10</span>
+        <span class="bar-wall-badge" style="background:rgba(34,211,238,0.1);color:var(--cyan-l)" id="bar-walls-blue"><iconify-icon icon="tabler:barrier-block" style="vertical-align:middle"></iconify-icon> 10</span>
       </div>
 
       <!-- Board actions -->
       <div class="board-actions">
-        <button class="btn btn-secondary" onclick="barUndo()" style="font-size:0.82rem" type="button"><iconify-icon icon="mdi:undo-variant"></iconify-icon> בטל</button>
+        <button class="btn btn-secondary" onclick="barUndo()" style="font-size:0.82rem" type="button" id="bar-undo-btn"><iconify-icon icon="mdi:undo-variant"></iconify-icon> בטל</button>
         <button class="btn btn-danger" onclick="confirmNewGame('bar')" style="font-size:0.82rem" type="button"><iconify-icon icon="mdi:refresh"></iconify-icon> חדש</button>
       </div>
     </div>
@@ -3584,11 +3719,11 @@ document.addEventListener('DOMContentLoaded', function() {
           <button class="tab-btn" onclick="switchTab('bar','history',this)" type="button"><iconify-icon icon="mdi:history"></iconify-icon> היסטוריה</button>
         </div>
         <div id="bar-tab-howto" class="tab-pane active" style="font-size:0.82rem;color:var(--text-dim);line-height:1.75;padding:14px">
-          <p style="font-weight:700;color:var(--text);margin-bottom:8px">חסימת שערים — מרוץ ואסטרטגיה</p>
+          <p style="font-weight:700;color:var(--text);margin-bottom:8px">המבוך — מרוץ ואסטרטגיה</p>
           <p style="margin-bottom:6px">שני שחקנים על לוח 9×9. כחול מתחיל בתחתית, כתום בראש. כל אחד מנסה להגיע לצד השני.</p>
           <p style="margin-bottom:6px"><b>בכל תור — בחר אחת:</b></p>
-          <p style="margin-bottom:3px">🚶 <b>זוז</b> — הזז את הכלי שלך משבצת אחת.</p>
-          <p style="margin-bottom:6px">🧱 <b>הנח חומה</b> — חומה בת 2 תאים. לכל שחקן 10 חומות.</p>
+          <p style="margin-bottom:3px"><iconify-icon icon="material-symbols-light:directions-walk" style="vertical-align:middle"></iconify-icon> <b>זוז</b> — הזז את הכלי שלך משבצת אחת.</p>
+          <p style="margin-bottom:6px"><iconify-icon icon="tabler:barrier-block" style="vertical-align:middle"></iconify-icon> <b>הנח חומה</b> — חומה בת 2 תאים. לכל שחקן 10 חומות.</p>
           <p style="margin-bottom:6px"><b>חוק:</b> אסור לחסום לחלוטין את מסלול היריב.</p>
           <p style="margin-bottom:6px"><b>ניצחון:</b> ראשון שמגיע לשורת המטרה.</p>
           <p style="padding:7px 9px;background:rgba(255,255,255,0.04);border-radius:8px;font-size:0.76rem">
@@ -3610,6 +3745,7 @@ document.addEventListener('DOMContentLoaded', function() {
               <button class="mode-pill" id="bar-diff-medium" onclick="barSetDiff('medium')">בינוני</button>
               <button class="mode-pill" id="bar-diff-hard" onclick="barSetDiff('hard')">קשה</button>
             </div>
+            <p id="bar-hard-notice" class="hard-mode-notice" style="display:none"><iconify-icon icon="mdi:lock-outline" style="vertical-align:middle"></iconify-icon> במצב קשה: "בטל" אינו זמין</p>
           </div>
         </div>
         <div id="bar-tab-history" class="tab-pane" style="padding:10px 12px">
@@ -3728,8 +3864,8 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="settings-label">גודל לוח</div>
             <div class="mode-pills">
               <button class="mode-pill" id="kt-size-5" onclick="ktSetSize(5)">5×5</button>
-              <button class="mode-pill" id="kt-size-6" onclick="ktSetSize(6)">6×6</button>
-              <button class="mode-pill active" id="kt-size-8" onclick="ktSetSize(8)">8×8</button>
+              <button class="mode-pill active" id="kt-size-6" onclick="ktSetSize(6)">6×6</button>
+              <button class="mode-pill" id="kt-size-8" onclick="ktSetSize(8)">8×8</button>
             </div>
             <div style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;line-height:1.5">💡 5×5 מומלץ למתחילים</div>
           </div>
