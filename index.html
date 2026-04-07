@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ChessBits</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♟</text></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js" async></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;700;800;900&display=swap');
 
   /* ══ Design tokens ══ */
   :root {
@@ -43,6 +43,13 @@
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+  button iconify-icon, a iconify-icon { pointer-events: none; }
+  iconify-icon { display: inline-flex; vertical-align: middle; flex-shrink: 0; }
+  .btn iconify-icon { font-size: 1.1rem; width: 1.1rem; height: 1.1rem; }
+  .tab-btn iconify-icon { font-size: 0.95rem; width: 0.95rem; height: 0.95rem; }
+  .btn-home iconify-icon { font-size: 1.1rem; width: 1.1rem; height: 1.1rem; }
+  .mode-pill iconify-icon { font-size: 0.95rem; width: 0.95rem; height: 0.95rem; }
+
   body {
     font-family: 'Heebo', sans-serif;
     background: var(--bg);
@@ -56,7 +63,6 @@
   }
 
   .page { display: none; flex-direction: column; min-height: 100vh; }
-  .page.active { display: flex; }
 
   /* ══ Header ══ */
   header {
@@ -87,6 +93,7 @@
     margin-top: 6px; color: var(--text-dim); font-size: 0.9rem; font-weight: 400;
     position: relative; z-index: 1;
   }
+  #home-tagline { direction: ltr; unicode-bidi: embed; }
 
   /* ══ Footer ══ */
   footer {
@@ -176,11 +183,8 @@
     width: 26px; height: 26px; border-radius: 50%;
     background: rgba(34,211,238,0.55); box-shadow: 0 0 12px rgba(34,211,238,0.7); pointer-events: none;
   }
-  .fp-piece { font-size: 2.6rem; line-height: 1; pointer-events: none; }
-  .fp-sq.white-sq .fp-piece { color: #f8f8ff; text-shadow: 0 0 2px #000, 0 1px 4px rgba(0,0,0,0.9); }
-  .fp-sq.black-sq .fp-piece { color: #0f0f1a; text-shadow: 0 1px 2px rgba(255,255,255,0.2); }
-  .fp-piece-white { color: #f8f8ff !important; text-shadow: 0 0 2px #000, 0 1px 4px rgba(0,0,0,0.9) !important; }
-  .fp-piece-black { color: #111 !important; }
+  .fp-piece { font-size: 2.6rem; line-height: 1; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+  .fp-piece iconify-icon { font-size: inherit; width: 1em; height: 1em; display: block; pointer-events: none; }
   @keyframes fpCapture { 0%{transform:scale(1.5);opacity:.5} 100%{transform:scale(0);opacity:0} }
   .fp-capture-anim { animation: fpCapture 0.3s ease-out forwards; }
   @media (max-width: 500px) {
@@ -207,27 +211,41 @@
   }
 
   @media (max-width: 560px) {
-    .home-cards-row { grid-template-columns: 1fr; max-width: 380px; }
+    .home-cards-row { grid-template-columns: repeat(2, 1fr); max-width: 100%; gap: 10px; }
     .home-cards-row .home-card:last-child:nth-child(odd) { grid-column: auto; max-width: 100%; justify-self: auto; }
+    .home-card { padding: 16px 12px 14px; }
+    .home-card-icon { font-size: 2rem; margin-bottom: 6px; }
+    .home-card h2 { font-size: 0.9rem; margin-bottom: 4px; }
+    .home-card p { font-size: 0.73rem; margin-bottom: 12px; }
+    .btn-home { padding: 8px 10px; font-size: 0.78rem; }
   }
 
-  /* ══ Back nav ══ */
-  .nav-back-bar {
-    background: var(--surface2); border-bottom: 1px solid var(--border); padding: 8px 20px;
-    display: flex; align-items: center; justify-content: space-between;
+  /* ══ Header home button (game pages) ══ */
+  .header-home-btn {
+    position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer;
+    color: var(--text-dim); display: flex; align-items: center;
+    padding: 8px; border-radius: 10px; z-index: 2;
+    transition: background 0.15s, color 0.15s;
   }
-  .nav-game-title {
-    font-size: 1rem; font-weight: 800; color: var(--text);
-    display: flex; align-items: center; gap: 6px;
-    position: absolute; left: 50%; transform: translateX(-50%);
+  .header-home-btn:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+  .header-home-btn iconify-icon { font-size: 1.6rem; width: 1.6rem; height: 1.6rem; pointer-events: none; }
+
+  /* ══ Game subtitle in header ══ */
+  .page-game-name {
+    margin-top: 5px; font-size: 0.95rem; font-weight: 700;
+    color: var(--text-dim); position: relative; z-index: 1;
   }
-  .nav-back-bar { position: relative; }
+
+  /* ══ Logo icon in h1 ══ */
+  .logo-icon { font-size: 2rem; width: 1em; height: 1em; vertical-align: middle; pointer-events: none;
+    color: var(--cyan-l); filter: drop-shadow(0 0 6px rgba(34,211,238,0.3)); }
 
   /* ══ Game layout ══ */
   .game-main {
-    flex: 1; max-width: 1120px; margin: 0 auto;
+    flex: 1; max-width: 1300px; margin: 0 auto;
     padding: 20px 16px 40px; width: 100%;
-    display: grid; grid-template-columns: 1fr 265px; gap: 20px; align-items: start;
+    display: grid; grid-template-columns: 1fr 220px 220px; gap: 16px; align-items: start;
   }
 
   /* ══ Board section card ══ */
@@ -273,8 +291,9 @@
 
   /* ══ Piece styles ══ */
   .piece { font-size: 2.4rem; line-height: 1; display: block; pointer-events: none; }
-  .white-piece { color: #f8f8ff; text-shadow: 0 0 2px #000, 0 1px 4px rgba(0,0,0,0.9), 1px 1px 0 #333; }
-  .black-piece { color: #0f0f1a; text-shadow: 0 1px 2px rgba(255,255,255,0.2); }
+  .piece iconify-icon { font-size: inherit; width: 1em; height: 1em; display: block; pointer-events: none; }
+  .white-piece { color: #f8f8ff; filter: drop-shadow(0 0 2px #000) drop-shadow(0 1px 3px rgba(0,0,0,0.9)); }
+  .black-piece { color: #111; filter: drop-shadow(0 1px 2px rgba(255,255,255,0.18)); }
   @keyframes pieceLand { 0%{transform:scale(1.35);opacity:.7} 60%{transform:scale(.9);opacity:1} 100%{transform:scale(1);opacity:1} }
   .piece-anim { animation: pieceLand 0.22s cubic-bezier(.4,0,.2,1); }
 
@@ -356,8 +375,20 @@
   @keyframes barFlash { 0%{opacity:0} 30%{opacity:1} 100%{opacity:1} }
   .bar-placed { animation: barFlash 0.25s ease-out; }
 
+  /* ══ Status card (middle panel) ══ */
+  .status-card {
+    background: var(--surface); border-radius: var(--r);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4); border: 1px solid var(--border);
+    padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;
+  }
+  .status-card-title {
+    font-size: 0.68rem; font-weight: 700; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: .07em; margin-bottom: 2px;
+    border-bottom: 1px solid var(--border); padding-bottom: 8px;
+  }
+
   /* ══ Side panel ══ */
-  .side-panel { display: flex; flex-direction: column; gap: 12px; width: 265px; }
+  .side-panel { display: flex; flex-direction: column; gap: 12px; width: 220px; }
   .side-tabs-card {
     background: var(--surface); border-radius: var(--r);
     box-shadow: 0 4px 20px rgba(0,0,0,0.4); overflow: hidden;
@@ -455,8 +486,8 @@
   .kt-sq.current .kt-sq-num, .kt-sq.visited .kt-sq-num { color: #fff; opacity: 1; }
   .kt-sq.current .kt-sq-num { color: #fff; }
   .kt-sq.visited .kt-sq-num { color: rgba(34,211,238,0.9); }
-  .kt-piece { font-size: 2.1rem; line-height: 1; pointer-events: none; }
-  .kt-sq.current .kt-piece { filter: brightness(12); }
+  .kt-piece { font-size: 2.1rem; line-height: 1; display: flex; align-items: center; justify-content: center; pointer-events: none; color: #fff; filter: drop-shadow(0 0 4px rgba(255,255,255,0.4)); }
+  .kt-piece iconify-icon { font-size: inherit; width: 1em; height: 1em; display: block; pointer-events: none; }
 
   .kt-stats {
     display: flex; gap: 14px; padding: 10px 16px;
@@ -472,12 +503,13 @@
   @media (max-width: 440px) { #kt-board { grid-template-columns: repeat(8,36px); } .kt-sq { width:36px;height:36px; } .kt-piece{font-size:1.28rem;} }
 
   /* ══ Responsive ══ */
-  @media (max-width: 860px) { .game-main { grid-template-columns: 1fr; padding: 14px 12px 30px; } .side-panel { width: 100%; } }
+  @media (max-width: 1020px) { .game-main { grid-template-columns: 1fr 210px; } }
+  @media (max-width: 860px) { .game-main { grid-template-columns: 1fr; padding: 14px 12px 30px; } .side-panel { width: 100%; } .status-card { display: none; } }
   @media (max-width: 600px) {
     .side-panel > .side-tabs-card:nth-child(n+2) { display: none; }
     .sq { width: 42px; height: 42px; } #board, #ws-board { grid-template-columns: repeat(8,42px); }
     .piece { font-size: 1.52rem; } .rank-label-item { height: 42px; } .file-label-item { width: 42px; }
-    .board-actions { flex-wrap: nowrap; } .turn-banner { margin: 0 10px 10px; font-size: 0.86rem; } header h1 { font-size: 1.5rem; }
+    .board-actions { flex-wrap: nowrap; } .turn-banner { margin: 0 10px 10px; font-size: 0.86rem; } header h1 { font-size: 1.5rem; } .logo-icon { font-size: 1.5rem; }
   }
   @media (max-width: 440px) {
     .sq { width: 36px; height: 36px; } #board, #ws-board { grid-template-columns: repeat(8,36px); }
@@ -488,9 +520,9 @@
 <body>
 
 <!-- ════════════ HOME PAGE ════════════ -->
-<div id="page-home" class="page active">
+<div id="page-home" class="page">
   <header>
-    <h1>♞ ChessBits</h1>
+    <h1><iconify-icon icon="material-symbols-light:chess-knight" class="logo-icon"></iconify-icon> ChessBits</h1>
     <p id="home-tagline"></p>
   </header>
   <div class="home-main">
@@ -499,31 +531,31 @@
         <span class="home-card-icon">♟</span>
         <h2>שחמט רגיל</h2>
         <p>שחק שחמט קלאסי — נגד חבר על אותו המסך, או מול המחשב ברמות קושי שונות. כולל כל כללי השחמט המלאים.</p>
-        <button class="btn-home" id="btn-go-game">▶ למשחק שחמט רגיל</button>
+        <button class="btn-home" id="btn-go-game" type="button"><iconify-icon icon="material-symbols-light:chess-pawn"></iconify-icon> שחמט רגיל</button>
       </div>
       <div class="home-card" id="home-card-ws">
         <span class="home-card-icon">🐺</span>
         <h2>זאב וכבשים</h2>
         <p>משחק אסטרטגי א-סימטרי — זאב אחד מול 4 כבשים על ריבועים כהים. הזאב מנסה לחצות; הכבשים מנסות לחסום.</p>
-        <button class="btn-home btn-home-green" id="btn-go-ws">▶ למשחק זאב וכבשים</button>
+        <button class="btn-home btn-home-green" id="btn-go-ws" type="button"><iconify-icon icon="mdi:dog-side"></iconify-icon> זאב וכבשים</button>
       </div>
       <div class="home-card" id="home-card-bar">
         <span class="home-card-icon">🚧</span>
         <h2>חסימת שערים</h2>
         <p>מרוץ אסטרטגי על לוח 9×9 — הגע לצד השני לפני יריבך. בכל תור: זוז צעד אחד <b>או</b> הנח חומה לחסימה.</p>
-        <button class="btn-home btn-home-orange" id="btn-go-bar">▶ למשחק חסימת שערים</button>
+        <button class="btn-home btn-home-orange" id="btn-go-bar" type="button"><iconify-icon icon="mdi:barrier"></iconify-icon> חסימת שערים</button>
       </div>
       <div class="home-card" id="home-card-kt">
         <span class="home-card-icon">♞</span>
         <h2>מסע הפרש</h2>
         <p>אתגר בודד קלאסי — הוליך את הפרש על פני כל 64 המשבצות, כל אחת בדיוק פעם אחת. תוכל לחזור לנקודת ההתחלה?</p>
-        <button class="btn-home btn-home-purple" id="btn-go-kt">▶ למסע הפרש</button>
+        <button class="btn-home btn-home-purple" id="btn-go-kt" type="button"><iconify-icon icon="material-symbols-light:chess-knight"></iconify-icon> מסע הפרש</button>
       </div>
       <div class="home-card" id="home-card-fp">
         <span class="home-card-icon">🎯</span>
         <h2>ארבעת הרגלים</h2>
         <p>לוח 4×4 עם 16 כלים — הזז כלים לבנים לפי כללי שחמט עד שהפרש לוכד את כל 4 הרגלים השחורים!</p>
-        <button class="btn-home btn-home-teal" id="btn-go-fp">▶ למשחק ארבעת הרגלים</button>
+        <button class="btn-home btn-home-teal" id="btn-go-fp" type="button"><iconify-icon icon="mdi:target"></iconify-icon> ארבעת הרגלים</button>
       </div>
     </div>
   </div>
@@ -536,18 +568,18 @@
 <!-- ════════════ GAME PAGE ════════════ -->
 <div id="page-game" class="page">
   <header>
-    <h1>♞ ChessBits</h1>
+    <button class="header-home-btn" onclick="goHome()" type="button" title="Home">
+      <iconify-icon icon="mdi:home-outline"></iconify-icon>
+    </button>
+    <h1><iconify-icon icon="material-symbols-light:chess-knight" class="logo-icon"></iconify-icon> ChessBits</h1>
+    <p class="page-game-name">שחמט</p>
   </header>
-  <div class="nav-back-bar">
-    <button onclick="goHome()" style="background:none;border:none;cursor:pointer;color:var(--text-dim);font-family:inherit;font-size:0.85rem;font-weight:600;display:flex;align-items:center;gap:6px;padding:4px 0;transition:color 0.15s;" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color='#94a3b8'">← חזרה לדף הבית</button>
-    <span class="nav-game-title">♟ שחמט</span>
-  </div>
 
   <div class="game-main">
     <div class="board-section">
       <!-- Black player bar -->
       <div class="player-bar" id="player-bar-black">
-        <div class="player-avatar"><span class="piece black-piece" style="font-size:1.3rem">♟</span></div>
+        <div class="player-avatar"><span class="piece black-piece" style="font-size:1.3rem"><iconify-icon icon="material-symbols-light:chess-pawn" style="font-size:1.3rem;width:1.3rem;height:1.3rem;display:block;pointer-events:none"></iconify-icon></span></div>
         <div style="flex:1">
           <div class="player-name">שחור</div>
           <div class="captured-pieces" id="cap-black"></div>
@@ -556,7 +588,7 @@
       </div>
 
       <!-- Turn banner -->
-      <div id="chess-turn-banner" class="turn-banner white">
+      <div id="chess-turn-banner" class="turn-banner white" style="display:none">
         <span class="tb-dot" id="chess-tb-dot" style="background:#e2e8f0;border:2px solid #94a3b8"></span>
         <span id="chess-tb-text">תור הלבן</span>
       </div>
@@ -573,7 +605,7 @@
 
       <!-- White player bar -->
       <div class="player-bar bottom" id="player-bar-white">
-        <div class="player-avatar white-player"><span class="piece white-piece" style="font-size:1.3rem;text-shadow:0 0 2px #888,0 1px 3px rgba(0,0,0,0.6)">♙</span></div>
+        <div class="player-avatar white-player"><span class="piece white-piece" style="font-size:1.3rem"><iconify-icon icon="material-symbols-light:chess-pawn" style="font-size:1.3rem;width:1.3rem;height:1.3rem;display:block;pointer-events:none"></iconify-icon></span></div>
         <div style="flex:1">
           <div class="player-name">לבן</div>
           <div class="captured-pieces" id="cap-white"></div>
@@ -583,9 +615,23 @@
 
       <!-- Board actions -->
       <div class="board-actions">
-        <button class="btn btn-secondary" onclick="undoMove()" style="font-size:0.82rem">↩ בטל</button>
-        <button class="btn btn-secondary" onclick="flipBoard()" style="font-size:0.82rem">🔃 הפוך</button>
-        <button class="btn btn-danger" onclick="confirmNewGame('chess')" style="font-size:0.82rem">🔄 חדש</button>
+        <button class="btn btn-secondary" onclick="undoMove()" style="font-size:0.82rem" type="button"><iconify-icon icon="mdi:undo-variant"></iconify-icon> בטל</button>
+        <button class="btn btn-secondary" onclick="flipBoard()" style="font-size:0.82rem" type="button"><iconify-icon icon="mdi:swap-vertical"></iconify-icon> הפוך</button>
+        <button class="btn btn-danger" onclick="confirmNewGame('chess')" style="font-size:0.82rem" type="button"><iconify-icon icon="mdi:refresh"></iconify-icon> חדש</button>
+      </div>
+    </div>
+
+    <!-- Status card -->
+    <div class="status-card">
+      <div class="status-card-title">סטטוס משחק</div>
+      <div id="status-text" style="font-size:0.95rem;font-weight:700;color:var(--text)">תור הלבן</div>
+      <div>
+        <div style="font-size:0.68rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">שבויים — שחור</div>
+        <div style="font-size:0.85rem;color:var(--text-dim);min-height:20px" id="cap-black-tab"></div>
+      </div>
+      <div>
+        <div style="font-size:0.68rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">שבויים — לבן</div>
+        <div style="font-size:0.85rem;color:var(--text-dim);min-height:20px" id="cap-white-tab"></div>
       </div>
     </div>
 
@@ -593,26 +639,37 @@
     <div class="side-panel">
       <div class="side-tabs-card">
         <div class="tab-bar">
-          <button class="tab-btn active" onclick="switchTab('chess','game',this)">🎮 משחק</button>
-          <button class="tab-btn" onclick="switchTab('chess','settings',this)">⚙️ הגדרות</button>
-          <button class="tab-btn" onclick="switchTab('chess','history',this)">📜 היסטוריה</button>
+          <button class="tab-btn active" onclick="switchTab('chess','howto',this)" type="button"><iconify-icon icon="mdi:help-circle-outline"></iconify-icon> איך משחקים?</button>
+          <button class="tab-btn" onclick="switchTab('chess','settings',this)" type="button"><iconify-icon icon="mdi:cog-outline"></iconify-icon> הגדרות</button>
+          <button class="tab-btn" onclick="switchTab('chess','history',this)" type="button"><iconify-icon icon="mdi:history"></iconify-icon> היסטוריה</button>
         </div>
-        <div id="chess-tab-game" class="tab-pane active">
-          <div id="status-text" style="font-size:0.92rem;font-weight:600;color:var(--text);margin-bottom:12px;">תור הלבן</div>
-          <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em">כלים שבויים — שחור</div>
-          <div style="font-size:0.82rem;color:var(--text-dim);min-height:20px;margin-bottom:10px" id="cap-black-tab"></div>
-          <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em">כלים שבויים — לבן</div>
-          <div style="font-size:0.82rem;color:var(--text-dim);min-height:20px" id="cap-white-tab"></div>
+        <div id="chess-tab-howto" class="tab-pane active" style="font-size:0.82rem;color:var(--text-dim);line-height:1.75;padding:14px">
+          <p style="font-weight:700;color:var(--text);margin-bottom:8px">שחמט קלאסי על לוח 8×8</p>
+          <p style="margin-bottom:6px">כל שחקן שולט על 16 כלים: מלך, מלכה, 2 צריחים, 2 רצים, 2 פרשים ו-8 רגלים. הלבן תמיד מתחיל.</p>
+          <p style="margin-bottom:6px"><b>מטרה:</b> להביא את המלך היריב למט — מצב שבו המלך מאויים ואין לו מנוס.</p>
+          <p style="margin-bottom:6px"><b>כלי מיוחדים:</b></p>
+          <p style="margin-bottom:3px">♟ <b>רגלי</b> — זז קדימה, לוכד אלכסונית. בפתיחה יכול לזוז 2 משבצות.</p>
+          <p style="margin-bottom:3px">♞ <b>פרש</b> — זז ב-L, קופץ מעל כלים.</p>
+          <p style="margin-bottom:3px">♝ <b>רץ</b> — זז אלכסונית כמה שרוצה.</p>
+          <p style="margin-bottom:3px">♜ <b>צריח</b> — זז ישר (אופקי/אנכי).</p>
+          <p style="margin-bottom:3px">♛ <b>מלכה</b> — משלבת צריח ורץ.</p>
+          <p style="margin-bottom:6px">♚ <b>מלך</b> — משבצת אחת בכל כיוון.</p>
+          <p style="margin-bottom:3px">🏰 <b>הצרחה</b> — מלך + צריח מחליפים מקומות.</p>
+          <p style="margin-bottom:3px">⚡ <b>אנפסון</b> — לכידת רגלי שזז 2 משבצות.</p>
+          <p style="margin-bottom:6px">👑 <b>קידום</b> — רגלי בשורה אחרונה הופך לכלי חזק.</p>
+          <p style="padding:7px 9px;background:rgba(255,255,255,0.04);border-radius:8px;font-size:0.76rem">
+            <b>הגדרות:</b> שני שחקנים או נגד מחשב ברמות קל / בינוני / קשה.
+          </p>
         </div>
         <div id="chess-tab-settings" class="tab-pane">
           <div class="settings-section">
             <div class="settings-label">מצב משחק</div>
             <div class="mode-pills">
-              <button class="mode-pill active" id="chess-vs-pvp" onclick="chessSetVs('pvp')">👥 שני שחקנים</button>
-              <button class="mode-pill" id="chess-vs-ai" onclick="chessSetVs('ai')">🤖 נגד מחשב</button>
+              <button class="mode-pill" id="chess-vs-pvp" onclick="chessSetVs('pvp')"><iconify-icon icon="mdi:account-multiple-outline"></iconify-icon> שני שחקנים</button>
+              <button class="mode-pill active" id="chess-vs-ai" onclick="chessSetVs('ai')"><iconify-icon icon="mdi:robot-outline"></iconify-icon> נגד מחשב</button>
             </div>
           </div>
-          <div class="settings-difficulty hidden" id="chess-difficulty">
+          <div class="settings-difficulty" id="chess-difficulty">
             <div class="settings-label">רמת קושי</div>
             <div class="mode-pills">
               <button class="mode-pill active" id="chess-diff-easy" onclick="chessSetDiff('easy')">קל</button>
@@ -623,20 +680,6 @@
         </div>
         <div id="chess-tab-history" class="tab-pane" style="padding:10px 12px">
           <div id="move-list"><div style="color:var(--text-muted);font-size:0.82rem;padding:4px 0">אין מהלכים עדיין</div></div>
-        </div>
-      </div>
-
-      <!-- Rules card — always visible below tabs -->
-      <div class="side-tabs-card" style="margin-top:12px">
-        <div style="padding:14px 16px">
-          <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.07em">כללי המשחק</div>
-          <div style="font-size:0.82rem;color:var(--text-dim);line-height:1.8">
-            <p>♟ <b>זוז</b> — כלי זזים לפי כללי שחמט</p>
-            <p>♟ <b>אנפסון</b> — לכידת רץ אויב</p>
-            <p>♟ <b>הצרחה</b> — מלך ורגלי בו זמנית</p>
-            <p>♟ <b>קידום</b> — רגלי מגיע לשורה אחרונה</p>
-            <p style="margin-top:6px">🏆 <b>ניצחון</b> — מט למלך היריב</p>
-          </div>
         </div>
       </div>
     </div>
@@ -713,13 +756,7 @@ function drawChessPattern(svgEl) {
   svgEl.innerHTML = out;
 }
 
-function drawAllPatterns() {
-  // SVG patterns removed
-  return;
-  document.querySelectorAll('.chess-pattern').forEach(drawChessPattern);
-  const fpH = document.getElementById('fp-hdr-svg');
-
-}
+function drawAllPatterns() {}
 
 // Draw on load and on resize
 window.addEventListener('load', drawAllPatterns);
@@ -728,24 +765,28 @@ window.addEventListener('resize', drawAllPatterns);
 // ══════════════════════════════════════
 //  NAVIGATION
 // ══════════════════════════════════════
+const SCREEN_IDS = ['page-home', 'page-game', 'page-ws', 'page-bar', 'page-kt', 'page-fp'];
+const GAME_PLAYER_MODE = {
+  chess: 'dual', ws: 'dual', bar: 'dual', kt: 'single', fp: 'single'
+};
+
+function showScreen(id) {
+  SCREEN_IDS.forEach(sid => {
+    const el = document.getElementById(sid);
+    if (el) el.style.display = (sid === id) ? 'flex' : 'none';
+  });
+  try { window.scrollTo(0, 0); } catch(e) {}
+}
+
 function goToGame() {
-  document.getElementById('page-home').classList.remove('active');
-  document.getElementById('page-game').classList.add('active');
-  history.pushState({ screen: 'chess' }, '');
-  // Re-draw patterns now that game page is visible and has real dimensions
+  showScreen('page-game');
   requestAnimationFrame(() => {
     document.querySelectorAll('#page-game .chess-pattern').forEach(drawChessPattern);
   });
   newGame();
 }
 function goHome() {
-  document.getElementById('page-game').classList.remove('active');
-  document.getElementById('page-ws').classList.remove('active');
-  document.getElementById('page-bar').classList.remove('active');
-  document.getElementById('page-kt').classList.remove('active');
-  document.getElementById('page-fp').classList.remove('active');
-  document.getElementById('page-fp').classList.remove('active');
-  document.getElementById('page-home').classList.add('active');
+  showScreen('page-home');
   ktStopTimer();
 }
 
@@ -755,6 +796,14 @@ function goHome() {
 const PIECE_UNICODE = {
   wK:'♔',wQ:'♕',wR:'♖',wB:'♗',wN:'♘',wP:'♙',
   bK:'♚',bQ:'♛',bR:'♜',bB:'♝',bN:'♞',bP:'♟'
+};
+const PIECE_ICON = {
+  wK:'material-symbols-light:chess-king',   wQ:'material-symbols-light:chess-queen',
+  wR:'material-symbols-light:chess-rook',   wB:'material-symbols-light:chess-bishop',
+  wN:'material-symbols-light:chess-knight', wP:'material-symbols-light:chess-pawn',
+  bK:'material-symbols-light:chess-king',   bQ:'material-symbols-light:chess-queen',
+  bR:'material-symbols-light:chess-rook',   bB:'material-symbols-light:chess-bishop',
+  bN:'material-symbols-light:chess-knight', bP:'material-symbols-light:chess-pawn',
 };
 const INIT_BOARD = [
   ['bR','bN','bB','bQ','bK','bB','bN','bR'],
@@ -768,7 +817,7 @@ const INIT_BOARD = [
 ];
 
 let board, turn, selected, highlights, legalMoves, chessHistory, moveNotations;
-let flipped = true, gameMode = 'pvp', gameOver = false;
+let flipped = true, gameMode = 'ai-easy', gameOver = false;
 let enPassant = null;   // [row, col] of the square a pawn can capture INTO via e.p.
 let castlingRights, lastFrom = null, lastTo = null, pendingPromotion = null;
 
@@ -944,7 +993,7 @@ function renderGrid(opts) {
   if (fl) {
     fl.innerHTML = '';
     for (let i = 0; i < size; i++) {
-      const ci = flipped ? size - 1 - i : i;
+      const ci = flipped ? i : size - 1 - i;
       const d = document.createElement('div');
       d.className = 'file-label-item';
       d.textContent = fileLabel ? fileLabel(ci) : 'abcdefgh'[ci];
@@ -955,7 +1004,7 @@ function renderGrid(opts) {
   for (let ri = 0; ri < size; ri++) {
     for (let ci = 0; ci < size; ci++) {
       const r = flipped ? ri : size - 1 - ri;
-      const c = flipped ? size - 1 - ci : ci;
+      const c = flipped ? ci : size - 1 - ci;
       const sq = document.createElement('div');
       const isLight = (r + c) % 2 === 0;
       sq.className = 'sq ' + (isLight ? 'light' : 'dark');
@@ -977,6 +1026,7 @@ function renderBoard() {
     fileLabelsId: 'file-labels',
     size: 8,
     flipped,
+    rankLabel: ri => 8 - ri,
     getCellClass(r, c) {
       const classes = [];
       if (selected && selected[0]===r && selected[1]===c) classes.push('selected');
@@ -994,7 +1044,10 @@ function renderBoard() {
       const p = board[r][c], col = gc(p);
       const span = document.createElement('span');
       span.className = 'piece ' + (col==='w' ? 'white-piece' : 'black-piece');
-      span.textContent = PIECE_UNICODE[p];
+      const icon = document.createElement('iconify-icon');
+      icon.setAttribute('icon', PIECE_ICON[p]);
+      icon.style.pointerEvents = 'none';
+      span.appendChild(icon);
       return span;
     },
     onCellClick: onSqClick,
@@ -1206,7 +1259,7 @@ function updateCaptures(){
     const diff=v-(on[k]||0); if(diff<=0) return;
     const cls=k[0]==='w'?'white-piece':'black-piece';
     const arr=k[0]==='w'?capB:capW;
-    for(let i=0;i<diff;i++) arr.push(`<span class="piece ${cls}" style="font-size:0.85rem">${PIECE_UNICODE[k]}</span>`);
+    for(let i=0;i<diff;i++) arr.push(`<span class="piece ${cls}" style="font-size:0.85rem"><iconify-icon icon="${PIECE_ICON[k]}" style="font-size:0.85rem;width:0.85rem;height:0.85rem;display:block;pointer-events:none"></iconify-icon></span>`);
   });
   const cbHtml = capB.join(''), cwHtml = capW.join('');
   document.getElementById('cap-black').innerHTML = cbHtml;
@@ -1217,10 +1270,10 @@ function updateCaptures(){
   if (cwt) cwt.innerHTML = cwHtml || '<span style="color:var(--text-muted);font-size:0.78rem">אין כלים שבויים</span>';
 }
 function showPromoModal(col){
-  const pcs=col==='w'?[{t:'Q',s:'♕'},{t:'R',s:'♖'},{t:'B',s:'♗'},{t:'N',s:'♘'}]:[{t:'Q',s:'♛'},{t:'R',s:'♜'},{t:'B',s:'♝'},{t:'N',s:'♞'}];
+  const pcs=[{t:'Q',icon:'chess-queen'},{t:'R',icon:'chess-rook'},{t:'B',icon:'chess-bishop'},{t:'N',icon:'chess-knight'}];
   const cls=col==='w'?'white-piece':'black-piece';
   const bg=col==='w'?'dark-bg':'';
-  document.getElementById('promo-pieces').innerHTML=pcs.map(p=>`<div class="promo-piece ${bg}" onclick="choosePromo('${p.t}')"><span class="piece ${cls}">${p.s}</span></div>`).join('');
+  document.getElementById('promo-pieces').innerHTML=pcs.map(p=>`<div class="promo-piece ${bg}" onclick="choosePromo('${p.t}')"><span class="piece ${cls}"><iconify-icon icon="material-symbols-light:${p.icon}" style="pointer-events:none"></iconify-icon></span></div>`).join('');
   document.getElementById('promo-modal').classList.add('open');
 }
 function choosePromo(type){
@@ -1256,7 +1309,7 @@ let wsSelected = null;
 let wsHighlights = [];
 let wsHistory = [];
 let wsMoveLog = [];
-let wsMode = 'pvp';  // pvp | ai-wolf | ai-sheep
+let wsMode = 'ai-easy';  // pvp | ai-wolf | ai-sheep
 let wsAiDifficulty = 'easy';  // easy | medium | hard
 let wsOver = false;
 
@@ -1456,6 +1509,8 @@ function wsUpdateStatus() {
   if (!el) return;
   if (wsOver) return;
   el.textContent = 'תור ' + (wsTurn === 'wolf' ? 'הזאב 🐺' : 'הכבשים 🐑');
+  const mc = document.getElementById('ws-move-count');
+  if (mc) mc.textContent = 'מהלך ' + wsMoveLog.length;
 }
 
 function wsUpdateMoveList() {
@@ -1568,9 +1623,7 @@ function wsAiMove() {
 }
 
 function goToWS() {
-  document.getElementById('page-home').classList.remove('active');
-  document.getElementById('page-ws').classList.add('active');
-  history.pushState({ screen: 'ws' }, '');
+  showScreen('page-ws');
   requestAnimationFrame(() => {
     document.querySelectorAll('#page-ws .chess-pattern').forEach(drawChessPattern);
   });
@@ -1578,9 +1631,6 @@ function goToWS() {
 }
 
 
-// ══════════════════════════════════════
-//  BARRICADE ENGINE
-// ══════════════════════════════════════
 // ══════════════════════════════════════════════════════════════
 //  BARRICADE (Quoridor) ENGINE
 //  9×9 board. Two players: Blue starts row 8 (bottom), goal row 0
@@ -1605,7 +1655,7 @@ let barTurn = 'blue';
 let barAction = 'move';   // 'move' | 'wall'
 let barOrient = 'H';      // 'H' | 'V'
 let barOver = false;
-let barMode = 'pvp';
+let barMode = 'ai-easy';
 let barAiDifficulty = 'easy';  // easy | medium | hard
 let barHistory = [];
 let barHover = null;      // {r,c} for wall preview
@@ -2078,6 +2128,10 @@ function barUpdateUI() {
   const ow = document.getElementById('bar-walls-orange');
   if (bw) bw.textContent = '🚧 ' + barWallsLeft.blue;
   if (ow) ow.textContent = '🚧 ' + barWallsLeft.orange;
+  const bwStat = document.getElementById('bar-walls-blue-stat');
+  const owStat = document.getElementById('bar-walls-orange-stat');
+  if (bwStat) bwStat.textContent = '🔵 חומות: ' + barWallsLeft.blue;
+  if (owStat) owStat.textContent = '🟠 חומות: ' + barWallsLeft.orange;
   const tb = document.getElementById('bar-turn-blue');
   const to = document.getElementById('bar-turn-orange');
   if (tb) tb.classList.toggle('active', barTurn === 'blue' && !barOver);
@@ -2175,11 +2229,8 @@ function barAiMove() {
   else barDoWall(bestAction.r, bestAction.c, bestAction.orient, true);
 }
 
-// ── Navigation ──
 function goToBar() {
-  document.getElementById('page-home').classList.remove('active');
-  document.getElementById('page-bar').classList.add('active');
-  history.pushState({ screen: 'bar' }, '');
+  showScreen('page-bar');
   // Two rAF frames: first lets the page render & get real dimensions,
   // second draws after canvas has actual layout size
   requestAnimationFrame(() => {
@@ -2192,7 +2243,7 @@ function goToBar() {
 }
 
 window.addEventListener('resize', () => {
-  if (document.getElementById('page-bar').classList.contains('active')) {
+  if (document.getElementById('page-bar').style.display !== 'none') {
     barResizeCanvas();
     if (barCtx) {
       barCtx = barCanvas.getContext('2d');
@@ -2275,10 +2326,10 @@ function confirmNewGame(which) {
 }
 
 function handleGameOverNewGame() {
-  if (document.getElementById('page-fp').classList.contains('active')) fpNewGame();
-  else if (document.getElementById('page-kt').classList.contains('active')) ktNewGame();
-  else if (document.getElementById('page-ws').classList.contains('active')) wsNewGame();
-  else if (document.getElementById('page-bar').classList.contains('active')) barNewGame();
+  if (document.getElementById('page-fp').style.display !== 'none') fpNewGame();
+  else if (document.getElementById('page-kt').style.display !== 'none') ktNewGame();
+  else if (document.getElementById('page-ws').style.display !== 'none') wsNewGame();
+  else if (document.getElementById('page-bar').style.display !== 'none') barNewGame();
   else newGame();
 }
 function closeConfirm() {
@@ -2286,8 +2337,9 @@ function closeConfirm() {
   _pendingNewGame = null;
 }
 function doConfirmNewGame() {
+  const fn = _pendingNewGame;
   closeConfirm();
-  if (typeof _pendingNewGame === 'function') _pendingNewGame();
+  if (typeof fn === 'function') fn();
 }
 
 // ══════════════════════════════════════
@@ -2295,22 +2347,12 @@ function doConfirmNewGame() {
 // ══════════════════════════════════════
 function updateChessTurnBanner(t, over) {
   const banner = document.getElementById('chess-turn-banner');
-  const dot    = document.getElementById('chess-tb-dot');
-  const txt    = document.getElementById('chess-tb-text');
   const pbW = document.getElementById('player-bar-white');
   const pbB = document.getElementById('player-bar-black');
-  if (!banner) return;
-  if (over) { banner.style.display = 'none'; return; }
-  banner.style.display = '';
+  if (banner) banner.style.display = 'none';
   if (t === 'w') {
-    banner.className = 'turn-banner white';
-    dot.style.background = '#fff'; dot.style.border = '2px solid #94a3b8';
-    txt.textContent = 'תור הלבן';
     if (pbW) pbW.classList.add('is-turn'); if (pbB) pbB.classList.remove('is-turn');
   } else {
-    banner.className = 'turn-banner black';
-    dot.style.background = '#fff'; dot.style.border = '2px solid #64748b';
-    txt.textContent = 'תור השחור';
     if (pbB) pbB.classList.add('is-turn'); if (pbW) pbW.classList.remove('is-turn');
   }
 }
@@ -2320,22 +2362,12 @@ function updateChessTurnBanner(t, over) {
 // ══════════════════════════════════════
 function updateWsTurnBanner(t, over) {
   const banner = document.getElementById('ws-turn-banner');
-  const txt    = document.getElementById('ws-tb-text');
   const bW = document.getElementById('ws-bar-wolf');
   const bS = document.getElementById('ws-bar-sheep');
-  if (!banner) return;
-  if (over) { banner.style.display = 'none'; return; }
-  banner.style.display = '';
-  const dot = document.getElementById('ws-tb-dot');
+  if (banner) banner.style.display = 'none';
   if (t === 'wolf') {
-    banner.className = 'turn-banner wolf';
-    if (dot) { dot.style.background = '#7f1d1d'; dot.style.borderColor = '#fca5a5'; }
-    txt.textContent = 'תור הזאב 🐺';
     if (bW) bW.classList.add('is-turn'); if (bS) bS.classList.remove('is-turn');
   } else {
-    banner.className = 'turn-banner sheep';
-    if (dot) { dot.style.background = '#475569'; dot.style.borderColor = '#94a3b8'; }
-    txt.textContent = 'תור הכבשים 🐑';
     if (bS) bS.classList.add('is-turn'); if (bW) bW.classList.remove('is-turn');
   }
 }
@@ -2345,22 +2377,12 @@ function updateWsTurnBanner(t, over) {
 // ══════════════════════════════════════
 function updateBarTurnStrip(t, over) {
   const strip = document.getElementById('bar-turn-strip');
-  const dot   = document.getElementById('bar-ts-dot');
-  const txt   = document.getElementById('bar-ts-text');
   const pbT = document.getElementById('bar-player-top');
   const pbB = document.getElementById('bar-player-bot');
-  if (!strip) return;
-  if (over) { strip.style.display = 'none'; return; }
-  strip.style.display = '';
+  if (strip) strip.style.display = 'none';
   if (t === 'blue') {
-    strip.className = 'turn-banner bar-blue';
-    dot.style.background = '#2563eb'; dot.style.borderColor = '#93c5fd';
-    txt.textContent = 'תור הכחול';
     if (pbB) pbB.classList.add('is-turn'); if (pbT) pbT.classList.remove('is-turn');
   } else {
-    strip.className = 'turn-banner bar-orange';
-    dot.style.background = '#f97316'; dot.style.borderColor = '#fdba74';
-    txt.textContent = 'תור הכתום';
     if (pbT) pbT.classList.add('is-turn'); if (pbB) pbB.classList.remove('is-turn');
   }
 }
@@ -2380,14 +2402,14 @@ function animatePieceAt(r, c) {
 
 
 // ══════════════════════════════════════════════════════════
-//  KNIGHT'S TOUR  —  מסע הפרש
+//  KNIGHT'S TOUR
 // ══════════════════════════════════════════════════════════
 let ktSize = 8;            // board size (5, 6, or 8)
 let ktBoard = [];          // -1 = unvisited, 0+ = visit order
 let ktPos = null;          // [r,c] current knight position, null = not started
 let ktMoves = 0;           // how many moves made
 let ktHistory = [];        // [{r,c}] for undo
-let ktMode = 'free';       // 'free' | 'timed'
+let ktMode = 'timed';      // 'free' | 'timed'
 let ktTimer = null;
 let ktSeconds = 0;
 let ktOver = false;
@@ -2443,6 +2465,7 @@ function ktOnClick(r, c) {
     ktUpdateMoveList();
     const undoBtn = document.getElementById('kt-btn-undo');
     if (undoBtn) undoBtn.disabled = false;
+    ktUpdateStatus(`מהלך ${ktMoves} — המשך`);
     return;
   }
 
@@ -2583,7 +2606,10 @@ function ktRender(highlightHint) {
       if (isCurrent) {
         const piece = document.createElement('span');
         piece.className = 'kt-piece';
-        piece.textContent = '♞';
+        const knightIcon = document.createElement('iconify-icon');
+        knightIcon.setAttribute('icon', 'material-symbols-light:chess-knight');
+        knightIcon.style.pointerEvents = 'none';
+        piece.appendChild(knightIcon);
         sq.appendChild(piece);
       }
 
@@ -2618,12 +2644,18 @@ function ktRender(highlightHint) {
     sq.style.width = sq.style.height = sqSize + 'px';
     // Scale piece and number font too
     const piece = sq.querySelector('.kt-piece');
-    if (piece) piece.style.fontSize = Math.max(sqSize * 0.55, 18) + 'px';
+    if (piece) {
+      const pSz = Math.max(sqSize * 0.55, 18) + 'px';
+      piece.style.fontSize = pSz;
+      const pIcon = piece.querySelector('iconify-icon');
+      if (pIcon) { pIcon.style.width = pSz; pIcon.style.height = pSz; }
+    }
     const num = sq.querySelector('.kt-sq-num');
     if (num) num.style.fontSize = Math.max(sqSize * 0.22, 9) + 'px';
   });
   if (rl) rl.querySelectorAll('.rank-label-item').forEach(d => d.style.height = sqSize+'px');
   if (fl) fl.querySelectorAll('.file-label-item').forEach(d => d.style.width = sqSize+'px');
+  ktUpdateStatusCard();
 }
 
 // ── Status ──
@@ -2634,8 +2666,15 @@ function ktUpdateStatus(msg, state) {
   const bannerTxt = document.getElementById('kt-tb-text');
   if (el) el.textContent = msg;
   if (bannerTxt) bannerTxt.textContent = msg;
+  const statusCard = document.getElementById('kt-status-text');
+  if (statusCard) statusCard.textContent = msg;
   if (banner) {
-    banner.className = 'turn-banner ' + (state === 'done' ? 'kt-done' : state === 'fail' ? 'kt-fail' : 'kt-active');
+    // Single-player: show banner only before first move (status card takes over after)
+    const hide = GAME_PLAYER_MODE.kt === 'single' && ktMoves >= 1;
+    banner.style.display = hide ? 'none' : '';
+    if (!hide) {
+      banner.className = 'turn-banner ' + (state === 'done' ? 'kt-done' : state === 'fail' ? 'kt-fail' : 'kt-active');
+    }
   }
   if (dot) {
     dot.style.background = state === 'done' ? '#16a34a' : state === 'fail' ? '#dc2626' : '#7c3aed';
@@ -2673,6 +2712,17 @@ function ktShowWin(closed) {
   }
 }
 
+// ── Status card helper ──
+function ktUpdateStatusCard() {
+  const el = document.getElementById('kt-status-text');
+  const mvEl = document.getElementById('kt-stat-moves');
+  const progEl = document.getElementById('kt-status-progress');
+  const bannerText = document.getElementById('kt-tb-text');
+  if (el && bannerText) el.textContent = bannerText.textContent;
+  if (mvEl) mvEl.textContent = ktMoves;
+  if (progEl) progEl.style.width = (ktMoves / (ktSize * ktSize) * 100) + '%';
+}
+
 // ── Timer ──
 function ktStartTimer() {
   ktStopTimer();
@@ -2681,7 +2731,10 @@ function ktStartTimer() {
 function ktStopTimer() { if (ktTimer) { clearInterval(ktTimer); ktTimer = null; } }
 function ktUpdateTimerDisplay() {
   const el = document.getElementById('kt-timer-val');
-  if (el) el.textContent = Math.floor(ktSeconds/60)+':'+String(ktSeconds%60).padStart(2,'0');
+  const formatted = Math.floor(ktSeconds/60)+':'+String(ktSeconds%60).padStart(2,'0');
+  if (el) el.textContent = formatted;
+  const statTimeEl = document.getElementById('kt-stat-time');
+  if (statTimeEl) statTimeEl.textContent = formatted;
 }
 
 // ── Best score ──
@@ -2717,19 +2770,15 @@ function ktSetSize(s) {
   ktNewGame();
 }
 
-// ── Navigation ──
 function goToKT() {
-  document.getElementById('page-home').classList.remove('active');
-  document.getElementById('page-kt').classList.add('active');
-  history.pushState({ screen: 'kt' }, '');
+  showScreen('page-kt');
   requestAnimationFrame(() => requestAnimationFrame(() => {
     document.querySelectorAll('#page-kt .chess-pattern').forEach(drawChessPattern);
     ktNewGame();
   }));
 }
-// Resize KT board when window resizes
 window.addEventListener('resize', () => {
-  if (document.getElementById('page-kt').classList.contains('active')) {
+  if (document.getElementById('page-kt').style.display !== 'none') {
     requestAnimationFrame(() => ktRender());
   }
 });
@@ -2753,7 +2802,7 @@ function setActivePill(prefix, group, val) {
 }
 
 // ══════════ CHESS ══════════
-let chessVs   = 'pvp';   // 'pvp' | 'ai'
+let chessVs   = 'ai';    // 'pvp' | 'ai'
 let chessDiff = 'easy';  // 'easy' | 'medium' | 'hard'
 
 function chessSetVs(v) {
@@ -2773,7 +2822,7 @@ function chessSetDiff(d) {
 }
 
 // ══════════ WOLF & SHEEP ══════════
-let wsVs   = 'pvp';   // 'pvp' | 'ai'
+let wsVs   = 'ai';    // 'pvp' | 'ai'
 let wsSide = 'wolf';  // 'wolf' | 'sheep'  (which side the HUMAN plays)
 let wsDiff = 'easy';  // 'easy' | 'medium' | 'hard'
 
@@ -2804,7 +2853,7 @@ function wsApplyAiMode() {
 }
 
 // ══════════ BARRICADE ══════════
-let barVs   = 'pvp';   // 'pvp' | 'ai'
+let barVs   = 'ai';    // 'pvp' | 'ai'
 let barDiff = 'easy';  // 'easy' | 'medium' | 'hard'
 
 function barSetVs(v) {
@@ -2841,15 +2890,19 @@ let fpCaptured   = 0;
 let fpMoves      = 0;
 let fpOver       = false;
 let fpDiff       = 'easy';  // easy | medium | hard
+let fpMode       = 'timed'; // 'free' | 'timed'
+let fpTimer      = null;
+let fpSeconds    = 0;
 let fpHistory    = [];      // [{board, sel, captured, moves}]
 let fpMoveLog    = [];      // strings for history tab
-let fpBest       = null;    // best move count
+let fpBest       = null;    // best move count (free mode)
+let fpBestTime   = null;    // best time in seconds (timed mode)
 
 // ── Initial board layout ──
 // Row 0 (top):    BP BP BP BP   — 4 black pawns
 // Row 1:          XX XX XX XX   — blocked row (no piece can land here)
-// Row 2:          WB WB WB WB   — 4 bishops (רצים)
-// Row 3:          WR WR WR WR   — 4 rooks (צריחים)
+// Row 2:          WB WB WB WB   — 4 bishops
+// Row 3:          WR WR WR WR   — 4 rooks
 // Row 4:          WP WP WP XX   — 3 white pawns + 1 blocked
 // Row 5 (bottom): WN XX XX XX   — 1 knight + 3 blocked
 const FP_INIT = [
@@ -2864,8 +2917,18 @@ const FP_INIT = [
 const FP_PIECE_GLYPH = {
   WN:'♞', WR:'♜', WB:'♝', WP:'♟', BP:'♟'
 };
+const FP_PIECE_ICON = {
+  WN: 'material-symbols-light:chess-knight',
+  WR: 'material-symbols-light:chess-rook',
+  WB: 'material-symbols-light:chess-bishop',
+  WP: 'material-symbols-light:chess-pawn',
+  BP: 'material-symbols-light:chess-pawn',
+};
 
 function fpNewGame() {
+  fpStopTimer();
+  fpSeconds  = 0;
+  fpUpdateTimerDisplay();
   fpBoard    = FP_INIT.map(row => [...row]);
   fpSelected = null;
   fpCaptured = 0;
@@ -2970,6 +3033,9 @@ function fpClickSquare(r, c) {
 }
 
 function fpDoMove(fr, fc, tr, tc) {
+  // Start timer on first move
+  if (fpMode === 'timed' && fpMoves === 0) fpStartTimer();
+
   // Save state for undo
   fpHistory.push({
     board: fpBoard.map(r=>[...r]),
@@ -3004,6 +3070,7 @@ function fpDoMove(fr, fc, tr, tc) {
   // Hard mode: check move limit
   if (fpDiff === 'hard' && fpMoves >= 25 && !fpOver) {
     fpOver = true;
+    fpStopTimer();
     fpSetBanner('נגמרו המהלכים! (25/25)', 'kt-fail');
     document.getElementById('fp-status').textContent = '❌ נגמרו המהלכים';
     setTimeout(() => showGameOverFP(false), 500);
@@ -3017,9 +3084,20 @@ function fpDoMove(fr, fc, tr, tc) {
 function fpCheckWin() {
   if (fpCaptured < 4) return;
   fpOver = true;
-  if (!fpBest || fpMoves < fpBest) {
-    fpBest = fpMoves;
-    document.getElementById('fp-best-score').textContent = `🏆 ${fpBest} מהלכים`;
+  fpStopTimer();
+  if (fpMode === 'timed') {
+    if (fpBestTime === null || fpSeconds < fpBestTime) {
+      fpBestTime = fpSeconds;
+      const bsEl = document.getElementById('fp-best-score');
+      const t = Math.floor(fpBestTime/60)+':'+String(fpBestTime%60).padStart(2,'0');
+      if (bsEl) bsEl.textContent = `⏱ ${t}`;
+    }
+  } else {
+    if (!fpBest || fpMoves < fpBest) {
+      fpBest = fpMoves;
+      const bsEl = document.getElementById('fp-best-score');
+      if (bsEl) bsEl.textContent = `🏆 ${fpBest} מהלכים`;
+    }
   }
   fpSetBanner('🎉 כל הרגלים נלכדו!', 'kt-done');
   setTimeout(() => showGameOverFP(true), 400);
@@ -3029,9 +3107,13 @@ function showGameOverFP(won) {
   const el = document.getElementById('game-over');
   document.getElementById('go-icon').textContent = won ? '🎯' : '💀';
   document.getElementById('go-title').textContent = won ? 'כל הרגלים נלכדו!' : 'נגמרו המהלכים';
-  document.getElementById('go-desc').textContent  = won
-    ? `ניצחת ב-${fpMoves} מהלכים!`
-    : 'נסה שוב עם פחות מהלכים';
+  if (won) {
+    const t = Math.floor(fpSeconds/60)+':'+String(fpSeconds%60).padStart(2,'0');
+    const timeStr = fpMode === 'timed' ? ` · ⏱ ${t}` : '';
+    document.getElementById('go-desc').textContent = `ניצחת ב-${fpMoves} מהלכים${timeStr}!`;
+  } else {
+    document.getElementById('go-desc').textContent = 'נסה שוב עם פחות מהלכים';
+  }
   el.classList.add('open');
   window._pendingNewGame = () => { fpNewGame(); };
 }
@@ -3054,6 +3136,33 @@ function fpSetDiff(d) {
   fpDiff = d;
   document.querySelectorAll('[id^="fp-diff-"]').forEach(b=>b.classList.remove('active'));
   document.getElementById('fp-diff-'+d).classList.add('active');
+  fpNewGame();
+}
+
+// ── Timer ──
+function fpStartTimer() {
+  fpStopTimer();
+  fpTimer = setInterval(() => { fpSeconds++; fpUpdateTimerDisplay(); }, 1000);
+}
+function fpStopTimer() { if (fpTimer) { clearInterval(fpTimer); fpTimer = null; } }
+function fpUpdateTimerDisplay() {
+  const formatted = Math.floor(fpSeconds/60)+':'+String(fpSeconds%60).padStart(2,'0');
+  const el = document.getElementById('fp-timer-val');
+  if (el) el.textContent = formatted;
+  const statEl = document.getElementById('fp-stat-time');
+  if (statEl) statEl.textContent = formatted;
+}
+
+// ── Mode ──
+function fpSetMode(m) {
+  fpMode = m;
+  document.querySelectorAll('[id^="fp-mode-"]').forEach(b=>b.classList.remove('active'));
+  const btn = document.getElementById('fp-mode-'+m);
+  if (btn) btn.classList.add('active');
+  const timerStat = document.getElementById('fp-timer-stat');
+  if (timerStat) timerStat.style.display = m === 'timed' ? '' : 'none';
+  const timeRow = document.getElementById('fp-time-row');
+  if (timeRow) timeRow.style.display = m === 'timed' ? '' : 'none';
   fpNewGame();
 }
 
@@ -3122,19 +3231,25 @@ function fpRender() {
       if (piece) {
         const pEl = document.createElement('span');
         pEl.className = 'fp-piece';
-        pEl.style.fontSize = Math.round(sz * 0.6) + 'px';
-        pEl.textContent = FP_PIECE_GLYPH[piece];
+        const iconSize = Math.round(sz * 0.6) + 'px';
+        pEl.style.fontSize = iconSize;
+        pEl.style.width = iconSize;
+        pEl.style.height = iconSize;
+        const iconEl = document.createElement('iconify-icon');
+        iconEl.setAttribute('icon', FP_PIECE_ICON[piece]);
+        iconEl.style.pointerEvents = 'none';
         if (piece === 'BP') {
           pEl.style.color = '#111';
-          pEl.style.textShadow = '0 1px 2px rgba(255,255,255,0.2)';
+          pEl.style.filter = 'drop-shadow(0 1px 2px rgba(255,255,255,0.2))';
         } else {
           pEl.style.color = '#f8f8ff';
-          pEl.style.textShadow = '0 0 2px #000, 0 1px 4px rgba(0,0,0,0.9), 1px 1px 0 #333';
+          pEl.style.filter = 'drop-shadow(0 0 2px #000) drop-shadow(0 1px 3px rgba(0,0,0,0.9))';
         }
         // Highlight knight in easy mode
         if (piece==='WN' && fpDiff==='easy') {
           pEl.style.filter = 'drop-shadow(0 0 6px rgba(34,211,238,0.9))';
         }
+        pEl.appendChild(iconEl);
         sq.appendChild(pEl);
       } else if (isMovable && !isCapture) {
         const dot = document.createElement('div');
@@ -3157,6 +3272,13 @@ function fpUpdateUI() {
   if (capEl) capEl.textContent = fpCaptured;
   if (movEl) movEl.textContent = fpMoves;
   if (prog)  prog.style.width = (fpCaptured/4*100)+'%';
+  // Also update bar IDs in kt-stats div
+  const capBar = document.getElementById('fp-captured-bar');
+  const movBar = document.getElementById('fp-moves-bar');
+  const progBar = document.getElementById('fp-progress-bar');
+  if (capBar) capBar.textContent = fpCaptured;
+  if (movBar) movBar.textContent = fpMoves;
+  if (progBar) progBar.style.width = (fpCaptured/4*100)+'%';
   // Captured display
   const captured = '♟'.repeat(fpCaptured) + '♙'.repeat(4-fpCaptured);
   if (capDisp) capDisp.innerHTML = captured.split('').map((c,i)=>
@@ -3180,9 +3302,14 @@ function fpUpdateUI() {
 function fpSetBanner(text, cls) {
   const b = document.getElementById('fp-turn-banner');
   if (!b) return;
-  b.className = 'turn-banner ' + cls;
-  b.style.margin = '8px 16px 4px';
-  document.getElementById('fp-tb-text').textContent = text;
+  // Single-player: show banner only before first move (status card takes over after)
+  const hide = GAME_PLAYER_MODE.fp === 'single' && fpMoves >= 1;
+  b.style.display = hide ? 'none' : '';
+  if (!hide) {
+    b.className = 'turn-banner ' + cls;
+    b.style.margin = '8px 16px 4px';
+    document.getElementById('fp-tb-text').textContent = text;
+  }
 }
 
 function fpUpdateMoveList() {
@@ -3201,14 +3328,11 @@ function fpUpdateMoveList() {
 }
 
 function goToFP() {
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-fp').classList.add('active');
-  history.pushState({ screen: 'fp' }, '');
+  showScreen('page-fp');
   // Double rAF ensures layout is settled before measuring board dimensions
   requestAnimationFrame(() => requestAnimationFrame(() => {
     drawAllPatterns();
     fpNewGame();
-    // Force re-render after layout settles so board size calculation is correct
     setTimeout(() => fpRender(), 50);
   }));
 }
@@ -3226,15 +3350,11 @@ const CHESSBITS_TAGLINES = [
 })();
 
 document.addEventListener('DOMContentLoaded', function() {
-  // Push initial home state so back button returns here instead of leaving the site
-  history.replaceState({ screen: 'home' }, '');
-
-  // Handle browser back/forward button
-  window.addEventListener('popstate', function(e) {
-    if (!e.state || e.state.screen === 'home') {
-      goHome();
-    }
+  SCREEN_IDS.forEach(sid => {
+    const el = document.getElementById(sid);
+    if (el) el.style.display = sid === 'page-home' ? 'flex' : 'none';
   });
+
   // Set tagline (fallback for if IIFE ran before element existed)
   const tEl = document.getElementById('home-tagline');
   if (tEl && !tEl.textContent) tEl.textContent = CHESSBITS_TAGLINES[Math.floor(Math.random() * CHESSBITS_TAGLINES.length)];
@@ -3270,12 +3390,12 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- ════════════ WOLF & SHEEP PAGE ════════════ -->
 <div id="page-ws" class="page">
   <header>
-    <h1>♞ ChessBits</h1>
+    <button class="header-home-btn" onclick="goHome()" type="button" title="Home">
+      <iconify-icon icon="mdi:home-outline"></iconify-icon>
+    </button>
+    <h1><iconify-icon icon="material-symbols-light:chess-knight" class="logo-icon"></iconify-icon> ChessBits</h1>
+    <p class="page-game-name">זאב וכבשים</p>
   </header>
-  <div class="nav-back-bar">
-    <button onclick="goHome()" style="background:none;border:none;cursor:pointer;color:var(--text-dim);font-family:inherit;font-size:0.85rem;font-weight:600;display:flex;align-items:center;gap:6px;padding:4px 0;transition:color 0.15s;" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color='#94a3b8'">← חזרה לדף הבית</button>
-    <span class="nav-game-title">🐺 זאב וכבשים</span>
-  </div>
 
   <div class="game-main">
     <div class="board-section">
@@ -3290,7 +3410,7 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
 
       <!-- Turn banner -->
-      <div id="ws-turn-banner" class="turn-banner sheep">
+      <div id="ws-turn-banner" class="turn-banner sheep" style="display:none">
         <span class="tb-dot" id="ws-tb-dot" style="background:#475569;border:2px solid #94a3b8"></span>
         <span id="ws-tb-text">תור הזאב</span>
       </div>
@@ -3316,31 +3436,47 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
 
       <div class="board-actions">
-        <button class="btn btn-secondary" onclick="wsUndo()" style="font-size:0.82rem">↩ בטל</button>
-        <button class="btn btn-danger" onclick="confirmNewGame('ws')" style="font-size:0.82rem">🔄 חדש</button>
+        <button class="btn btn-secondary" onclick="wsUndo()" style="font-size:0.82rem" type="button"><iconify-icon icon="mdi:undo-variant"></iconify-icon> בטל</button>
+        <button class="btn btn-danger" onclick="confirmNewGame('ws')" style="font-size:0.82rem" type="button"><iconify-icon icon="mdi:refresh"></iconify-icon> חדש</button>
       </div>
+    </div>
+
+    <!-- Status card -->
+    <div class="status-card">
+      <div class="status-card-title">סטטוס משחק</div>
+      <div id="ws-status" style="font-size:0.95rem;font-weight:700;color:var(--text)">תור הזאב</div>
+      <div id="ws-move-count" style="font-size:0.82rem;color:var(--text-dim)">מהלך 0</div>
     </div>
 
     <!-- Tabbed side panel -->
     <div class="side-panel">
       <div class="side-tabs-card">
         <div class="tab-bar">
-          <button class="tab-btn active" onclick="switchTab('ws','game',this)">🎮 משחק</button>
-          <button class="tab-btn" onclick="switchTab('ws','settings',this)">⚙️ הגדרות</button>
-          <button class="tab-btn" onclick="switchTab('ws','history',this)">📜 היסטוריה</button>
+          <button class="tab-btn active" onclick="switchTab('ws','howto',this)" type="button"><iconify-icon icon="mdi:help-circle-outline"></iconify-icon> איך משחקים?</button>
+          <button class="tab-btn" onclick="switchTab('ws','settings',this)" type="button"><iconify-icon icon="mdi:cog-outline"></iconify-icon> הגדרות</button>
+          <button class="tab-btn" onclick="switchTab('ws','history',this)" type="button"><iconify-icon icon="mdi:history"></iconify-icon> היסטוריה</button>
         </div>
-        <div id="ws-tab-game" class="tab-pane active">
-          <div id="ws-status" style="font-size:0.92rem;font-weight:600;color:var(--text)">תור הזאב</div>
+        <div id="ws-tab-howto" class="tab-pane active" style="font-size:0.82rem;color:var(--text-dim);line-height:1.75;padding:14px">
+          <p style="font-weight:700;color:var(--text);margin-bottom:8px">זאב וכבשים — שחמט א-סימטרי</p>
+          <p style="margin-bottom:6px">משחק על ריבועים כהים בלוח 8×8. זאב אחד מול ארבע כבשים.</p>
+          <p style="margin-bottom:6px">🐺 <b>הזאב</b> — מתחיל בשורה 1, זז אלכסונית לכל כיוון (כולל אחורה).</p>
+          <p style="margin-bottom:6px">🐑 <b>הכבשים</b> — מתחילות בשורה 8, זזות אלכסונית כלפי מטה בלבד.</p>
+          <p style="margin-bottom:6px"><b>הזאב מנצח</b> אם חוצה לשורה 8.</p>
+          <p style="margin-bottom:6px"><b>הכבשים מנצחות</b> אם חוסמות את הזאב לחלוטין.</p>
+          <p style="margin-bottom:6px">הזאב תמיד מתחיל, ואז חילופי תורות.</p>
+          <p style="padding:7px 9px;background:rgba(255,255,255,0.04);border-radius:8px;font-size:0.76rem">
+            <b>הגדרות:</b> שני שחקנים או נגד מחשב — בחר זאב/כבשים ורמת קושי.
+          </p>
         </div>
         <div id="ws-tab-settings" class="tab-pane">
           <div class="settings-section">
             <div class="settings-label">מצב משחק</div>
             <div class="mode-pills">
-              <button class="mode-pill active" id="ws-vs-pvp" onclick="wsSetVs('pvp')">👥 שני שחקנים</button>
-              <button class="mode-pill" id="ws-vs-ai" onclick="wsSetVs('ai')">🤖 נגד מחשב</button>
+              <button class="mode-pill" id="ws-vs-pvp" onclick="wsSetVs('pvp')"><iconify-icon icon="mdi:account-multiple-outline"></iconify-icon> שני שחקנים</button>
+              <button class="mode-pill active" id="ws-vs-ai" onclick="wsSetVs('ai')"><iconify-icon icon="mdi:robot-outline"></iconify-icon> נגד מחשב</button>
             </div>
           </div>
-          <div class="settings-difficulty hidden" id="ws-difficulty">
+          <div class="settings-difficulty" id="ws-difficulty">
             <div class="settings-label">אני משחק בתור</div>
             <div class="mode-pills" style="margin-bottom:8px">
               <button class="mode-pill active" id="ws-side-wolf" onclick="wsSetSide('wolf')">🐺 זאב</button>
@@ -3358,19 +3494,6 @@ document.addEventListener('DOMContentLoaded', function() {
           <div id="ws-move-list"><div style="color:var(--text-muted);font-size:0.82rem;">אין מהלכים עדיין</div></div>
         </div>
       </div>
-
-      <!-- Rules card — always visible below tabs -->
-      <div class="side-tabs-card" style="margin-top:12px">
-        <div style="padding:14px 16px">
-          <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.07em">כללי המשחק</div>
-          <div style="font-size:0.82rem;color:var(--text-dim);line-height:1.8">
-            <p>🐺 <b>זאב</b> — זז אלכסונית לכל כיוון</p>
-            <p>🐑 <b>כבשים</b> — זזות מטה בלבד</p>
-            <p style="margin-top:6px">🏆 זאב מנצח בהגעה לשורה 1</p>
-            <p>🏆 כבשים מנצחות בחסימה מוחלטת</p>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -3383,12 +3506,12 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- ════════════ BARRICADE PAGE ════════════ -->
 <div id="page-bar" class="page">
   <header>
-    <h1>♞ ChessBits</h1>
+    <button class="header-home-btn" onclick="goHome()" type="button" title="Home">
+      <iconify-icon icon="mdi:home-outline"></iconify-icon>
+    </button>
+    <h1><iconify-icon icon="material-symbols-light:chess-knight" class="logo-icon"></iconify-icon> ChessBits</h1>
+    <p class="page-game-name">חסימת שערים</p>
   </header>
-  <div class="nav-back-bar">
-    <button onclick="goHome()" style="background:none;border:none;cursor:pointer;color:var(--text-dim);font-family:inherit;font-size:0.85rem;font-weight:600;display:flex;align-items:center;gap:6px;padding:4px 0;transition:color 0.15s;" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color='#94a3b8'">← חזרה לדף הבית</button>
-    <span class="nav-game-title">🚧 חסימת שערים</span>
-  </div>
 
   <div class="game-main">
     <!-- Board area -->
@@ -3404,7 +3527,7 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
 
       <!-- Turn banner (matches chess/ws style) -->
-      <div id="bar-turn-strip" class="turn-banner bar-blue">
+      <div id="bar-turn-strip" class="turn-banner bar-blue" style="display:none">
         <span class="tb-dot" id="bar-ts-dot" style="background:#2563eb;border:2px solid #93c5fd"></span>
         <span id="bar-ts-text">תור הכחול</span>
       </div>
@@ -3437,8 +3560,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
       <!-- Board actions -->
       <div class="board-actions">
-        <button class="btn btn-secondary" onclick="barUndo()" style="font-size:0.82rem">↩ בטל</button>
-        <button class="btn btn-danger" onclick="confirmNewGame('bar')" style="font-size:0.82rem">🔄 חדש</button>
+        <button class="btn btn-secondary" onclick="barUndo()" style="font-size:0.82rem" type="button"><iconify-icon icon="mdi:undo-variant"></iconify-icon> בטל</button>
+        <button class="btn btn-danger" onclick="confirmNewGame('bar')" style="font-size:0.82rem" type="button"><iconify-icon icon="mdi:refresh"></iconify-icon> חדש</button>
+      </div>
+    </div>
+
+    <!-- Status card -->
+    <div class="status-card">
+      <div class="status-card-title">סטטוס משחק</div>
+      <div id="bar-status" style="font-size:0.95rem;font-weight:700;color:var(--text)">תור הכחול</div>
+      <div style="display:flex;gap:14px;margin-top:2px">
+        <span id="bar-walls-blue-stat" style="font-size:0.84rem;color:var(--cyan-l)"></span>
+        <span id="bar-walls-orange-stat" style="font-size:0.84rem;color:#fdba74"></span>
       </div>
     </div>
 
@@ -3446,22 +3579,31 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="side-panel">
       <div class="side-tabs-card">
         <div class="tab-bar">
-          <button class="tab-btn active" onclick="switchTab('bar','game',this)">🎮 משחק</button>
-          <button class="tab-btn" onclick="switchTab('bar','settings',this)">⚙️ הגדרות</button>
-          <button class="tab-btn" onclick="switchTab('bar','history',this)">📜 היסטוריה</button>
+          <button class="tab-btn active" onclick="switchTab('bar','howto',this)" type="button"><iconify-icon icon="mdi:help-circle-outline"></iconify-icon> איך משחקים?</button>
+          <button class="tab-btn" onclick="switchTab('bar','settings',this)" type="button"><iconify-icon icon="mdi:cog-outline"></iconify-icon> הגדרות</button>
+          <button class="tab-btn" onclick="switchTab('bar','history',this)" type="button"><iconify-icon icon="mdi:history"></iconify-icon> היסטוריה</button>
         </div>
-        <div id="bar-tab-game" class="tab-pane active">
-          <div id="bar-status" style="font-size:0.92rem;font-weight:600;color:var(--text)">תור הכחול</div>
+        <div id="bar-tab-howto" class="tab-pane active" style="font-size:0.82rem;color:var(--text-dim);line-height:1.75;padding:14px">
+          <p style="font-weight:700;color:var(--text);margin-bottom:8px">חסימת שערים — מרוץ ואסטרטגיה</p>
+          <p style="margin-bottom:6px">שני שחקנים על לוח 9×9. כחול מתחיל בתחתית, כתום בראש. כל אחד מנסה להגיע לצד השני.</p>
+          <p style="margin-bottom:6px"><b>בכל תור — בחר אחת:</b></p>
+          <p style="margin-bottom:3px">🚶 <b>זוז</b> — הזז את הכלי שלך משבצת אחת.</p>
+          <p style="margin-bottom:6px">🧱 <b>הנח חומה</b> — חומה בת 2 תאים. לכל שחקן 10 חומות.</p>
+          <p style="margin-bottom:6px"><b>חוק:</b> אסור לחסום לחלוטין את מסלול היריב.</p>
+          <p style="margin-bottom:6px"><b>ניצחון:</b> ראשון שמגיע לשורת המטרה.</p>
+          <p style="padding:7px 9px;background:rgba(255,255,255,0.04);border-radius:8px;font-size:0.76rem">
+            <b>הגדרות:</b> שני שחקנים או נגד מחשב ברמות קל / קשה.
+          </p>
         </div>
         <div id="bar-tab-settings" class="tab-pane">
           <div class="settings-section">
             <div class="settings-label">מצב משחק</div>
             <div class="mode-pills">
-              <button class="mode-pill active" id="bar-vs-pvp" onclick="barSetVs('pvp')">👥 שני שחקנים</button>
-              <button class="mode-pill" id="bar-vs-ai" onclick="barSetVs('ai')">🤖 נגד מחשב</button>
+              <button class="mode-pill" id="bar-vs-pvp" onclick="barSetVs('pvp')"><iconify-icon icon="mdi:account-multiple-outline"></iconify-icon> שני שחקנים</button>
+              <button class="mode-pill active" id="bar-vs-ai" onclick="barSetVs('ai')"><iconify-icon icon="mdi:robot-outline"></iconify-icon> נגד מחשב</button>
             </div>
           </div>
-          <div class="settings-difficulty hidden" id="bar-difficulty">
+          <div class="settings-difficulty" id="bar-difficulty">
             <div class="settings-label">רמת קושי</div>
             <div class="mode-pills">
               <button class="mode-pill active" id="bar-diff-easy" onclick="barSetDiff('easy')">קל</button>
@@ -3472,19 +3614,6 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
         <div id="bar-tab-history" class="tab-pane" style="padding:10px 12px">
           <div id="bar-move-list"><div style="color:var(--text-muted);font-size:0.82rem;">אין מהלכים עדיין</div></div>
-        </div>
-      </div>
-
-      <!-- Rules card — always visible below tabs -->
-      <div class="side-tabs-card" style="margin-top:12px">
-        <div style="padding:14px 16px">
-          <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.07em">כללי המשחק</div>
-          <div style="font-size:0.82rem;color:var(--text-dim);line-height:1.8">
-            <p>🚶 <b>זוז</b> — צעד אחד בכל כיוון</p>
-            <p>🚧 <b>חומה</b> — 10 לכל שחקן</p>
-            <p>🏆 <b>ניצחון</b> — הגע לשורת היריב</p>
-            <p style="margin-top:6px;padding:8px;background:rgba(255,255,255,0.04);border-radius:8px;color:var(--text-muted);font-size:0.75rem;line-height:1.5">חומה לא יכולה לחסום לחלוטין את הדרך!</p>
-          </div>
         </div>
       </div>
     </div>
@@ -3501,7 +3630,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- Confirm new game modal -->
 <div id="confirm-modal">
   <div class="confirm-box">
-    <div class="confirm-icon">🔄</div>
+    <div class="confirm-icon"><iconify-icon icon="mdi:refresh" style="font-size:2rem;width:2rem;height:2rem;display:block;margin:0 auto 8px"></iconify-icon></div>
     <h3>משחק חדש?</h3>
     <p>כל המהלכים ייאבדו. האם להתחיל מחדש?</p>
     <div class="confirm-btns">
@@ -3515,12 +3644,12 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- ════════════ KNIGHT TOUR PAGE ════════════ -->
 <div id="page-kt" class="page">
   <header>
-    <h1>♞ ChessBits</h1>
+    <button class="header-home-btn" onclick="goHome()" type="button" title="Home">
+      <iconify-icon icon="mdi:home-outline"></iconify-icon>
+    </button>
+    <h1><iconify-icon icon="material-symbols-light:chess-knight" class="logo-icon"></iconify-icon> ChessBits</h1>
+    <p class="page-game-name">מסע הפרש</p>
   </header>
-  <div class="nav-back-bar">
-    <button onclick="goHome()" style="background:none;border:none;cursor:pointer;color:var(--text-dim);font-family:inherit;font-size:0.85rem;font-weight:600;display:flex;align-items:center;gap:6px;padding:4px 0;transition:color 0.15s;" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color='#94a3b8'">← חזרה לדף הבית</button>
-    <span class="nav-game-title">♞ מסע הפרש</span>
-  </div>
 
   <div class="game-main">
     <div class="board-section">
@@ -3551,37 +3680,48 @@ document.addEventListener('DOMContentLoaded', function() {
 
       <!-- Board actions -->
       <div class="board-actions">
-        <button class="btn btn-secondary" onclick="ktUndo()" id="kt-btn-undo" style="font-size:0.82rem" disabled>↩ בטל</button>
-        <button class="btn btn-secondary" onclick="ktHint()" id="kt-btn-hint" style="font-size:0.82rem">💡 רמז</button>
-        <button class="btn btn-danger" onclick="confirmNewGame('kt')" style="font-size:0.82rem">🔄 חדש</button>
+        <button class="btn btn-secondary" onclick="ktUndo()" id="kt-btn-undo" style="font-size:0.82rem" disabled type="button"><iconify-icon icon="mdi:undo-variant"></iconify-icon> בטל</button>
+        <button class="btn btn-secondary" onclick="ktHint()" id="kt-btn-hint" style="font-size:0.82rem" type="button"><iconify-icon icon="mdi:lightbulb-outline"></iconify-icon> רמז</button>
+        <button class="btn btn-danger" onclick="confirmNewGame('kt')" style="font-size:0.82rem" type="button"><iconify-icon icon="mdi:refresh"></iconify-icon> חדש</button>
       </div>
+    </div>
+
+    <!-- Status card -->
+    <div class="status-card">
+      <div class="status-card-title">סטטוס משחק</div>
+      <div id="kt-status-text" style="font-size:0.95rem;font-weight:700;color:var(--text)">בחר משבצת התחלה</div>
+      <div style="font-size:0.82rem;color:var(--text-dim)">מהלכים: <span id="kt-stat-moves" style="font-weight:700;color:var(--text)">0</span></div>
+      <div style="font-size:0.82rem;color:var(--text-dim)">זמן: <span id="kt-stat-time" style="font-weight:700;color:var(--text)">0:00</span></div>
+      <div class="kt-progress-bar" style="margin-top:4px"><div class="kt-progress-fill" id="kt-status-progress" style="width:0%"></div></div>
     </div>
 
     <!-- Side panel -->
     <div class="side-panel">
       <div class="side-tabs-card">
         <div class="tab-bar">
-          <button class="tab-btn active" onclick="switchTab('kt','game',this)">🎮 משחק</button>
-          <button class="tab-btn" onclick="switchTab('kt','settings',this)">⚙️ הגדרות</button>
-          <button class="tab-btn" onclick="switchTab('kt','history',this)">📜 היסטוריה</button>
+          <button class="tab-btn active" onclick="switchTab('kt','howto',this)" type="button"><iconify-icon icon="mdi:help-circle-outline"></iconify-icon> איך משחקים?</button>
+          <button class="tab-btn" onclick="switchTab('kt','settings',this)" type="button"><iconify-icon icon="mdi:cog-outline"></iconify-icon> הגדרות</button>
+          <button class="tab-btn" onclick="switchTab('kt','history',this)" type="button"><iconify-icon icon="mdi:history"></iconify-icon> היסטוריה</button>
         </div>
-        <div id="kt-tab-game" class="tab-pane active">
-          <div id="kt-status" style="font-size:0.92rem;font-weight:600;color:var(--text);margin-bottom:12px">בחר משבצת התחלה</div>
-          <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em">תוצאה אישית</div>
-          <div id="kt-best-score" style="font-size:0.85rem;color:var(--text-dim)">אין עדיין</div>
-          <div style="font-size:0.75rem;font-weight:700;color:var(--text-muted);margin-top:12px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">שיטות עזר</div>
-          <div style="font-size:0.8rem;color:var(--text-dim);line-height:1.7">
-            <span style="display:inline-flex;align-items:center;gap:4px;margin-left:8px"><span style="width:12px;height:12px;border-radius:2px;background:rgba(34,211,238,0.25);display:inline-block;border:1px solid rgba(34,211,238,0.4)"></span>ביקרת</span>
-            <span style="display:inline-flex;align-items:center;gap:4px;margin-left:8px"><span style="width:12px;height:12px;border-radius:2px;background:rgba(124,58,237,0.28);display:inline-block"></span>מהלך אפשרי</span>
-            <span style="display:inline-flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:rgba(220,38,38,0.18);display:inline-block"></span>ללא מוצא</span>
-          </div>
+        <div id="kt-tab-howto" class="tab-pane active" style="font-size:0.82rem;color:var(--text-dim);line-height:1.75;padding:14px">
+          <p style="font-weight:700;color:var(--text);margin-bottom:8px">מסע הפרש — אתגר קלאסי</p>
+          <p style="margin-bottom:6px">הוליך את הפרש (♞) על פני כל משבצות הלוח — כל משבצת בדיוק פעם אחת.</p>
+          <p style="margin-bottom:6px"><b>הפרש זז ב-L:</b> 2 משבצות בכיוון אחד ו-1 לצד.</p>
+          <p style="margin-bottom:3px">1. לחץ על משבצת להצבת הפרש.</p>
+          <p style="margin-bottom:3px">2. לחץ על משבצת מסומנת כדי לזוז אליה.</p>
+          <p style="margin-bottom:6px">3. מספר בכל משבצת מראה סדר הביקור.</p>
+          <p style="margin-bottom:6px">💡 השתמש ברמז לפי אלגוריתם Warnsdorff.</p>
+          <p style="margin-bottom:6px"><b>ניצחון:</b> כיסית את כל המשבצות!</p>
+          <p style="padding:7px 9px;background:rgba(255,255,255,0.04);border-radius:8px;font-size:0.76rem">
+            <b>הגדרות:</b> גודל לוח (5×5, 6×6, 8×8) ומצב — חופשי (ללא הגבלת זמן) או מתוזמן (עם שעון עצר). ברירת מחדל: 8×8, מתוזמן.
+          </p>
         </div>
         <div id="kt-tab-settings" class="tab-pane">
           <div class="settings-section">
             <div class="settings-label">מצב משחק</div>
             <div class="mode-pills">
-              <button class="mode-pill active" id="kt-mode-free" onclick="ktSetMode('free')">🆓 חופשי</button>
-              <button class="mode-pill" id="kt-mode-timed" onclick="ktSetMode('timed')">⏱ מתוזמן</button>
+              <button class="mode-pill" id="kt-mode-free" onclick="ktSetMode('free')">🆓 חופשי</button>
+              <button class="mode-pill active" id="kt-mode-timed" onclick="ktSetMode('timed')">⏱ מתוזמן</button>
             </div>
           </div>
           <div class="settings-section">
@@ -3598,19 +3738,6 @@ document.addEventListener('DOMContentLoaded', function() {
           <div id="kt-move-list"><div style="color:var(--text-muted);font-size:0.82rem;">אין מהלכים עדיין</div></div>
         </div>
       </div>
-
-      <!-- Rules card -->
-      <div class="side-tabs-card" style="margin-top:12px">
-        <div style="padding:14px 16px">
-          <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.07em">כללי המשחק</div>
-          <div style="font-size:0.82rem;color:var(--text-dim);line-height:1.8">
-            <p>♞ <b>הפרש</b> זז בצורת L: 2+1 משבצות</p>
-            <p>✅ <b>מטרה</b> — בקר בכל 64 המשבצות</p>
-            <p>🔄 <b>סגור</b> — חזור להתחלה בסוף</p>
-            <p style="margin-top:6px;padding:8px;background:rgba(255,255,255,0.04);border-radius:8px;color:var(--text-muted);font-size:0.75rem;line-height:1.5">כל משבצת מבוקרת מסומנת במספר הביקור שלה</p>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -3624,23 +3751,22 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- ════════════ FOUR PAWNS PAGE ════════════ -->
 <div id="page-fp" class="page">
   <header>
-    <h1>♞ ChessBits</h1>
-    
+    <button class="header-home-btn" onclick="goHome()" type="button" title="Home">
+      <iconify-icon icon="mdi:home-outline"></iconify-icon>
+    </button>
+    <h1><iconify-icon icon="material-symbols-light:chess-knight" class="logo-icon"></iconify-icon> ChessBits</h1>
+    <p class="page-game-name">ארבעת הרגלים</p>
   </header>
-
-  <div class="nav-back-bar">
-    <button onclick="goHome()" style="background:none;border:none;cursor:pointer;color:var(--text-dim);font-family:inherit;font-size:0.85rem;font-weight:600;display:flex;align-items:center;gap:6px;padding:4px 0;transition:color 0.15s;" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color='#94a3b8'">← חזרה לדף הבית</button>
-    <span class="nav-game-title">🎯 ארבעת הרגלים</span>
-  </div>
 
   <div class="game-main">
     <div class="board-section">
 
       <!-- Stats bar -->
       <div class="kt-stats">
-        <div class="kt-stat">🎯<span id="fp-captured-val" class="kt-stat-val">0</span><span>/4</span></div>
-        <div class="kt-progress-bar"><div class="kt-progress-fill" id="fp-progress" style="width:0%"></div></div>
-        <div class="kt-stat">🔢<span id="fp-moves-val" class="kt-stat-val">0</span><span> מהלכים</span></div>
+        <div class="kt-stat">🎯<span class="kt-stat-val" id="fp-captured-bar">0</span><span>/4</span></div>
+        <div class="kt-progress-bar"><div class="kt-progress-fill" id="fp-progress-bar" style="width:0%"></div></div>
+        <div class="kt-stat">🔢<span class="kt-stat-val" id="fp-moves-bar">0</span><span> מהלכים</span></div>
+        <div class="kt-stat" id="fp-timer-stat">⏱ <span class="kt-stat-val" id="fp-timer-val">0:00</span></div>
       </div>
 
       <!-- Turn banner -->
@@ -3677,27 +3803,60 @@ document.addEventListener('DOMContentLoaded', function() {
 
       <!-- Actions -->
       <div class="board-actions">
-        <button class="btn btn-secondary" onclick="fpUndo()" id="fp-undo-btn" style="font-size:0.82rem">↩ בטל</button>
-        <button class="btn btn-danger" onclick="confirmNewGame('fp')" style="font-size:0.82rem">🔄 חדש</button>
+        <button class="btn btn-secondary" onclick="fpUndo()" id="fp-undo-btn" style="font-size:0.82rem" type="button"><iconify-icon icon="mdi:undo-variant"></iconify-icon> בטל</button>
+        <button class="btn btn-danger" onclick="confirmNewGame('fp')" style="font-size:0.82rem" type="button"><iconify-icon icon="mdi:refresh"></iconify-icon> חדש</button>
       </div>
+    </div>
+
+    <!-- Status card -->
+    <div class="status-card">
+      <div class="status-card-title">סטטוס משחק</div>
+      <div id="fp-status" style="font-size:0.95rem;font-weight:700;color:var(--text)">בחר כלי לבן להזזה</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+        <span style="font-size:0.82rem;color:var(--text-dim)">נלכדו:</span>
+        <span id="fp-captured-val" class="kt-stat-val">0</span>
+        <span style="font-size:0.82rem;color:var(--text-dim)">/4</span>
+        <div class="kt-progress-bar" style="flex:1;min-width:40px"><div class="kt-progress-fill" id="fp-progress" style="width:0%"></div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:0.82rem;color:var(--text-dim)">מהלכים:</span>
+        <span id="fp-moves-val" class="kt-stat-val">0</span>
+      </div>
+      <div id="fp-time-row" style="font-size:0.82rem;color:var(--text-dim)">זמן: <span id="fp-stat-time" style="font-weight:700;color:var(--text)">0:00</span></div>
+      <div id="fp-captured-display" style="font-size:1.4rem;letter-spacing:3px;min-height:28px;margin-top:4px">♙♙♙♙</div>
+      <div id="fp-best-score" style="font-size:0.78rem;color:var(--yellow);margin-top:4px;min-height:18px"></div>
     </div>
 
     <!-- Side panel -->
     <div class="side-panel">
       <div class="side-tabs-card">
         <div class="tab-bar">
-          <button class="tab-btn active" onclick="switchTab('fp','game',this)">🎮 משחק</button>
-          <button class="tab-btn" onclick="switchTab('fp','settings',this)">⚙️ הגדרות</button>
-          <button class="tab-btn" onclick="switchTab('fp','history',this)">📜 היסטוריה</button>
+          <button class="tab-btn active" onclick="switchTab('fp','howto',this)" type="button"><iconify-icon icon="mdi:help-circle-outline"></iconify-icon> איך משחקים?</button>
+          <button class="tab-btn" onclick="switchTab('fp','settings',this)" type="button"><iconify-icon icon="mdi:cog-outline"></iconify-icon> הגדרות</button>
+          <button class="tab-btn" onclick="switchTab('fp','history',this)" type="button"><iconify-icon icon="mdi:history"></iconify-icon> היסטוריה</button>
         </div>
-        <div id="fp-tab-game" class="tab-pane active">
-          <div id="fp-status" style="font-size:0.9rem;font-weight:600;color:var(--text);margin-bottom:12px">בחר כלי לבן להזזה</div>
-          <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em">רגלים שנלכדו</div>
-          <div id="fp-captured-display" style="font-size:1.5rem;min-height:30px;letter-spacing:3px;margin-bottom:12px">♙♙♙♙</div>
-          <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.07em">שיא אישי</div>
-          <div id="fp-best-score" style="font-size:0.85rem;color:var(--text-dim)">אין עדיין</div>
+        <div id="fp-tab-howto" class="tab-pane active" style="font-size:0.82rem;color:var(--text-dim);line-height:1.75;padding:14px">
+          <p style="font-weight:700;color:var(--text);margin-bottom:8px">ארבעת הרגלים — פאזל שחמט</p>
+          <p style="margin-bottom:6px">פאזל על לוח 4×4. כלים לבנים מוצבים בצדך, 4 רגלים שחורים בשורה העליונה.</p>
+          <p style="margin-bottom:6px"><b>מטרה:</b> הנע את הפרש הלבן (♞) ללכוד את כל 4 הרגלים השחורים.</p>
+          <p style="margin-bottom:3px">♞ <b>פרש</b> — זז ב-L, לוכד רגלים שחורים.</p>
+          <p style="margin-bottom:3px">♝ <b>רץ</b> — זז אלכסונית (לא לוכד).</p>
+          <p style="margin-bottom:3px">♜ <b>צריח</b> — זז ישר (לא לוכד).</p>
+          <p style="margin-bottom:6px">♟ <b>רגלי לבן</b> — קדימה/לכידה אלכסונית (לא לוכד שחורים).</p>
+          <p style="margin-bottom:6px">XX = משבצת חסומה, אף כלי לא דורך עליה.</p>
+          <p style="margin-bottom:6px">💡 הזז כלים לבנים כדי לפנות מסלול לפרש.</p>
+          <p style="padding:7px 9px;background:rgba(255,255,255,0.04);border-radius:8px;font-size:0.76rem">
+            <b>הגדרות:</b> מצב מתוזמן (עם שעון עצר) או חופשי (ללא זמן). קושי: קל (פרש מסומן), בינוני (ללא הדגשות), קשה (מגבלת 25 מהלכים).
+          </p>
         </div>
         <div id="fp-tab-settings" class="tab-pane">
+          <div class="settings-section">
+            <div class="settings-label">מצב משחק</div>
+            <div class="mode-pills">
+              <button class="mode-pill"        id="fp-mode-free"  onclick="fpSetMode('free')">🆓 חופשי</button>
+              <button class="mode-pill active" id="fp-mode-timed" onclick="fpSetMode('timed')">⏱ מתוזמן</button>
+            </div>
+          </div>
           <div class="settings-section">
             <div class="settings-label">רמת קושי</div>
             <div class="mode-pills">
@@ -3712,135 +3871,6 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
         <div id="fp-tab-history" class="tab-pane" style="padding:10px 12px">
           <div id="fp-move-list"><div style="color:var(--text-muted);font-size:0.82rem;">אין מהלכים עדיין</div></div>
-        </div>
-      </div>
-      <!-- Rules -->
-      <div class="side-tabs-card" style="margin-top:12px">
-        <div style="padding:14px 16px">
-          <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.07em">כללי המשחק</div>
-          <div style="font-size:0.82rem;color:var(--text-dim);line-height:1.9">
-            <p>🎯 <b>מטרה</b> — לכוד 4 רגלים שחורים</p>
-            <p>♞ <b>רק הפרש לוכד</b> רגלים שחורים</p>
-            <p>♜ <b>צריח</b> — ישר (אופקי/אנכי)</p>
-            <p>♝ <b>רץ</b> — אלכסונית</p>
-            <p>♟ <b>רגלי</b> — קדימה, לוכד אלכסוני</p>
-            <p style="margin-top:8px;padding:7px 9px;background:rgba(255,255,255,0.04);border-radius:8px;color:var(--text-muted);font-size:0.74rem;line-height:1.5">💡 הזז כלים לבנים כדי לפנות דרך לפרש</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <footer>
-    <span>ChessBits © 2026</span>
-    <span style="font-size:0.8rem;color:#94a3b8">למשחקים נוספים: <a href="https://loteman.github.io/Loteman-Games/" target="_blank" rel="noopener" style="color:#94a3b8;text-decoration:underline">Loteman Games</a></span>
-  </footer>
-</div>
-</body>
-<!-- ════════════ FOUR PAWNS PAGE ════════════ -->
-<div id="page-fp" class="page">
-  <header>
-    <h1>♞ ChessBits</h1>
-    <p>הסיע את הפרש הלבן ולכוד את כל 4 הרגלים השחורים</p>
-  </header>
-
-  <div class="nav-back-bar">
-    <button onclick="goHome()" style="background:none;border:none;cursor:pointer;color:var(--text-dim);font-family:inherit;font-size:0.85rem;font-weight:600;display:flex;align-items:center;gap:6px;padding:4px 0;transition:color 0.15s;" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color='#94a3b8'">← חזרה לדף הבית</button>
-  </div>
-
-  <div class="game-main">
-    <div class="board-section">
-
-      <!-- Stats bar -->
-      <div class="kt-stats">
-        <div class="kt-stat">🎯<span id="fp-captured-val" class="kt-stat-val">0</span><span>/4</span></div>
-        <div class="kt-progress-bar"><div class="kt-progress-fill" id="fp-progress" style="width:0%"></div></div>
-        <div class="kt-stat">🔢<span id="fp-moves-val" class="kt-stat-val">0</span><span> מהלכים</span></div>
-      </div>
-
-      <!-- Turn banner -->
-      <div id="fp-turn-banner" class="turn-banner bar-blue" style="margin:8px 16px 4px">
-        <span class="tb-dot" style="background:var(--cyan);border:2px solid var(--cyan-l)"></span>
-        <span id="fp-tb-text">בחר כלי לבן להזזה</span>
-      </div>
-
-      <!-- Board -->
-      <div class="board-wrap" style="padding:14px 8px">
-        <div style="display:inline-block">
-          <div style="display:flex">
-            <!-- Row labels -->
-            <div style="display:flex;flex-direction:column">
-              <div class="fp-rank-label">6</div>
-              <div class="fp-rank-label">5</div>
-              <div class="fp-rank-label">4</div>
-              <div class="fp-rank-label">3</div>
-              <div class="fp-rank-label">2</div>
-              <div class="fp-rank-label">1</div>
-            </div>
-            <div>
-              <div id="fp-board"></div>
-              <div style="display:flex;padding-top:4px">
-                <div class="fp-file-label">a</div>
-                <div class="fp-file-label">b</div>
-                <div class="fp-file-label">c</div>
-                <div class="fp-file-label">d</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Actions -->
-      <div class="board-actions">
-        <button class="btn btn-secondary" onclick="fpUndo()" id="fp-undo-btn" style="font-size:0.82rem">↩ בטל</button>
-        <button class="btn btn-danger" onclick="confirmNewGame('fp')" style="font-size:0.82rem">🔄 חדש</button>
-      </div>
-    </div>
-
-    <!-- Side panel -->
-    <div class="side-panel">
-      <div class="side-tabs-card">
-        <div class="tab-bar">
-          <button class="tab-btn active" onclick="switchTab('fp','game',this)">🎮 משחק</button>
-          <button class="tab-btn" onclick="switchTab('fp','settings',this)">⚙️ הגדרות</button>
-          <button class="tab-btn" onclick="switchTab('fp','history',this)">📜 היסטוריה</button>
-        </div>
-        <div id="fp-tab-game" class="tab-pane active">
-          <div id="fp-status" style="font-size:0.9rem;font-weight:600;color:var(--text);margin-bottom:12px">בחר כלי לבן להזזה</div>
-          <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em">רגלים שנלכדו</div>
-          <div id="fp-captured-display" style="font-size:1.5rem;min-height:30px;letter-spacing:3px;margin-bottom:12px">♙♙♙♙</div>
-          <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.07em">שיא אישי</div>
-          <div id="fp-best-score" style="font-size:0.85rem;color:var(--text-dim)">אין עדיין</div>
-        </div>
-        <div id="fp-tab-settings" class="tab-pane">
-          <div class="settings-section">
-            <div class="settings-label">רמת קושי</div>
-            <div class="mode-pills">
-              <button class="mode-pill active" id="fp-diff-easy"   onclick="fpSetDiff('easy')">קל</button>
-              <button class="mode-pill"        id="fp-diff-medium" onclick="fpSetDiff('medium')">בינוני</button>
-              <button class="mode-pill"        id="fp-diff-hard"   onclick="fpSetDiff('hard')">קשה</button>
-            </div>
-            <div style="font-size:0.74rem;color:var(--text-muted);margin-top:8px;line-height:1.5">
-              קל: הפרש מסומן תמיד<br>בינוני: ללא הדגשות<br>קשה: מגבלת 25 מהלכים
-            </div>
-          </div>
-        </div>
-        <div id="fp-tab-history" class="tab-pane" style="padding:10px 12px">
-          <div id="fp-move-list"><div style="color:var(--text-muted);font-size:0.82rem;">אין מהלכים עדיין</div></div>
-        </div>
-      </div>
-      <!-- Rules -->
-      <div class="side-tabs-card" style="margin-top:12px">
-        <div style="padding:14px 16px">
-          <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.07em">כללי המשחק</div>
-          <div style="font-size:0.82rem;color:var(--text-dim);line-height:1.9">
-            <p>🎯 <b>מטרה</b> — לכוד 4 רגלים שחורים</p>
-            <p>♞ <b>רק הפרש לוכד</b> רגלים שחורים</p>
-            <p>♜ <b>צריח</b> — ישר (אופקי/אנכי)</p>
-            <p>♝ <b>רץ</b> — אלכסונית</p>
-            <p>♟ <b>רגלי</b> — קדימה, לוכד אלכסוני</p>
-            <p style="margin-top:8px;padding:7px 9px;background:rgba(255,255,255,0.04);border-radius:8px;color:var(--text-muted);font-size:0.74rem;line-height:1.5">💡 הזז כלים לבנים כדי לפנות דרך לפרש</p>
-          </div>
         </div>
       </div>
     </div>
