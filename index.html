@@ -670,9 +670,9 @@
           <p style="margin-bottom:3px">♜ <b>צריח</b> — זז ישר (אופקי/אנכי).</p>
           <p style="margin-bottom:3px">♛ <b>מלכה</b> — משלבת צריח ורץ.</p>
           <p style="margin-bottom:6px">♚ <b>מלך</b> — משבצת אחת בכל כיוון.</p>
-          <p style="margin-bottom:3px">🏰 <b>הצרחה</b> — מלך + צריח מחליפים מקומות.</p>
-          <p style="margin-bottom:3px">⚡ <b>אנפסון</b> — לכידת רגלי שזז 2 משבצות.</p>
-          <p style="margin-bottom:6px">👑 <b>קידום</b> — רגלי בשורה אחרונה הופך לכלי חזק.</p>
+          <p style="margin-bottom:3px"><iconify-icon icon="material-symbols-light:chess-rook" style="vertical-align:middle"></iconify-icon> <b>הצרחה</b> — מלך + צריח מחליפים מקומות.</p>
+          <p style="margin-bottom:3px"><iconify-icon icon="mdi:lightning-bolt" style="vertical-align:middle"></iconify-icon> <b>אנפסון</b> — לכידת רגלי שזז 2 משבצות.</p>
+          <p style="margin-bottom:6px"><iconify-icon icon="mdi:crown" style="vertical-align:middle"></iconify-icon> <b>קידום</b> — רגלי בשורה אחרונה הופך לכלי חזק.</p>
           <p style="padding:7px 9px;background:rgba(255,255,255,0.04);border-radius:8px;font-size:0.76rem">
             <b>הגדרות:</b> שני שחקנים או נגד מחשב ברמות קל / בינוני / קשה.
           </p>
@@ -3233,7 +3233,9 @@ function fpCheckWin() {
 
 function showGameOverFP(won) {
   const el = document.getElementById('game-over');
-  document.getElementById('go-icon').textContent = won ? '🎯' : '💀';
+  document.getElementById('go-icon').innerHTML = won
+    ? '<iconify-icon icon="mdi:target" style="font-size:2.5rem"></iconify-icon>'
+    : '<iconify-icon icon="mdi:skull-outline" style="font-size:2.5rem"></iconify-icon>';
   document.getElementById('go-title').textContent = won ? 'כל הרגלים נלכדו!' : 'נגמרו המהלכים';
   if (won) {
     const t = Math.floor(fpSeconds/60)+':'+String(fpSeconds%60).padStart(2,'0');
@@ -3846,7 +3848,7 @@ document.addEventListener('DOMContentLoaded', function() {
           <p style="margin-bottom:3px">1. לחץ על משבצת להצבת הפרש.</p>
           <p style="margin-bottom:3px">2. לחץ על משבצת מסומנת כדי לזוז אליה.</p>
           <p style="margin-bottom:6px">3. מספר בכל משבצת מראה סדר הביקור.</p>
-          <p style="margin-bottom:6px">💡 השתמש ברמז לפי אלגוריתם Warnsdorff.</p>
+          <p style="margin-bottom:6px"><iconify-icon icon="mdi:lightbulb-outline" style="vertical-align:middle"></iconify-icon> השתמש ברמז לפי אלגוריתם Warnsdorff.</p>
           <p style="margin-bottom:6px"><b>ניצחון:</b> כיסית את כל המשבצות!</p>
           <p style="padding:7px 9px;background:rgba(255,255,255,0.04);border-radius:8px;font-size:0.76rem">
             <b>הגדרות:</b> גודל לוח (5×5, 6×6, 8×8) ומצב — חופשי (ללא הגבלת זמן) או מתוזמן (עם שעון עצר). ברירת מחדל: 8×8, מתוזמן.
@@ -3856,7 +3858,7 @@ document.addEventListener('DOMContentLoaded', function() {
           <div class="settings-section">
             <div class="settings-label">מצב משחק</div>
             <div class="mode-pills">
-              <button class="mode-pill" id="kt-mode-free" onclick="ktSetMode('free')">🆓 חופשי</button>
+              <button class="mode-pill" id="kt-mode-free" onclick="ktSetMode('free')"><iconify-icon icon="mdi:lock-open-variant-outline" style="vertical-align:middle"></iconify-icon> חופשי</button>
               <button class="mode-pill active" id="kt-mode-timed" onclick="ktSetMode('timed')">⏱ מתוזמן</button>
             </div>
           </div>
@@ -3867,7 +3869,7 @@ document.addEventListener('DOMContentLoaded', function() {
               <button class="mode-pill active" id="kt-size-6" onclick="ktSetSize(6)">6×6</button>
               <button class="mode-pill" id="kt-size-8" onclick="ktSetSize(8)">8×8</button>
             </div>
-            <div style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;line-height:1.5">💡 5×5 מומלץ למתחילים</div>
+            <div style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;line-height:1.5"><iconify-icon icon="mdi:lightbulb-outline" style="vertical-align:middle"></iconify-icon> 5×5 מומלץ למתחילים</div>
           </div>
         </div>
         <div id="kt-tab-history" class="tab-pane" style="padding:10px 12px">
@@ -3899,9 +3901,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
       <!-- Stats bar -->
       <div class="kt-stats">
-        <div class="kt-stat">🎯<span class="kt-stat-val" id="fp-captured-bar">0</span><span>/4</span></div>
+        <div class="kt-stat"><iconify-icon icon="mdi:target" style="vertical-align:middle"></iconify-icon><span class="kt-stat-val" id="fp-captured-bar">0</span><span>/4</span></div>
         <div class="kt-progress-bar"><div class="kt-progress-fill" id="fp-progress-bar" style="width:0%"></div></div>
-        <div class="kt-stat">🔢<span class="kt-stat-val" id="fp-moves-bar">0</span><span> מהלכים</span></div>
+        <div class="kt-stat"><iconify-icon icon="mdi:counter" style="vertical-align:middle"></iconify-icon><span class="kt-stat-val" id="fp-moves-bar">0</span><span> מהלכים</span></div>
         <div class="kt-stat" id="fp-timer-stat">⏱ <span class="kt-stat-val" id="fp-timer-val">0:00</span></div>
       </div>
 
@@ -3980,7 +3982,7 @@ document.addEventListener('DOMContentLoaded', function() {
           <p style="margin-bottom:3px">♜ <b>צריח</b> — זז ישר (לא לוכד).</p>
           <p style="margin-bottom:6px">♟ <b>רגלי לבן</b> — קדימה/לכידה אלכסונית (לא לוכד שחורים).</p>
           <p style="margin-bottom:6px">XX = משבצת חסומה, אף כלי לא דורך עליה.</p>
-          <p style="margin-bottom:6px">💡 הזז כלים לבנים כדי לפנות מסלול לפרש.</p>
+          <p style="margin-bottom:6px"><iconify-icon icon="mdi:lightbulb-outline" style="vertical-align:middle"></iconify-icon> הזז כלים לבנים כדי לפנות מסלול לפרש.</p>
           <p style="padding:7px 9px;background:rgba(255,255,255,0.04);border-radius:8px;font-size:0.76rem">
             <b>הגדרות:</b> מצב מתוזמן (עם שעון עצר) או חופשי (ללא זמן). קושי: קל (פרש מסומן), בינוני (ללא הדגשות), קשה (מגבלת 25 מהלכים).
           </p>
@@ -3989,7 +3991,7 @@ document.addEventListener('DOMContentLoaded', function() {
           <div class="settings-section">
             <div class="settings-label">מצב משחק</div>
             <div class="mode-pills">
-              <button class="mode-pill"        id="fp-mode-free"  onclick="fpSetMode('free')">🆓 חופשי</button>
+              <button class="mode-pill"        id="fp-mode-free"  onclick="fpSetMode('free')"><iconify-icon icon="mdi:lock-open-variant-outline" style="vertical-align:middle"></iconify-icon> חופשי</button>
               <button class="mode-pill active" id="fp-mode-timed" onclick="fpSetMode('timed')">⏱ מתוזמן</button>
             </div>
           </div>
