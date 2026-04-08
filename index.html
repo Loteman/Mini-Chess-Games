@@ -377,9 +377,6 @@
   .turn-banner.kt-done    { background: rgba(52,211,153,0.1); color: #6ee7b7; border-color: rgba(52,211,153,0.25); }
   .turn-banner.kt-fail    { background: rgba(248,113,113,0.1); color: #fca5a5; border-color: rgba(248,113,113,0.25); }
 
-  /* ══ Barricade ══ */
-  .turn-banner.bar-blue   { background: rgba(34,211,238,0.1); color: var(--cyan-l); border-color: rgba(34,211,238,0.25); }
-  .turn-banner.bar-orange { background: rgba(251,146,60,0.1); color: #fdba74; border-color: rgba(251,146,60,0.25); }
   .bar-wall-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 0.77rem; font-weight: 700; }
   .bar-action-bar {
     display: flex; gap: 8px; padding: 10px 14px;
@@ -776,12 +773,6 @@ function drawChessPattern(svgEl) {
   svgEl.innerHTML = out;
 }
 
-function drawAllPatterns() {}
-
-// Draw on load and on resize
-window.addEventListener('load', drawAllPatterns);
-window.addEventListener('resize', drawAllPatterns);
-
 // ══════════════════════════════════════
 //  NAVIGATION
 // ══════════════════════════════════════
@@ -789,6 +780,9 @@ const SCREEN_IDS = ['page-home', 'page-game', 'page-ws', 'page-bar', 'page-kt', 
 const GAME_PLAYER_MODE = {
   chess: 'dual', ws: 'dual', bar: 'dual', kt: 'single', fp: 'single'
 };
+const FILE_LABELS = 'abcdefgh';  // chess/ws/kt column labels a–h
+const FP_HARD_LIMIT  = 25;       // max moves in Four Pawns hard mode
+const FP_TARGET_COUNT = 4;       // black pawns to capture
 
 const SCREEN_HASH = {
   'page-home': '', 'page-game': 'chess', 'page-ws': 'wolf',
@@ -816,13 +810,18 @@ window.addEventListener('popstate', function() {
   _inPopState = false;
 });
 
-function goToGame() {
-  showScreen('page-game');
-  requestAnimationFrame(() => {
-    document.querySelectorAll('#page-game .chess-pattern').forEach(drawChessPattern);
-  });
-  newGame();
+function goToPage(pageId, initFn, { doubleRaf = false, extra = null } = {}) {
+  showScreen(pageId);
+  const run = () => {
+    document.querySelectorAll(`#${pageId} .chess-pattern`).forEach(drawChessPattern);
+    if (extra) extra();
+    initFn();
+  };
+  doubleRaf
+    ? requestAnimationFrame(() => requestAnimationFrame(run))
+    : requestAnimationFrame(run);
 }
+function goToGame() { goToPage('page-game', newGame); }
 function goHome() {
   showScreen('page-home');
   ktStopTimer();
@@ -1170,14 +1169,12 @@ function applyMove(fr,fc,tr,tc,promo,ai=false) {
   board[fr][fc]=null;
   lastFrom=[fr,fc]; lastTo=[tr,tc];
 
-  // Notation
-  const F='abcdefgh';
   let note='';
   if(type==='K'&&Math.abs(tc-fc)===2) { note=tc>fc?'O-O':'O-O-O'; }
   else {
     const capX=(cap||epCap)?'x':'';
-    const pl=type!=='P'?type:(capX?F[fc]:'');
-    note=pl+capX+F[tc]+(8-tr);
+    const pl=type!=='P'?type:(capX?FILE_LABELS[fc]:'');
+    note=pl+capX+FILE_LABELS[tc]+(8-tr);
     if(promo) note+='='+promo;
   }
   turn=col==='w'?'b':'w';
@@ -1501,8 +1498,7 @@ function wsDoMove(fr, fc, tr, tc, ai=false) {
   requestAnimationFrame(() => animatePieceAt(tr, tc));
   if (navigator.vibrate) navigator.vibrate(18);
 
-  const F = 'abcdefgh';
-  const note = (piece==='wolf'?'🐺':'🐑') + ' ' + F[fc]+(8-fr)+'→'+F[tc]+(8-tr);
+    const note = (piece==='wolf'?'🐺':'🐑') + ' ' + FILE_LABELS[fc]+(8-fr)+'→'+FILE_LABELS[tc]+(8-tr);
   wsMoveLog.push(note);
 
   wsTurn = wsTurn === 'wolf' ? 'sheep' : 'wolf';
@@ -1667,13 +1663,7 @@ function wsAiMove() {
   wsDoMove(bestMove.fr, bestMove.fc, bestMove.tr, bestMove.tc, true);
 }
 
-function goToWS() {
-  showScreen('page-ws');
-  requestAnimationFrame(() => {
-    document.querySelectorAll('#page-ws .chess-pattern').forEach(drawChessPattern);
-  });
-  wsNewGame();
-}
+function goToWS() { goToPage('page-ws', wsNewGame); }
 
 
 // ══════════════════════════════════════════════════════════════
@@ -1685,17 +1675,17 @@ function goToWS() {
 //  Rule: walls cannot completely cut off a player's path to goal.
 // ══════════════════════════════════════════════════════════════
 
-const BAR_N = 9;          // board size
-const BAR_CELL = 52;      // px per cell (canvas)
-const BAR_WALL_W = 8;     // wall thickness px
-const BAR_GAP = 4;        // gap between cells px
-const BAR_PAD = 28;       // padding
+const BAR_N    = 9;   // board size
+const BAR_CELL = 52;  // px per cell (canvas)
+const BAR_GAP  = 4;   // gap between cells px
+const BAR_PAD  = 28;  // canvas padding px
+const BAR_WALLS_PER_PLAYER = 10;
 
 // State
 let barPos = {};          // {blue:[r,c], orange:[r,c]}
 let barWallsH = new Map();// "r,c" → player ('blue'|'orange') horizontal wall BELOW row r (blocks r↔r+1)
 let barWallsV = new Map();// "r,c" → player ('blue'|'orange') vertical wall RIGHT of col c (blocks c↔c+1)
-let barWallsLeft = {};    // {blue:10, orange:10}
+let barWallsLeft = {};
 let barTurn = 'blue';
 let barAction = 'move';   // 'move' | 'wall'
 let barOrient = 'H';      // 'H' | 'V'
@@ -1723,7 +1713,7 @@ function barNewGame() {
   barPos = { blue: [8, 4], orange: [0, 4] };
   barWallsH = new Map();
   barWallsV = new Map();
-  barWallsLeft = { blue: 10, orange: 10 };
+  barWallsLeft = { blue: BAR_WALLS_PER_PLAYER, orange: BAR_WALLS_PER_PLAYER };
   barTurn = 'blue';
   barAction = 'move';
   barOrient = 'H';
@@ -2031,7 +2021,6 @@ function barDrawPawn(ctx, r, c, fill, stroke, scale = 1) {
   ctx.strokeStyle = stroke;
   ctx.lineWidth = 3;
   ctx.stroke();
-  // white highlight
   ctx.beginPath();
   ctx.arc(cx - radius*0.25, cy - radius*0.25, radius*0.3, 0, Math.PI*2);
   ctx.fillStyle = 'rgba(255,255,255,0.2)';
@@ -2158,8 +2147,8 @@ function barSaveHistory() {
 function barDoMove(r, c) {
   barSaveHistory();
   barPos[barTurn] = [r, c];
-  // Check win
   const won = (barTurn === 'blue' && r === 0) || (barTurn === 'orange' && r === 8);
+  const winner = barTurn === 'blue' ? 'כחול' : 'כתום';
   barTurn = barTurn === 'blue' ? 'orange' : 'blue';
   barAnimPiece = {r, c, t: performance.now()};
   barDraw();
@@ -2167,7 +2156,6 @@ function barDoMove(r, c) {
   barUpdateUI();
   if (won) {
     barOver = true;
-    const winner = barTurn === 'blue' ? 'כתום' : 'כחול'; // switched already
     setTimeout(() => {
       document.getElementById('go-title').textContent = winner + ' ניצח!';
       document.getElementById('go-desc').textContent = 'הגיע לצד השני!';
@@ -2318,18 +2306,7 @@ function barAiMove() {
   else barDoWall(bestAction.r, bestAction.c, bestAction.orient, true);
 }
 
-function goToBar() {
-  showScreen('page-bar');
-  // Two rAF frames: first lets the page render & get real dimensions,
-  // second draws after canvas has actual layout size
-  requestAnimationFrame(() => {
-    document.querySelectorAll('#page-bar .chess-pattern').forEach(drawChessPattern);
-    requestAnimationFrame(() => {
-      barInitCanvas();
-      barNewGame();
-    });
-  });
-}
+function goToBar() { goToPage('page-bar', barNewGame, { doubleRaf: true, extra: barInitCanvas }); }
 
 window.addEventListener('resize', () => {
   if (document.getElementById('page-bar').style.display !== 'none') {
@@ -2449,48 +2426,28 @@ function doConfirmNewGame() {
 }
 
 // ══════════════════════════════════════
-//  UX: CHESS TURN BANNER
+//  SHARED HELPERS
 // ══════════════════════════════════════
+function formatTime(s) {
+  return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+}
+
+// ══════════════════════════════════════
+//  UX: TURN BANNER / PLAYER BAR
+// ══════════════════════════════════════
+function updateTurnBar(bannerId, barAId, valA, barBId, t, over) {
+  document.getElementById(bannerId)?.style.setProperty('display', 'none');
+  document.getElementById(barAId)?.classList.toggle('is-turn', !over && t === valA);
+  document.getElementById(barBId)?.classList.toggle('is-turn', !over && t !== valA);
+}
 function updateChessTurnBanner(t, over) {
-  const banner = document.getElementById('chess-turn-banner');
-  const pbW = document.getElementById('player-bar-white');
-  const pbB = document.getElementById('player-bar-black');
-  if (banner) banner.style.display = 'none';
-  if (t === 'w') {
-    if (pbW) pbW.classList.add('is-turn'); if (pbB) pbB.classList.remove('is-turn');
-  } else {
-    if (pbB) pbB.classList.add('is-turn'); if (pbW) pbW.classList.remove('is-turn');
-  }
+  updateTurnBar('chess-turn-banner', 'player-bar-white', 'w', 'player-bar-black', t, over);
 }
-
-// ══════════════════════════════════════
-//  UX: WS TURN BANNER
-// ══════════════════════════════════════
 function updateWsTurnBanner(t, over) {
-  const banner = document.getElementById('ws-turn-banner');
-  const bW = document.getElementById('ws-bar-wolf');
-  const bS = document.getElementById('ws-bar-sheep');
-  if (banner) banner.style.display = 'none';
-  if (t === 'wolf') {
-    if (bW) bW.classList.add('is-turn'); if (bS) bS.classList.remove('is-turn');
-  } else {
-    if (bS) bS.classList.add('is-turn'); if (bW) bW.classList.remove('is-turn');
-  }
+  updateTurnBar('ws-turn-banner', 'ws-bar-wolf', 'wolf', 'ws-bar-sheep', t, over);
 }
-
-// ══════════════════════════════════════
-//  UX: BARRICADE TURN STRIP
-// ══════════════════════════════════════
 function updateBarTurnStrip(t, over) {
-  const strip = document.getElementById('bar-turn-strip');
-  const pbT = document.getElementById('bar-player-top');
-  const pbB = document.getElementById('bar-player-bot');
-  if (strip) strip.style.display = 'none';
-  if (t === 'blue') {
-    if (pbB) pbB.classList.add('is-turn'); if (pbT) pbT.classList.remove('is-turn');
-  } else {
-    if (pbT) pbT.classList.add('is-turn'); if (pbB) pbB.classList.remove('is-turn');
-  }
+  updateTurnBar('bar-turn-strip', 'bar-player-bot', 'blue', 'bar-player-top', t, over);
 }
 
 // ══════════════════════════════════════
@@ -2526,7 +2483,6 @@ let ktOver = false;
 let ktBestScore = {};      // {size: {moves, seconds}} best per size
 
 const KT_KNIGHT_MOVES = [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]];
-const F = 'abcdefgh';
 
 function ktInBounds(r, c) { return r >= 0 && r < ktSize && c >= 0 && c < ktSize; }
 
@@ -2803,14 +2759,14 @@ function ktUpdateMoveList() {
     el.innerHTML = '<div style="color:var(--text-muted);font-size:0.82rem;">אין מהלכים עדיין</div>'; return;
   }
   const items = ktHistory.map((p,i) =>
-    `<div class="move-pair"><span class="move-num">${i+1}.</span><span class="move-token${i===ktHistory.length-1?' current':''}">${F[p.c]}${ktSize-p.r}</span></div>`
+    `<div class="move-pair"><span class="move-num">${i+1}.</span><span class="move-token${i===ktHistory.length-1?' current':''}">${FILE_LABELS[p.c]}${ktSize-p.r}</span></div>`
   ).reverse().slice(0,30).join('');
   el.innerHTML = `<div style="max-height:220px;overflow-y:auto;scrollbar-width:thin">${items}</div>`;
 }
 
 // ── Win modal ──
 function ktShowWin(closed) {
-  const t = Math.floor(ktSeconds/60)+':'+String(ktSeconds%60).padStart(2,'0');
+  const t = formatTime(ktSeconds);
   const icon = closed ? '🌀' : '🏆';
   const title = closed ? 'סיבוב סגור!' : 'הצלחת!';
   const desc = closed
@@ -2843,11 +2799,11 @@ function ktStartTimer() {
 }
 function ktStopTimer() { if (ktTimer) { clearInterval(ktTimer); ktTimer = null; } }
 function ktUpdateTimerDisplay() {
+  const t = formatTime(ktSeconds);
   const el = document.getElementById('kt-timer-val');
-  const formatted = Math.floor(ktSeconds/60)+':'+String(ktSeconds%60).padStart(2,'0');
-  if (el) el.textContent = formatted;
-  const statTimeEl = document.getElementById('kt-stat-time');
-  if (statTimeEl) statTimeEl.textContent = formatted;
+  if (el) el.textContent = t;
+  const statEl = document.getElementById('kt-stat-time');
+  if (statEl) statEl.textContent = t;
 }
 
 // ── Best score ──
@@ -2858,8 +2814,7 @@ function ktSaveBest() {
     if (!prev || ktSeconds < prev.seconds) {
       ktBestScore[ktSize] = {moves: ktMoves, seconds: ktSeconds};
       const el = document.getElementById('kt-best-score');
-      const t = Math.floor(ktSeconds/60)+':'+String(ktSeconds%60).padStart(2,'0');
-      if (el) el.textContent = `${ktSize}×${ktSize}: ${t} ⭐`;
+      if (el) el.textContent = `${ktSize}×${ktSize}: ${formatTime(ktSeconds)} ⭐`;
     }
   }
 }
@@ -2883,13 +2838,7 @@ function ktSetSize(s) {
   ktNewGame();
 }
 
-function goToKT() {
-  showScreen('page-kt');
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    document.querySelectorAll('#page-kt .chess-pattern').forEach(drawChessPattern);
-    ktNewGame();
-  }));
-}
+function goToKT() { goToPage('page-kt', ktNewGame, { doubleRaf: true }); }
 window.addEventListener('resize', () => {
   if (document.getElementById('page-kt').style.display !== 'none') {
     requestAnimationFrame(() => ktRender());
@@ -3068,11 +3017,6 @@ function fpNewGame() {
   fpUpdateMoveList();
 }
 
-function fpReset() {
-  // Reset to initial position, keep score
-  fpNewGame();
-}
-
 // ── Piece movement rules ──
 function fpGetMoves(board, r, c) {
   const piece = board[r][c];
@@ -3195,7 +3139,7 @@ function fpDoMove(fr, fc, tr, tc) {
     fpUpdateMoveList();
   }
   // Hard mode: check move limit
-  if (fpDiff === 'hard' && fpMoves >= 25 && !fpOver) {
+  if (fpDiff === 'hard' && fpMoves >= FP_HARD_LIMIT && !fpOver) {
     fpOver = true;
     fpStopTimer();
     fpSetBanner('נגמרו המהלכים! (25/25)', 'kt-fail');
@@ -3210,15 +3154,14 @@ function fpDoMove(fr, fc, tr, tc) {
 }
 
 function fpCheckWin() {
-  if (fpCaptured < 4) return;
+  if (fpCaptured < FP_TARGET_COUNT) return;
   fpOver = true;
   fpStopTimer();
   if (fpMode === 'timed') {
     if (fpBestTime === null || fpSeconds < fpBestTime) {
       fpBestTime = fpSeconds;
       const bsEl = document.getElementById('fp-best-score');
-      const t = Math.floor(fpBestTime/60)+':'+String(fpBestTime%60).padStart(2,'0');
-      if (bsEl) bsEl.textContent = `⏱ ${t}`;
+      if (bsEl) bsEl.textContent = `⏱ ${formatTime(fpBestTime)}`;
     }
   } else {
     if (!fpBest || fpMoves < fpBest) {
@@ -3238,8 +3181,7 @@ function showGameOverFP(won) {
     : '<iconify-icon icon="mdi:skull-outline" style="font-size:2.5rem"></iconify-icon>';
   document.getElementById('go-title').textContent = won ? 'כל הרגלים נלכדו!' : 'נגמרו המהלכים';
   if (won) {
-    const t = Math.floor(fpSeconds/60)+':'+String(fpSeconds%60).padStart(2,'0');
-    const timeStr = fpMode === 'timed' ? ` · ⏱ ${t}` : '';
+    const timeStr = fpMode === 'timed' ? ` · ⏱ ${formatTime(fpSeconds)}` : '';
     document.getElementById('go-desc').textContent = `ניצחת ב-${fpMoves} מהלכים${timeStr}!`;
   } else {
     document.getElementById('go-desc').textContent = 'נסה שוב עם פחות מהלכים';
@@ -3276,11 +3218,11 @@ function fpStartTimer() {
 }
 function fpStopTimer() { if (fpTimer) { clearInterval(fpTimer); fpTimer = null; } }
 function fpUpdateTimerDisplay() {
-  const formatted = Math.floor(fpSeconds/60)+':'+String(fpSeconds%60).padStart(2,'0');
+  const t = formatTime(fpSeconds);
   const el = document.getElementById('fp-timer-val');
-  if (el) el.textContent = formatted;
+  if (el) el.textContent = t;
   const statEl = document.getElementById('fp-stat-time');
-  if (statEl) statEl.textContent = formatted;
+  if (statEl) statEl.textContent = t;
 }
 
 // ── Mode ──
@@ -3315,7 +3257,6 @@ function fpRender() {
     ? fpGetMoves(fpBoard, knightPos.r, knightPos.c) : [];
 
   boardEl.innerHTML = '';
-  boardEl.style.gridTemplateColumns = 'repeat(4, var(--fp-sq-size, 72px))';
 
   const pageFP = document.getElementById('page-fp');
   const pageW = pageFP ? pageFP.clientWidth : 0;
@@ -3402,16 +3343,16 @@ function fpUpdateUI() {
   const capDisp = document.getElementById('fp-captured-display');
   if (capEl) capEl.textContent = fpCaptured;
   if (movEl) movEl.textContent = fpMoves;
-  if (prog)  prog.style.width = (fpCaptured/4*100)+'%';
+  if (prog)  prog.style.width = (fpCaptured/FP_TARGET_COUNT*100)+'%';
   // Also update bar IDs in kt-stats div
   const capBar = document.getElementById('fp-captured-bar');
   const movBar = document.getElementById('fp-moves-bar');
   const progBar = document.getElementById('fp-progress-bar');
   if (capBar) capBar.textContent = fpCaptured;
   if (movBar) movBar.textContent = fpMoves;
-  if (progBar) progBar.style.width = (fpCaptured/4*100)+'%';
+  if (progBar) progBar.style.width = (fpCaptured/FP_TARGET_COUNT*100)+'%';
   // Captured display
-  const captured = '♟'.repeat(fpCaptured) + '♙'.repeat(4-fpCaptured);
+  const captured = '♟'.repeat(fpCaptured) + '♙'.repeat(FP_TARGET_COUNT-fpCaptured);
   if (capDisp) capDisp.innerHTML = captured.split('').map((c,i)=>
     `<span style="color:${i<fpCaptured?'var(--cyan)':'var(--text-muted)'}">${c}</span>`
   ).join('');
@@ -3459,13 +3400,7 @@ function fpUpdateMoveList() {
 }
 
 function goToFP() {
-  showScreen('page-fp');
-  // Double rAF ensures layout is settled before measuring board dimensions
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    drawAllPatterns();
-    fpNewGame();
-    setTimeout(() => fpRender(), 50);
-  }));
+  goToPage('page-fp', () => { fpNewGame(); setTimeout(fpRender, 50); }, { doubleRaf: true });
 }
 
 
@@ -3519,7 +3454,6 @@ document.addEventListener('DOMContentLoaded', function() {
   if (fpCard) fpCard.addEventListener('click', goToFP);
   if (fpBtn)  fpBtn.addEventListener('click', function(e){ e.stopPropagation(); goToFP(); });
 
-  drawAllPatterns();
 });
 </script>
 
